@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
-public class UserInfo {
+public class User {
 	
 	@Id
 	private Long userId;

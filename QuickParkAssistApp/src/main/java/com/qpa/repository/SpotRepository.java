@@ -1,7 +1,7 @@
 package com.qpa.repository;
 
 import java.util.List;
-
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -32,5 +32,5 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
 	@Query("SELECT s FROM Spot s JOIN s.supportedVehicleTypes v WHERE s.location.city = :city AND v = :vehicleType AND s.status = 'AVAILABLE'")
     List<Spot> findAvailableSpotsByCityAndVehicleType(@Param("city") String city, @Param("vehicleType") VehicleType vehicleType);
 	
-	
+	Optional<Spot> findById(Long spotId); // ✅ Correct return type
 }
