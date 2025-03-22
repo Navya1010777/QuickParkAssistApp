@@ -1,6 +1,5 @@
 package com.qpa.controller;
 
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -25,8 +24,6 @@ import com.qpa.service.SpotService;
 
 import jakarta.validation.Valid;
 
-
-
 //@Validated
 @RestController
 @RequestMapping("/api/spots")
@@ -38,7 +35,6 @@ public class SpotController {
     public SpotController(SpotService spotService) {
         this.spotService = spotService;
     }
-
 
     @PostMapping("/create")
     public ResponseEntity<SpotResponseDTO> createSpot(
@@ -82,7 +78,6 @@ public class SpotController {
     public ResponseEntity<SpotResponseDTO> toggleSpotActivation(@PathVariable Long spotId) {
         return ResponseEntity.ok(spotService.toggleSpotActivation(spotId));
     }
-
 
     // Vehicle Owner endpoints
     @PatchMapping("/{spotId}/rate")
@@ -129,24 +124,24 @@ public class SpotController {
     // redundant
     @GetMapping("/availableSpots")
     public ResponseEntity<List<SpotResponseDTO>> getAvailableSpots() {
-    	return new ResponseEntity<>(spotService.getAvailableSpots(), HttpStatus.OK);
+        return new ResponseEntity<>(spotService.getAvailableSpots(), HttpStatus.OK);
     }
-    
-    
+
     @GetMapping("/by-booking/{bookingId}")
-    public ResponseEntity<SpotResponseDTO> getSpotByBookingId(@PathVariable long bookingId) throws InvalidEntityException{
-         
+    public ResponseEntity<SpotResponseDTO> getSpotByBookingId(@PathVariable long bookingId)
+            throws InvalidEntityException {
+
         return new ResponseEntity<>(spotService.getSpotByBookingId(bookingId), HttpStatus.OK);
 
     }
-    
+
     @GetMapping("/booked")
     public ResponseEntity<List<SpotResponseDTO>> getBookedSpots() {
 
         return new ResponseEntity<>(spotService.getBookedSpots(), HttpStatus.OK);
 
     }
-    
+
     @GetMapping("/by-booking")
     public ResponseEntity<List<SpotResponseDTO>> getBookedSpotsByStartAndEndDate(
             @RequestParam("startDate") String startDateStr,
@@ -158,7 +153,5 @@ public class SpotController {
         return new ResponseEntity<>(spotService.getAvailableSpotsByStartAndEndDate(startDate, endDate), HttpStatus.OK);
 
     }
-    
-
 
 }
