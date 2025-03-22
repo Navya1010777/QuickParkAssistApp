@@ -1,5 +1,130 @@
 package com.qpa.entity;
 
-public class SpotBookingInfo {
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
 
+public class SpotBookingInfo {
+    private Long bookingId;
+    private LocalDate bookingDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
+    private LocalTime startTime;
+    private LocalTime endTime;
+    private String status;
+    private SpotInfo spotInfo;
+    private Vehicle vehicle;
+    private List<AddOns> addOns;
+    private double TotalAmount;
+
+    // Default constructor
+    public SpotBookingInfo() {
+    }
+
+    // Parameterized constructor
+    public SpotBookingInfo(Long bookingId, LocalDate bookingDate, LocalDate startDate, LocalDate endDate,
+                          LocalTime startTime, LocalTime endTime, String status, SpotInfo spotInfo,
+                          Vehicle vehicle, double totalAmount, List<AddOns> addOns) {
+        this.bookingId = bookingId;
+        this.bookingDate = bookingDate;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = status;
+        this.spotInfo = spotInfo;
+        this.vehicle = vehicle;
+        this.addOns = addOns;
+        this.TotalAmount = totalAmount;
+    }
+
+    // Getters and Setters
+    public Long getBookingId() {
+        return bookingId;
+    }
+
+    public void setBookingId(Long bookingId) {
+        this.bookingId = bookingId;
+    }
+
+    public LocalDate getBookingDate() {
+        return bookingDate;
+    }
+
+    public void setBookingDate(LocalDate bookingDate) {
+        this.bookingDate = bookingDate;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime2) {
+        this.startTime = startTime2;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime2) {
+        this.endTime = endTime2;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public SpotInfo getSpotInfo() {
+        return spotInfo;
+    }
+
+    public void setSpotInfo(SpotInfo spotInfo) {
+        this.spotInfo = spotInfo;
+    }
+
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
+
+    public double getTotalAmount() {
+        return TotalAmount;
+    }
+     
+    public void setTotalAmount(double totalAmount) {
+        this.TotalAmount = totalAmount;
+    }
+
+    public List<AddOns> getAddOns() {
+        return addOns;
+    }
+
+    public void setAddOns(List<AddOns> addOns) {
+        this.addOns = addOns;
+    }
 }
