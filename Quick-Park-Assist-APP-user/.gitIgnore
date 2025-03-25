@@ -1,5 +1,0 @@
-*.class
-# Ignore only sensitive files
-application.properties
-pom.properties
-
