@@ -2,7 +2,7 @@ package com.qpa.dto;
 
 import com.qpa.entity.UserType;
 
-public class RegisterDto {
+public class RegisterDTO {
     private String fullName;
     private String email;
     private String password;

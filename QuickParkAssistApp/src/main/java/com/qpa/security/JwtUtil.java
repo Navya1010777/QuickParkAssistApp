@@ -12,6 +12,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
+import com.qpa.entity.UserType;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -28,10 +30,11 @@ public class JwtUtil {
         return Base64.getEncoder().encodeToString(SECRET_KEY.getEncoded());
     }
 
-    public String generateToken(String email, Long userId) {
+    public String generateToken(String email, Long userId, UserType role) {
         return Jwts.builder()
                 .setSubject(email)
-                .claim("userId", userId)  // ✅ Adding userId to the token
+                .claim("userId", userId) // ✅ Adding userId to the token
+                .claim("role", role) // ✅ Adding userId to the token
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // 10 hours validity
                 .signWith(SECRET_KEY)
@@ -59,6 +62,10 @@ public class JwtUtil {
 
     public Long extractUserId(String token) {
         return extractClaims(token).get("userId", Long.class); // ✅ Extract userId
+    }
+
+    public UserType extractRole(String token) {
+        return extractClaims(token).get("role", UserType.class);
     }
 
     public boolean validateToken(String token, String email) {

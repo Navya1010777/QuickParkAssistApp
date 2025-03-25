@@ -1,15 +1,22 @@
 package com.qpa.service;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.qpa.dto.RegisterDTO;
+import com.qpa.entity.AuthUser;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.UserType;
 import com.qpa.entity.Vehicle;
 import com.qpa.exception.InvalidEntityException;
+import com.qpa.exception.UnauthorizedAccessException;
 import com.qpa.repository.UserRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Service
@@ -17,107 +24,137 @@ public class UserService {
     private final UserRepository userRepository;
     private final VehicleService vehicleService;
     private final AuthService authService;
+    private final CloudinaryService cloudinaryService;
+    private final EmailService emailService;
 
-    /**
-     * Constructor-based dependency injection for required services.
-     *
-     * @param userRepository Repository to manage user data.
-     * @param vehicleService Service to manage vehicle-related operations.
-     * @param authService    Service to manage authentication-related operations.
-     */
-    public UserService(UserRepository userRepository, VehicleService vehicleService, AuthService authService) {
+    public UserService(UserRepository userRepository, VehicleService vehicleService,
+            AuthService authService, CloudinaryService cloudinaryService,
+            EmailService emailService) {
         this.userRepository = userRepository;
         this.vehicleService = vehicleService;
         this.authService = authService;
+        this.cloudinaryService = cloudinaryService;
+        this.emailService = emailService;
     }
 
-    /**
-     * Adds a new user to the system.
-     *
-     * @param user The user information to be saved.
-     * @return The saved user entity.
-     */
+    public UserInfo getCurrentUserProfile(HttpServletRequest request) throws InvalidEntityException {
+        Long userId = authService.getUserId(request);
+        return getUserById(userId);
+    }
+
+    public void uploadUserAvatar(MultipartFile file, HttpServletRequest request)
+            throws IOException, InvalidEntityException {
+        String imageUrl = cloudinaryService.uploadImage(file);
+        UserInfo user = getUserById(authService.getUserId(request));
+
+        // Delete existing image if any
+        if (user.getImageUrl() != null && !user.getImageUrl().isEmpty()) {
+            cloudinaryService.deleteImage(user.getImageUrl());
+        }
+
+        user.setImageUrl(imageUrl);
+        updateUser(user);
+    }
+
+    public void deleteUserAvatar(String imageUrl, HttpServletRequest request)
+            throws IOException, InvalidEntityException {
+        cloudinaryService.deleteImage(imageUrl);
+        UserInfo user = getUserById(authService.getUserId(request));
+        user.setImageUrl("");
+        updateUser(user);
+    }
+
+    public void registerUser(RegisterDTO request, HttpServletResponse response, HttpServletRequest httpRequest)
+            throws Exception {
+        // Check if the user is already logged in
+        if (authService.isAuthenticated(httpRequest)) {
+            throw new IllegalStateException("User is already logged in");
+        }
+
+        // Check if email is already registered
+        if (existsByEmail(request.getEmail())) {
+            throw new DataIntegrityViolationException("Email already exists");
+        }
+
+        // Prevent registration as ADMIN
+        if (request.getUserType() == UserType.ADMIN) {
+            throw new IllegalArgumentException("ADMIN Role is forbidden");
+        }
+
+        // Create new user
+        UserInfo user = new UserInfo();
+        user.setEmail(request.getEmail());
+        user.setFullName(request.getFullName());
+        user.setUserType(request.getUserType());
+        user = addUser(user);
+
+        // Create authentication details
+        AuthUser authUser = new AuthUser();
+        authUser.setPassword(request.getPassword());
+        authUser.setEmail(request.getEmail());
+        authUser.setUser(user);
+
+        // Add authentication
+        if (!authService.addAuth(authUser, response)) {
+            throw new RuntimeException("Authentication failed");
+        }
+
+        // Send registration email
+        emailService.sendSimpleMail(request.getEmail(), request.getFullName(),
+                "Registration Successful as " + request.getUserType());
+    }
+
+    public void updateUserDetails(UserInfo user, HttpServletRequest request) throws InvalidEntityException {
+        if (!authService.isAuthenticated(request)) {
+            throw new UnauthorizedAccessException("Unauthorized request");
+        }
+
+        try {
+            updateUser(user);
+        } catch (DataIntegrityViolationException e) {
+            if (e.getMessage().contains("Duplicate entry")) {
+                throw new DataIntegrityViolationException("Duplicate entry for email");
+            }
+            throw e;
+        }
+    }
+
     public UserInfo addUser(UserInfo user) {
         return userRepository.save(user);
     }
 
-    /**
-     * Retrieves a user by their ID.
-     *
-     * @param id The ID of the user.
-     * @return The found user entity.
-     * @throws InvalidEntityException if the user is not found.
-     */
     public UserInfo getUserById(Long id) throws InvalidEntityException {
         return userRepository.findById(id)
                 .orElseThrow(() -> new InvalidEntityException("User not found"));
     }
 
-    /**
-     * Retrieves all users from the system.
-     *
-     * @return A list of all users.
-     */
     public List<UserInfo> getAllUsers() {
         return userRepository.findAll();
     }
 
-    /**
-     * Updates an existing user's information.
-     *
-     * @param user The user entity with updated details.
-     * @return The updated user entity.
-     */
     public UserInfo updateUser(UserInfo user) {
         return userRepository.save(user);
     }
 
-    /**
-     * Deletes a user by their ID, ensuring authentication cleanup.
-     *
-     * @param id       The ID of the user to be deleted.
-     * @param response The HTTP response object for authentication deletion.
-     * @throws InvalidEntityException if the user is not found or cannot be deleted
-     *                                due to related entities.
-     */
     public void deleteUser(Long id, HttpServletResponse response) throws InvalidEntityException {
-        UserInfo user = userRepository.findById(id)
-                .orElseThrow(() -> new InvalidEntityException("User not found with ID: " + id));
+        UserInfo user = getUserById(id);
         try {
-            authService.deleteAuth(id, response); // Remove authentication details
-            userRepository.delete(user); // Delete user entity
-        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            authService.deleteAuth(id, response);
+            userRepository.delete(user);
+        } catch (DataIntegrityViolationException e) {
             throw new InvalidEntityException("Cannot delete user. Related entities exist.");
         }
     }
 
-    /**
-     * Retrieves the user associated with a given vehicle ID.
-     *
-     * @param vehicleId The ID of the vehicle.
-     * @return The user associated with the vehicle.
-     */
     public UserInfo viewUserByVehicleId(Long vehicleId) throws InvalidEntityException {
         return vehicleService.getVehicleById(vehicleId).getUserObj();
     }
 
-    /**
-     * Finds a user based on a booking ID.
-     *
-     * @param bookingId The ID of the booking.
-     * @return The user associated with the booking.
-     */
     public UserInfo findByBookingId(Long bookingId) throws InvalidEntityException {
         Vehicle vehicle = vehicleService.findByBookingId(bookingId);
         return viewUserByVehicleId(vehicle.getVehicleId());
     }
 
-    /**
-     * Checks if a user with the given email already exists.
-     *
-     * @param email The email to check.
-     * @return True if the email exists, false otherwise.
-     */
     public boolean existsByEmail(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
