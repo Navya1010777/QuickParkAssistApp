@@ -92,7 +92,7 @@ public class AuthController {
      * @param response The HTTP response where authentication details may be set.
      * @return ResponseEntity with success or failure response.
      */
-    @PostMapping("/login/admin")
+    @PostMapping("/login-admin")
     public ResponseEntity<ResponseDTO<Void>> loginAdmin(@RequestBody AuthUser request, HttpServletResponse response) {
         ResponseDTO<Void> responseDTO = authService.loginAdmin(request, response);
         if (!responseDTO.isSuccess()) {
