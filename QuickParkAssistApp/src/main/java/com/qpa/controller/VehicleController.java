@@ -183,4 +183,10 @@ public class VehicleController {
         return ResponseEntity.ok(new ResponseDTO<>("vehicles fetched successfully", 200, true, vehicles));
     }
 
+    @GetMapping("/viewAll")
+    public ResponseEntity<ResponseDTO<List<Vehicle>>> getAllvehicles() {
+        List<Vehicle> vehicles = vehicleService.getAllVehicles();
+        return ResponseEntity.ok(new ResponseDTO<>("vehicles fetched successfully", 200, true, vehicles));
+    }
+
 }

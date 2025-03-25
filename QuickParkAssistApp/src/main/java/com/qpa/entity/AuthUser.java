@@ -31,6 +31,7 @@ public class AuthUser {
     @Column(nullable = false)
     private String password;
 
+    
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "userId", nullable = false)
     @NotNull
