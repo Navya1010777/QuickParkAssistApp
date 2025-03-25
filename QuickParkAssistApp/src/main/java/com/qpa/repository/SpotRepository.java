@@ -22,10 +22,8 @@ public interface SpotRepository extends JpaRepository<Spot, Long> {
 	List<Spot> findByPriceType(PriceType priceType);
 	List<Spot> findByLocation_City(String city);
 	List<Spot> findByLocation_Area(String area);
-	List<Spot> findByOwner_UserId(Long userId);
-	
+	List<Spot> findByOwnerUserId(Long userId);
 
-	
 	@Query("SELECT s FROM Spot s WHERE s.location.city = :city")
 	List<Spot> findByLocationFilters(String city);
 	

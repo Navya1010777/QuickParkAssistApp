@@ -14,8 +14,6 @@ public class QuickParkAssistAppApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(QuickParkAssistAppApplication.class, args);
-		
-
 	}
 
 }

@@ -2,7 +2,6 @@ package com.qpa.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.qpa.entity.SpotBookingInfo;
@@ -10,6 +9,7 @@ import com.qpa.entity.UserInfo;
 import com.qpa.entity.Vehicle;
 import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
+import com.qpa.exception.UnauthorizedAccessException;
 import com.qpa.repository.SpotBookingInfoRepository;
 import com.qpa.repository.UserRepository;
 import com.qpa.repository.VehicleRepository;
@@ -19,34 +19,37 @@ import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class VehicleService {
+    private final VehicleRepository vehicleRepository;
+    private final SpotBookingInfoRepository spotBookingInfoRepository;
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
-    @Autowired 
-    private VehicleRepository vehicleRepository;
+    public VehicleService(
+            VehicleRepository vehicleRepository,
+            SpotBookingInfoRepository spotBookingInfoRepository,
+            JwtUtil jwtUtil,
+            UserRepository userRepository
+    ) {
+        this.vehicleRepository = vehicleRepository;
+        this.spotBookingInfoRepository = spotBookingInfoRepository;
+        this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
+    }
 
-    @Autowired
-    private SpotBookingInfoRepository spotBookingInfoRepository;
-
-    @Autowired 
-    private JwtUtil jwtUtil;
-
-    @Autowired 
-    private UserRepository userRepository;
-
-    /**
-     * Adds a new vehicle and associates it with the logged-in user.
-     */
-    public Vehicle addVehicle(Vehicle vehicle, HttpServletRequest request) throws InvalidEntityException {
+    public Vehicle saveVehicle(Vehicle vehicle, HttpServletRequest request) throws InvalidEntityException {
         String token = jwtUtil.extractTokenFromCookie(request);
         if (token == null) {
-            throw new InvalidEntityException("Token not found in cookies");
+            throw new UnauthorizedAccessException("Token not found in cookies");
         }
 
         Long userId = jwtUtil.extractUserId(token);
         if (userId == null) {
-            throw new InvalidEntityException("Invalid token: User ID not found");
+            throw new UnauthorizedAccessException("Invalid token: User ID not found");
         }
 
-        if (vehicleRepository.findByRegistrationNumber(vehicle.getRegistrationNumber()) != null) {
+        // Check for existing vehicle with same registration number
+        Vehicle existingVehicle = vehicleRepository.findByRegistrationNumber(vehicle.getRegistrationNumber());
+        if (existingVehicle != null) {
             throw new InvalidEntityException("Vehicle with registration number " + vehicle.getRegistrationNumber() + " already exists");
         }
 
@@ -57,18 +60,12 @@ public class VehicleService {
         return vehicleRepository.save(vehicle);
     }
 
-    /**
-     * Retrieves a vehicle by its ID.
-     */
-    public Vehicle getVehicleById(Long id) throws InvalidEntityException { 
+    public Vehicle getVehicleById(Long id) throws InvalidEntityException {
         return vehicleRepository.findById(id)
                 .orElseThrow(() -> new InvalidEntityException("Vehicle not found with ID: " + id));
     }
 
-    /**
-     * Retrieves all vehicles of a specific type.
-     */
-    public List<Vehicle> getVehiclesByType(VehicleType type) throws InvalidEntityException { 
+    public List<Vehicle> getVehiclesByType(VehicleType type) throws InvalidEntityException {
         List<Vehicle> vehicles = vehicleRepository.findByVehicleType(type);
         if (vehicles.isEmpty()) {
             throw new InvalidEntityException("No vehicles found for type: " + type);
@@ -76,41 +73,32 @@ public class VehicleService {
         return vehicles;
     }
 
-    /**
-     * Retrieves all vehicles.
-     */
-    public List<Vehicle> getAllVehicles() { 
-        return vehicleRepository.findAll(); 
+    public List<Vehicle> getAllVehicles() {
+        return vehicleRepository.findAll();
     }
 
-    /**
-     * Updates an existing vehicle.
-     */
-    public Vehicle updateVehicle(Vehicle vehicle) { 
-        return vehicleRepository.save(vehicle); 
+    public Vehicle updateVehicle(Vehicle vehicle) {
+        return vehicleRepository.save(vehicle);
     }
 
-    /**
-     * Deletes a vehicle by its ID.
-     */
-    public void deleteVehicle(Long id) throws InvalidEntityException { 
-        Vehicle vehicle =getVehicleById(id); // Ensures vehicle exists
+    public void deleteVehicle(Long id, Long userId) throws InvalidEntityException {
+        Vehicle vehicle = getVehicleById(id);
+
+        // Ensure the user is authorized to delete the vehicle
+        if (!userId.equals(vehicle.getUserObj().getUserId())) {
+            throw new UnauthorizedAccessException("You do not have permission to delete this vehicle");
+        }
+
         vehicleRepository.delete(vehicle);
     }
 
-    /**
-     * Finds a vehicle by booking ID.
-     */
-    public Vehicle findByBookingId(Long bookingId) throws InvalidEntityException{
+    public Vehicle findByBookingId(Long bookingId) throws InvalidEntityException {
         SpotBookingInfo bookingInfo = spotBookingInfoRepository.findById(bookingId)
                 .orElseThrow(() -> new InvalidEntityException("No booking found with ID: " + bookingId));
 
         return bookingInfo.getVehicle();
     }
 
-    /**
-     * Finds all vehicles associated with a user ID.
-     */
     public List<Vehicle> findByUserId(Long userId) {
         return vehicleRepository.findByUserObj_UserId(userId);
     }
