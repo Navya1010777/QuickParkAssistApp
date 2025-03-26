@@ -1,8 +1,9 @@
 package com.qpa.dto;
 
 import com.qpa.entity.PriceType;
+import com.qpa.entity.SpotStatus;
 import com.qpa.entity.SpotType;
-import com.qpa.entity.User;
+import com.qpa.entity.UserInfo;
 import com.qpa.entity.VehicleType;
 
 import java.time.DayOfWeek;
@@ -14,13 +15,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class SpotCreateDTO {
 	private String spotNumber;
 	private SpotType spotType;
-	private User owner;
+	private UserInfo owner;
 	private LocationDTO location;
 	private boolean hasEVCharging;
 	private double price;
 	private PriceType priceType;
 	private MultipartFile image;
 	private Set<VehicleType> supportedVehicle;
+	private SpotStatus status;
 	
 	public SpotCreateDTO() {
 
@@ -28,8 +30,8 @@ public class SpotCreateDTO {
 
 	
 
-	public SpotCreateDTO(String spotNumber, SpotType spotType, User owner, LocationDTO location, boolean hasEVCharging,
-			double price, PriceType priceType, MultipartFile image, Set<VehicleType> supportedVehicle) {
+	public SpotCreateDTO(String spotNumber, SpotType spotType, UserInfo owner, LocationDTO location, boolean hasEVCharging,
+			double price, PriceType priceType, MultipartFile image, Set<VehicleType> supportedVehicle, SpotStatus status) {
 		this.spotNumber = spotNumber;
 		this.spotType = spotType;
 		this.owner = owner;
@@ -39,6 +41,7 @@ public class SpotCreateDTO {
 		this.priceType = priceType;
 		this.image = image;
 		this.supportedVehicle = supportedVehicle;
+		this.status = status;
 	}
 
 
@@ -101,11 +104,11 @@ public class SpotCreateDTO {
 		this.supportedVehicle = supportedVehicle;
 	}
 
-	public User getOwner() {
+	public UserInfo getOwner() {
 		return owner;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwner(UserInfo owner) {
 		this.owner = owner;
 	}
 
@@ -120,4 +123,17 @@ public class SpotCreateDTO {
 	public void setImage(MultipartFile image) {
 		this.image = image;
 	}
+
+
+
+	public SpotStatus getStatus() {
+		return status;
+	}
+
+
+
+	public void setStatus(SpotStatus status) {
+		this.status = status;
+	}
+	
 }

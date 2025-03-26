@@ -14,7 +14,7 @@ public class Spot {
 	private String spotNumber;
 	
 	
-	private User owner;
+	private UserInfo owner;
 
 	
 	private SpotType spotType;
@@ -40,7 +40,7 @@ public class Spot {
     private LocalDateTime updatedAt;
     
    
-    private byte[] spotImage;
+    private String spotImage;
     
     
     private Set<VehicleType> supportedVehicleTypes; // no set
@@ -62,7 +62,7 @@ public class Spot {
 
 	public Spot(Long spotId, String spotNumber, SpotType spotType, SpotStatus status, Location location,
 			boolean hasEVCharging, double price, PriceType priceType, Double rating,
-			LocalDateTime createdAt, LocalDateTime updatedAt, byte[] spotImage,
+			LocalDateTime createdAt, LocalDateTime updatedAt, String spotImage,
 			Set<VehicleType> supportedVehicleTypes, boolean isActive) {
 		super();
 		this.spotId = spotId;
@@ -178,11 +178,11 @@ public class Spot {
 		this.supportedVehicleTypes = supportedVehicleTypes;
 	}
 
-	public User getOwner() {
+	public UserInfo getOwner() {
 		return owner;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwner(UserInfo owner) {
 		this.owner = owner;
 	}
 
@@ -191,12 +191,12 @@ public class Spot {
 	}
 
 
-	public byte[] getSpotImage() {
+	public String getSpotImage() {
 		return spotImage;
 	}
 
 
-	public void setSpotImage(byte[] spotImage) {
+	public void setSpotImage(String spotImage) {
 		this.spotImage = spotImage;
 	}
 
