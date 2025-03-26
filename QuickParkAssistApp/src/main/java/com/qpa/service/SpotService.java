@@ -33,18 +33,20 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class SpotService {
 	private final SpotRepository spotRepository;
-	private final LocationRepository locationRepository;
 	private final UserRepository userRepository;
 	private final SpotBookingInfoRepository bookingRepository;
 	private final AuthService authService;
+	private final LocationService locationService;
+	private final CloudinaryService cloudinaryService;
 
 	public SpotService(SpotRepository spotRepository, LocationRepository locationRepository,
-			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService) {
+			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService, LocationService locationService, CloudinaryService cloudinaryService) {
 		this.spotRepository = spotRepository;
-		this.locationRepository = locationRepository;
 		this.userRepository = userRepository;
 		this.bookingRepository = bookingRepository;
 		this.authService = authService;
+		this.locationService = locationService;
+		this.cloudinaryService = cloudinaryService;
 	}
 
 	public SpotResponseDTO createSpot(SpotCreateDTO spotDTO, MultipartFile spotImage, Long userId,
@@ -63,26 +65,27 @@ public class SpotService {
 		spot.setOwner(userRepository.findById(userId)
 				.orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId)));
 
-		spot.setSpotImage(spotImage.getBytes());
-
-		Location location = new Location();
-		BeanUtils.copyProperties(spotDTO.getLocation(), location);
-		location = locationRepository.save(location);
+		// Use LocationService to find or create location
+		Location location = locationService.findOrCreateLocation(spotDTO.getLocation());
 		spot.setLocation(location);
 
 		spot = spotRepository.save(spot);
+
+		if (spotImage != null && !spotImage.isEmpty()) {
+			String imageUrl = cloudinaryService.uploadSpotImage(spotImage, spot.getSpotId(), null);
+			spot.setSpotImage(imageUrl);
+			spot = spotRepository.save(spot);
+		}
+
 		return convertToDTO(spot);
 	}
 
-	public SpotResponseDTO updateSpot(Long spotId, SpotCreateDTO spotDTO, MultipartFile spotImage,
-			HttpServletRequest request)
+	public SpotResponseDTO updateSpot(Long spotId, SpotCreateDTO spotDTO, MultipartFile spotImage)
 			throws InvalidEntityException, IOException {
-		if (!authService.isAuthenticated(request)) {
-			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
-		}
 		Spot spot = spotRepository.findById(spotId)
 				.orElseThrow(() -> new InvalidEntityException("Spot not found with id : " + spotId));
 
+		// Update spot details
 		spot.setSpotNumber(spotDTO.getSpotNumber());
 		spot.setSpotType(spotDTO.getSpotType());
 		spot.setHasEVCharging(spotDTO.getHasEVCharging());
@@ -91,15 +94,18 @@ public class SpotService {
 		spot.setSupportedVehicleTypes(spotDTO.getSupportedVehicle());
 		spot.setStatus(spotDTO.getStatus());
 
-		if (spotImage != null && !spotImage.isEmpty()) {
-			spot.setSpotImage(spotImage.getBytes());
-		}
-
-		Location location = spot.getLocation();
-		BeanUtils.copyProperties(spotDTO.getLocation(), location);
-		locationRepository.save(location);
+		// Use LocationService to find or create location
+		Location location = locationService.findOrCreateLocation(spotDTO.getLocation());
+		spot.setLocation(location);
 
 		spot = spotRepository.save(spot);
+
+		if (spotImage != null && !spotImage.isEmpty()) {
+			String imageUrl = cloudinaryService.uploadSpotImage(spotImage, spot.getSpotId(), null);
+			spot.setSpotImage(imageUrl);
+			spot = spotRepository.save(spot);
+		}
+
 		return convertToDTO(spot);
 	}
 
@@ -118,35 +124,35 @@ public class SpotService {
 
 	public List<SpotResponseDTO> getAllSpots() {
 		return spotRepository.findAll().stream()
+				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
+				.filter(Spot::getIsActive)
 				.map(this::convertToDTO)
 				.collect(Collectors.toList());
 	}
 
 	public List<SpotResponseDTO> getSpotByOwner(Long userId) {
-		return spotRepository.findByOwner_UserId(userId).stream()
+		return spotRepository.findByOwnerUserId(userId).stream()
 				.map(this::convertToDTO)
 				.collect(Collectors.toList());
 	}
 
-	// Needs some work, not efficient right now.
 	public List<SpotResponseDTO> searchSpots(SpotSearchCriteria criteria) {
 		// Implementation for filtering spots based on various criteria
 		List<Spot> spots = spotRepository.findByLocationFilters(
-				criteria.getCity());
+				criteria.getCity()
+		);
 
-		List<SpotResponseDTO> filteredSpots = spots.stream()
-				.filter(spot -> spot.getIsActive() == true)
+		return spots.stream()
+				.filter(spot -> spot.getIsActive())
+				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
 				.filter(spot -> criteria.getSpotType() == null || spot.getSpotType() == criteria.getSpotType())
-				.filter(spot -> criteria.getHasEVCharging() == null
-						|| spot.getHasEVCharging() == criteria.getHasEVCharging())
+				.filter(spot -> criteria.getHasEVCharging() == null || spot.getHasEVCharging() == criteria.getHasEVCharging())
 				.filter(spot -> criteria.getPriceType() == null || spot.getPriceType() == criteria.getPriceType())
 				.filter(spot -> criteria.getSupportedVehicleType() == null ||
 						spot.getSupportedVehicleTypes().contains(criteria.getSupportedVehicleType()))
 				.filter(spot -> criteria.getStatus() == null || spot.getStatus() == criteria.getStatus())
 				.map(this::convertToDTO)
 				.collect(Collectors.toList());
-
-		return filteredSpots;
 	}
 
 	public SpotResponseDTO rateSpot(Long spotId, Double rating, HttpServletRequest request) {
@@ -177,7 +183,8 @@ public class SpotService {
 		return new SpotStatistics(
 				totalSpots,
 				availableSpots,
-				unavailableSpots);
+				unavailableSpots
+		);
 	}
 
 	private SpotResponseDTO convertToDTO(Spot spot) {
@@ -212,7 +219,7 @@ public class SpotService {
 				.collect(Collectors.toList());
 	}
 
-	public SpotResponseDTO getSpotByBookingId(long bookingId) throws InvalidEntityException {
+	public SpotResponseDTO getSpotByBookingId(long bookingId) throws InvalidEntityException{
 		Spot spot = bookingRepository.findSpotByBookingId(bookingId);
 		if (spot == null) {
 			throw new InvalidEntityException("No spot found for booking ID: " + bookingId);
@@ -233,12 +240,14 @@ public class SpotService {
 	public List<SpotResponseDTO> getAvailableSpotsByStartAndEndDate(LocalDate startDate, LocalDate endDate) {
 		List<Spot> bookedSpots = bookingRepository.findSpotsByStartAndEndDate(startDate, endDate);
 		if (bookedSpots.isEmpty()) {
-			throw new ResourceNotFoundException("No booked spots found between " + startDate + " and " + endDate);
+			throw new ResourceNotFoundException("No booked spots found between "+ startDate + " and " + endDate);
 		}
 		return bookedSpots.stream()
+				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
 				.map(this::convertToDTO)
 				.collect(Collectors.toList());
 	}
+
 
 	public SpotResponseDTO toggleSpotActivation(Long spotId) {
 		Spot spot = spotRepository.findById(spotId)

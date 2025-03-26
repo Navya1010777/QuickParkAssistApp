@@ -23,10 +23,10 @@ public interface SpotBookingInfoRepository extends JpaRepository<SpotBookingInfo
     List<Spot> findBookedSpots();
 
     @Query("SELECT s.spotInfo FROM SpotBookingInfo s " +
-            "WHERE s.startDate >= :startDate AND s.endDate <= :endDate " +
+            "WHERE :startDate <= s.endDate AND :endDate >= s.startDate " +
             "AND s.status = 'CONFIRMED'")
     List<Spot> findSpotsByStartAndEndDate(@Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate);
+                                          @Param("endDate") LocalDate endDate);
 
     boolean existsBySpotInfo_SpotIdAndVehicle_RegistrationNumber(Long spotId, String registrationNumber);
 

@@ -4,9 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -17,9 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
@@ -28,13 +24,13 @@ import jakarta.persistence.Table;
 @Entity
 @Table(name = "spots")
 public class Spot {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long spotId;
-	
+
 	private String spotNumber;
-	
+
 	@ManyToOne
 	@JoinColumn(name = "owner_id", nullable = false)
 	@JsonBackReference
@@ -42,58 +38,57 @@ public class Spot {
 
 	@Enumerated(EnumType.STRING)
 	private SpotType spotType;
-	
+
 	@Enumerated(EnumType.STRING)
 	private SpotStatus status;
 
 	@Column(columnDefinition = "BOOLEAN")
 	private boolean isActive = true;
-	
-	@OneToOne(cascade = CascadeType.ALL)
+
+	@ManyToOne
 	@JoinColumn(name = "location_id", nullable = false)
-	@JsonManagedReference
+	@JsonIgnore
 	private Location location;
 
 	@Column(columnDefinition = "BOOLEAN")
 	private boolean hasEVCharging;
-	
-	private double price;
-	
-	@Enumerated(EnumType.STRING)
-    private PriceType priceType;
-    
-    private Double rating;
-    
-    private LocalDateTime createdAt;
-    
-    private LocalDateTime updatedAt;
 
-	@Lob
-	@Column(name = "image_data", columnDefinition = "LONGBLOB")
-	private byte[] spotImage;
-    
-    @ElementCollection
-    @Enumerated(EnumType.STRING)
-    @CollectionTable(name = "spot_vehicle_types", joinColumns = @JoinColumn(name = "spot_id"))
-    @Column(name = "vehicle_type")
-    private Set<VehicleType> supportedVehicleTypes; // no set
-    
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-    
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+	private double price;
+
+	@Enumerated(EnumType.STRING)
+	private PriceType priceType;
+
+	private Double rating;
+
+	private LocalDateTime createdAt;
+
+	private LocalDateTime updatedAt;
+
+	@Column(name = "image_url")
+	private String spotImage;
+
+	@ElementCollection
+	@Enumerated(EnumType.STRING)
+	@CollectionTable(name = "spot_vehicle_types", joinColumns = @JoinColumn(name = "spot_id"))
+	@Column(name = "vehicle_type")
+	private Set<VehicleType> supportedVehicleTypes; // no set
+
+	@PrePersist
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
 
 	public Spot() {
 
 	}
 
-	public Spot(Long spotId, String spotNumber, UserInfo owner, SpotType spotType, SpotStatus status, boolean isActive, Location location, boolean hasEVCharging, double price, PriceType priceType, Double rating, LocalDateTime createdAt, LocalDateTime updatedAt, byte[] spotImage, Set<VehicleType> supportedVehicleTypes) {
+	public Spot(Long spotId, String spotNumber, UserInfo owner, SpotType spotType, SpotStatus status, boolean isActive, Location location, boolean hasEVCharging, double price, PriceType priceType, Double rating, LocalDateTime createdAt, LocalDateTime updatedAt, String spotImage, Set<VehicleType> supportedVehicleTypes) {
 		this.spotId = spotId;
 		this.spotNumber = spotNumber;
 		this.owner = owner;
@@ -191,11 +186,11 @@ public class Spot {
 		this.createdAt = createdAt;
 	}
 
-	public byte[] getSpotImage() {
+	public String getSpotImage() {
 		return spotImage;
 	}
 
-	public void setSpotImage(byte[] spotImage) {
+	public void setSpotImage(String spotImage) {
 		this.spotImage = spotImage;
 	}
 

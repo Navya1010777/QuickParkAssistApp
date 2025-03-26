@@ -13,7 +13,7 @@ public class SpotBookingInfo {
     private LocalTime startTime;
     private LocalTime endTime;
     private String status;
-    private SpotInfo spotInfo;
+    private Spot spotInfo;
     private Vehicle vehicle;
     private List<AddOns> addOns;
     private double TotalAmount;
@@ -24,7 +24,7 @@ public class SpotBookingInfo {
 
     // Parameterized constructor
     public SpotBookingInfo(Long bookingId, LocalDate bookingDate, LocalDate startDate, LocalDate endDate,
-                          LocalTime startTime, LocalTime endTime, String status, SpotInfo spotInfo,
+                          LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
                           Vehicle vehicle, double totalAmount, List<AddOns> addOns) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
@@ -96,11 +96,11 @@ public class SpotBookingInfo {
         this.status = status;
     }
 
-    public SpotInfo getSpotInfo() {
+    public Spot getSpotInfo() {
         return spotInfo;
     }
 
-    public void setSpotInfo(SpotInfo spotInfo) {
+    public void setSpotInfo(Spot spotInfo) {
         this.spotInfo = spotInfo;
     }
 

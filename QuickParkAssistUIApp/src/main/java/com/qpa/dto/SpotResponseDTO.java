@@ -6,7 +6,7 @@ import java.util.Set;
 import com.qpa.entity.PriceType;
 import com.qpa.entity.SpotStatus;
 import com.qpa.entity.SpotType;
-import com.qpa.entity.User;
+import com.qpa.entity.UserInfo;
 import com.qpa.entity.VehicleType;
 
 public class SpotResponseDTO {
@@ -15,15 +15,14 @@ public class SpotResponseDTO {
 	private SpotType spotType;
 	private SpotStatus status;
 	private boolean isActive;
-	private User owner;
+	private UserInfo owner;
 	private LocationDTO location;
 	private boolean hasEVCharging;
 	private double price;
 	private PriceType priceType;
 	private Double rating;
-	private byte[] spotImage;
+	private String spotImage;
 	private Set<VehicleType> supportedVehicleTypes;
-	private String spotImageBase64;
 	
 	public SpotResponseDTO() {
 
@@ -31,9 +30,9 @@ public class SpotResponseDTO {
 
 	
 
-	public SpotResponseDTO(Long spotId, String spotNumber, SpotType spotType, SpotStatus status, User owner,
+	public SpotResponseDTO(Long spotId, String spotNumber, SpotType spotType, SpotStatus status, UserInfo owner,
 			LocationDTO location, boolean hasEVCharging, double price, PriceType priceType, Double rating,
-			byte[] spotImage, Set<VehicleType> supportedVehicleTypes, String spotImageBase64, boolean isActive) {
+			String spotImage, Set<VehicleType> supportedVehicleTypes, boolean isActive) {
 		this.spotId = spotId;
 		this.spotNumber = spotNumber;
 		this.spotType = spotType;
@@ -46,7 +45,6 @@ public class SpotResponseDTO {
 		this.rating = rating;
 		this.spotImage = spotImage;
 		this.supportedVehicleTypes = supportedVehicleTypes;
-		this.spotImageBase64 = spotImageBase64;
 		this.isActive = isActive;
 	}
 
@@ -132,35 +130,21 @@ public class SpotResponseDTO {
 		this.supportedVehicleTypes = supportedVehicleTypes;
 	}
 
-	public User getOwner() {
+	public UserInfo getOwner() {
 		return owner;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwner(UserInfo owner) {
 		this.owner = owner;
 	}
 
-	public byte[] getSpotImage() {
+	public String getSpotImage() {
 		return spotImage;
 	}
 
-	public void setSpotImage(byte[] spotImage) {
+	public void setSpotImage(String spotImage) {
 		this.spotImage = spotImage;
 	}
-
-
-
-	public String getSpotImageBase64() {
-		return spotImageBase64;
-	}
-
-
-
-	public void setSpotImageBase64(String spotImageBase64) {
-		this.spotImageBase64 = spotImageBase64;
-	}
-
-
 
 	public boolean getIsActive() {
 		return isActive;

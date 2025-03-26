@@ -2,59 +2,48 @@ package com.qpa.entity;
 
 //import java.time.DayOfWeek;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
-
 public class Spot {
-	
 
 	private Long spotId;
-	
+
 	private String spotNumber;
-	
-	
+
 	private UserInfo owner;
 
-	
 	private SpotType spotType;
-	
+
 	private boolean isActive;
-	
+
 	private SpotStatus status;
-	
-	
+
 	private Location location;
-	
+
 	private boolean hasEVCharging;
-	
+
 	private double price;
-	
-	
-    private PriceType priceType;
-    
-    private Double rating;
-    
-    private LocalDateTime createdAt;
-    
-    private LocalDateTime updatedAt;
-    
-   
-    private byte[] spotImage;
-    
-    
-    private Set<VehicleType> supportedVehicleTypes; // no set
-    
-  
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-    
-   
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+
+	private PriceType priceType;
+
+	private Double rating;
+
+	private LocalDateTime createdAt;
+
+	private LocalDateTime updatedAt;
+
+	private String spotImage;
+
+	private Set<VehicleType> supportedVehicleTypes; // no set
+
+	protected void onCreate() {
+		createdAt = LocalDateTime.now();
+		updatedAt = LocalDateTime.now();
+	}
+
+	protected void onUpdate() {
+		updatedAt = LocalDateTime.now();
+	}
 
 	public Spot() {
 
@@ -62,7 +51,7 @@ public class Spot {
 
 	public Spot(Long spotId, String spotNumber, SpotType spotType, SpotStatus status, Location location,
 			boolean hasEVCharging, double price, PriceType priceType, Double rating,
-			LocalDateTime createdAt, LocalDateTime updatedAt, byte[] spotImage,
+			LocalDateTime createdAt, LocalDateTime updatedAt, String spotImage,
 			Set<VehicleType> supportedVehicleTypes, boolean isActive) {
 		super();
 		this.spotId = spotId;
@@ -160,7 +149,6 @@ public class Spot {
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
-	
 
 	public LocalDateTime getUpdatedAt() {
 		return updatedAt;
@@ -178,11 +166,11 @@ public class Spot {
 		this.supportedVehicleTypes = supportedVehicleTypes;
 	}
 
-	public User getOwner() {
+	public UserInfo getOwner() {
 		return owner;
 	}
 
-	public void setOwner(User owner) {
+	public void setOwner(UserInfo owner) {
 		this.owner = owner;
 	}
 
@@ -190,24 +178,20 @@ public class Spot {
 		return hasEVCharging;
 	}
 
-
-	public byte[] getSpotImage() {
+	public String getSpotImage() {
 		return spotImage;
 	}
 
-
-	public void setSpotImage(byte[] spotImage) {
+	public void setSpotImage(String spotImage) {
 		this.spotImage = spotImage;
 	}
-
 
 	public boolean getIsActive() {
 		return isActive;
 	}
 
-
 	public void setIsActive(boolean isActive) {
 		this.isActive = isActive;
 	}
-	
+
 }

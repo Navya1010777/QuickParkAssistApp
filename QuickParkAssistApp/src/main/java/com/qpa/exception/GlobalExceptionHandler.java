@@ -1,6 +1,5 @@
 package com.qpa.exception;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,42 +13,38 @@ import com.qpa.dto.ResponseDTO;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse(
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                LocalDateTime.now());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
 
+    /**
+     * Handles validation errors for input fields
+     */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        // Create a map to store the error messages
+    public ResponseEntity<ResponseDTO<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(fieldError ->
+                errors.put(fieldError.getField(), fieldError.getDefaultMessage())
+        );
 
-        // Extract all the field errors
-        ex.getBindingResult().getFieldErrors().forEach(fieldError -> {
-            // Only include the field name and error message
-            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
-        });
-
-        // Return a simplified error response
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ResponseDTO<>("Validation failed", HttpStatus.BAD_REQUEST.value(), false, errors));
     }
 
-    // Handle other specific exceptions if needed
+    /**
+     * Handles resource not found exceptions
+     */
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ResponseDTO<>(ex.getMessage(), HttpStatus.NOT_FOUND.value(), false));
+    }
+
+    /**
+     * Handles invalid entity exceptions
+     */
     @ExceptionHandler(InvalidEntityException.class)
     public ResponseEntity<Map<String, String>> handleEmployeeNotFoundException(InvalidEntityException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("message", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<ResponseDTO<Void>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .body(new ResponseDTO<>(ex.getMessage(), 401, false));
     }
 }
 

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class EmailService {
 
     @Autowired
-    private JavaMailSender JavaMailSender;
+    private JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username}")
     private String sender;
@@ -24,7 +24,7 @@ public class EmailService {
             simpleMailMessage.setTo(to);
             simpleMailMessage.setText(body);
             simpleMailMessage.setSubject(subject);
-            JavaMailSender.send(simpleMailMessage);
+            javaMailSender.send(simpleMailMessage);
 
             return "Mail sent successfully";
 

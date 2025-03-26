@@ -390,7 +390,7 @@ public class SpotBookingService {
 
     @Transactional
 
-    @Scheduled(fixedRate = 2 * 60 * 1000) // Runs every 15 minutes (made for 2 min for testing purpose)
+    @Scheduled(fixedRate = 15 * 60 * 1000) // Runs every 15 minutes (made for 2 min for testing purpose)
 
     public void updateBookingStatusesToConfirm() {
 
@@ -424,7 +424,7 @@ public class SpotBookingService {
 
     @Transactional
 
-    @Scheduled(fixedRate = 2 * 60 * 1000) // Runs every 15 minutes
+    @Scheduled(fixedRate = 15 * 60 * 1000) // Runs every 15 minutes
 
     public void updateBookingStatusesToComplete() {
 

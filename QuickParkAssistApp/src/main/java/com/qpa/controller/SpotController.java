@@ -29,7 +29,6 @@ import com.qpa.service.SpotService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
-//@Validated
 @RestController
 @RequestMapping("/api/spots")
 public class SpotController {
@@ -39,6 +38,7 @@ public class SpotController {
     public SpotController(SpotService spotService) {
         this.spotService = spotService;
     }
+
 
     @PostMapping("/create")
     public ResponseEntity<SpotResponseDTO> createSpot(
@@ -56,7 +56,7 @@ public class SpotController {
             @RequestPart(value = "image", required = false) MultipartFile image,
             @RequestParam Long userId, HttpServletRequest request) throws InvalidEntityException, IOException {
         // If needed, you can add a check to ensure the user owns the spot
-        return ResponseEntity.ok(spotService.updateSpot(spotId, spotDTO, image, request));
+        return ResponseEntity.ok(spotService.updateSpot(spotId, spotDTO, image));
     }
 
     @DeleteMapping("/{spotId}")
@@ -83,6 +83,7 @@ public class SpotController {
     public ResponseEntity<SpotResponseDTO> toggleSpotActivation(@PathVariable Long spotId) {
         return ResponseEntity.ok(spotService.toggleSpotActivation(spotId));
     }
+
 
     // Vehicle Owner endpoints
     @PatchMapping("/{spotId}/rate")
@@ -133,8 +134,7 @@ public class SpotController {
     }
 
     @GetMapping("/by-booking/{bookingId}")
-    public ResponseEntity<SpotResponseDTO> getSpotByBookingId(@PathVariable long bookingId)
-            throws InvalidEntityException {
+    public ResponseEntity<SpotResponseDTO> getSpotByBookingId(@PathVariable long bookingId) throws InvalidEntityException{
 
         return new ResponseEntity<>(spotService.getSpotByBookingId(bookingId), HttpStatus.OK);
 
@@ -142,9 +142,7 @@ public class SpotController {
 
     @GetMapping("/booked")
     public ResponseEntity<List<SpotResponseDTO>> getBookedSpots() {
-
         return new ResponseEntity<>(spotService.getBookedSpots(), HttpStatus.OK);
-
     }
 
     @GetMapping("/by-booking")
