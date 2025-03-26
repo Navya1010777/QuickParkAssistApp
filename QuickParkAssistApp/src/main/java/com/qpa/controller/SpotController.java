@@ -2,15 +2,20 @@ package com.qpa.controller;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Collections;
-
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.qpa.dto.SpotCreateDTO;
@@ -19,9 +24,9 @@ import com.qpa.dto.SpotSearchCriteria;
 import com.qpa.dto.SpotStatistics;
 import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
-import com.qpa.exception.ResourceNotFoundException;
 import com.qpa.service.SpotService;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 //@Validated
@@ -30,8 +35,7 @@ import jakarta.validation.Valid;
 public class SpotController {
 
     private final SpotService spotService;
-
-    @Autowired
+    
     public SpotController(SpotService spotService) {
         this.spotService = spotService;
     }
@@ -40,8 +44,9 @@ public class SpotController {
     public ResponseEntity<SpotResponseDTO> createSpot(
             @Valid @RequestPart("spot") SpotCreateDTO spotDTO,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestParam Long userId) throws IOException {
-        return ResponseEntity.ok(spotService.createSpot(spotDTO, image, userId));
+            @RequestParam Long userId, HttpServletRequest request) throws IOException {
+        
+        return ResponseEntity.ok(spotService.createSpot(spotDTO, image, userId, request));
     }
 
     @PutMapping("/{spotId}")
@@ -49,17 +54,17 @@ public class SpotController {
             @PathVariable Long spotId,
             @RequestPart("spot") SpotCreateDTO spotDTO,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestParam Long userId) throws InvalidEntityException, IOException {
+            @RequestParam Long userId, HttpServletRequest request) throws InvalidEntityException, IOException {
         // If needed, you can add a check to ensure the user owns the spot
-        return ResponseEntity.ok(spotService.updateSpot(spotId, spotDTO, image));
+        return ResponseEntity.ok(spotService.updateSpot(spotId, spotDTO, image, request));
     }
 
     @DeleteMapping("/{spotId}")
     public ResponseEntity<Void> deleteSpot(
             @PathVariable Long spotId,
-            @RequestParam Long userId) {
+            @RequestParam Long userId, HttpServletRequest request) {
         // Add ownership check if needed
-        spotService.deleteSpot(spotId);
+        spotService.deleteSpot(spotId, request);
         return ResponseEntity.noContent().build();
     }
 
@@ -84,9 +89,9 @@ public class SpotController {
     public ResponseEntity<SpotResponseDTO> rate(
             @PathVariable Long spotId,
             @RequestParam Double rating,
-            @RequestParam Long userId) {
+            @RequestParam Long userId, HttpServletRequest request) {
         // You might want to add logic to prevent rating your own spot
-        return ResponseEntity.ok(spotService.rateSpot(spotId, rating));
+        return ResponseEntity.ok(spotService.rateSpot(spotId, rating, request));
     }
 
     // Remaining endpoints stay mostly the same

@@ -10,6 +10,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.qpa.dto.ResponseDTO;
+
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -42,6 +44,12 @@ public class GlobalExceptionHandler {
         Map<String, String> error = new HashMap<>();
         error.put("message", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ResponseDTO<Void>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ResponseDTO<>(ex.getMessage(), 401, false));
     }
 }
 

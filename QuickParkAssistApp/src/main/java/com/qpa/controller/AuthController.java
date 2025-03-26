@@ -78,7 +78,7 @@ public class AuthController {
      * @return ResponseEntity with success if the user is an admin.
      * @throws UnauthorizedAccessException if the user is not an admin.
      */
-    @GetMapping("/check/admin")
+    @GetMapping("/check-admin")
     public ResponseEntity<ResponseDTO<Void>> checkAdmin(HttpServletRequest request) {
         if (!authService.checkAdmin(request)) {
             throw new UnauthorizedAccessException("Admin is not authenticated");

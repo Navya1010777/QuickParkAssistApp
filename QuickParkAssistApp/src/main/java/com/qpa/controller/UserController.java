@@ -1,5 +1,7 @@
 package com.qpa.controller;
 
+import java.io.IOException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,9 +50,12 @@ public class UserController {
         try {
             userService.uploadUserAvatar(file, request);
             return ResponseEntity.ok(new ResponseDTO<>("Image uploaded successfully", HttpStatus.OK.value(), true));
-        } catch (Exception e) {
+        } catch (IOException e) {
             return ResponseEntity.badRequest()
                     .body(new ResponseDTO<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), false));
+        } catch (InvalidEntityException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ResponseDTO<>(e.getMessage(), HttpStatus.CONFLICT.value(), false, null));
         }
     }
 
@@ -59,9 +64,12 @@ public class UserController {
         try {
             userService.deleteUserAvatar(imageUrl, request);
             return ResponseEntity.ok(new ResponseDTO<>("Image successfully deleted", HttpStatus.OK.value(), true));
-        } catch (Exception e) {
+        } catch (IOException e) {
             return ResponseEntity.badRequest()
-                    .body(new ResponseDTO<>(e.getMessage(), HttpStatus.BAD_REQUEST.value(), false));
+                    .body(new ResponseDTO<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR.value(), false));
+        } catch (InvalidEntityException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ResponseDTO<>(e.getMessage(), HttpStatus.CONFLICT.value(), false, null));
         }
     }
 
@@ -82,9 +90,9 @@ public class UserController {
         try {
             userService.updateUserDetails(user, request);
             return ResponseEntity.ok(new ResponseDTO<>("Details updated successfully", HttpStatus.OK.value(), true));
-        } catch (Exception e) {
+        } catch (InvalidEntityException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ResponseDTO<>(e.getMessage(), HttpStatus.CONFLICT.value(), false));
+                    .body(new ResponseDTO<>(e.getMessage(), HttpStatus.CONFLICT.value(), false, null));
         }
     }
 

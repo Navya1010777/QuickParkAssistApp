@@ -65,7 +65,17 @@ public class JwtUtil {
     }
 
     public UserType extractRole(String token) {
-        return extractClaims(token).get("role", UserType.class);
+        String roleStr = extractClaims(token).get("role", String.class); // ✅ Get role as String
+        if (roleStr == null) {
+            return null; // Role not found in token
+        }
+
+        try {
+            return UserType.valueOf(roleStr); // ✅ Convert String to Enum
+        } catch (IllegalArgumentException e) {
+            System.out.println("Invalid role in token: " + roleStr);
+            return null;
+        }
     }
 
     public boolean validateToken(String token, String email) {

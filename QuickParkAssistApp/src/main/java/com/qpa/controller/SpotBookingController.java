@@ -22,7 +22,7 @@ import com.qpa.repository.SpotBookingInfoRepository;
 import com.qpa.service.SpotBookingService;
 
 @RestController
-@RequestMapping("/bookSlot")
+@RequestMapping("/api/bookSlot")
 public class SpotBookingController {
 
     @Autowired

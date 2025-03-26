@@ -201,10 +201,22 @@ public class AuthService {
         try {
             // Extract token from cookies
             String token = jwtUtil.extractTokenFromCookie(request);
-            if (token == null)
+            if (token == null) {
+                System.out.println("JWT token is missing.");
                 return false;
+            }
 
-            return jwtUtil.extractRole(token).equals(UserType.ADMIN);
+            // Extract role from JWT
+            UserType roleEnum = jwtUtil.extractRole(token);
+            if (roleEnum == null) {
+                System.out.println("Role not found in token.");
+                return false;
+            }
+
+            String role = roleEnum.name(); // Safe to call .name() now
+            System.out.println("Extracted role: " + role);
+
+            return UserType.ADMIN.name().equalsIgnoreCase(role);
         } catch (Exception e) {
             System.out.println("Error in checkAdmin: " + e.getMessage());
             return false;
@@ -219,7 +231,6 @@ public class AuthService {
      * @return ResponseDTO with admin login success status.
      */
     public ResponseDTO<Void> loginAdmin(AuthUser request, HttpServletResponse response) {
-
 
         if (!request.getEmail().equals(adminEmail)) {
             throw new InvalidCredentialsException("Invalid email or password");

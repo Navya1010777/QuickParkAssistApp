@@ -20,11 +20,13 @@ import com.qpa.entity.SpotStatus;
 import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
 import com.qpa.exception.ResourceNotFoundException;
+import com.qpa.exception.UnauthorizedAccessException;
 import com.qpa.repository.LocationRepository;
 import com.qpa.repository.SpotBookingInfoRepository;
 import com.qpa.repository.SpotRepository;
 import com.qpa.repository.UserRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -34,16 +36,22 @@ public class SpotService {
 	private final LocationRepository locationRepository;
 	private final UserRepository userRepository;
 	private final SpotBookingInfoRepository bookingRepository;
+	private final AuthService authService;
 
 	public SpotService(SpotRepository spotRepository, LocationRepository locationRepository,
-			UserRepository userRepository, SpotBookingInfoRepository bookingRepository) {
+			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService) {
 		this.spotRepository = spotRepository;
 		this.locationRepository = locationRepository;
 		this.userRepository = userRepository;
 		this.bookingRepository = bookingRepository;
+		this.authService = authService;
 	}
 
-	public SpotResponseDTO createSpot(SpotCreateDTO spotDTO, MultipartFile spotImage, Long userId) throws IOException {
+	public SpotResponseDTO createSpot(SpotCreateDTO spotDTO, MultipartFile spotImage, Long userId,
+			HttpServletRequest request) throws IOException {
+		if (!authService.isAuthenticated(request)) {
+			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
+		}
 		Spot spot = new Spot();
 		spot.setSpotNumber(spotDTO.getSpotNumber());
 		spot.setSpotType(spotDTO.getSpotType());
@@ -66,8 +74,12 @@ public class SpotService {
 		return convertToDTO(spot);
 	}
 
-	public SpotResponseDTO updateSpot(Long spotId, SpotCreateDTO spotDTO, MultipartFile spotImage)
+	public SpotResponseDTO updateSpot(Long spotId, SpotCreateDTO spotDTO, MultipartFile spotImage,
+			HttpServletRequest request)
 			throws InvalidEntityException, IOException {
+		if (!authService.isAuthenticated(request)) {
+			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
+		}
 		Spot spot = spotRepository.findById(spotId)
 				.orElseThrow(() -> new InvalidEntityException("Spot not found with id : " + spotId));
 
@@ -91,7 +103,10 @@ public class SpotService {
 		return convertToDTO(spot);
 	}
 
-	public void deleteSpot(Long spotId) {
+	public void deleteSpot(Long spotId, HttpServletRequest request) {
+		if (!authService.isAuthenticated(request)) {
+			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
+		}
 		spotRepository.deleteById(spotId);
 	}
 
@@ -134,7 +149,10 @@ public class SpotService {
 		return filteredSpots;
 	}
 
-	public SpotResponseDTO rateSpot(Long spotId, Double rating) {
+	public SpotResponseDTO rateSpot(Long spotId, Double rating, HttpServletRequest request) {
+		if (!authService.isAuthenticated(request)) {
+			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
+		}
 		Spot spot = spotRepository.findById(spotId)
 				.orElseThrow(() -> new ResourceNotFoundException("Spot not found with id : " + spotId));
 

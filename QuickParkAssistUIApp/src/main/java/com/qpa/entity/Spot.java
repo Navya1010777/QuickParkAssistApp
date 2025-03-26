@@ -14,7 +14,7 @@ public class Spot {
 	private String spotNumber;
 	
 	
-	private User owner;
+	private UserInfo owner;
 
 	
 	private SpotType spotType;
