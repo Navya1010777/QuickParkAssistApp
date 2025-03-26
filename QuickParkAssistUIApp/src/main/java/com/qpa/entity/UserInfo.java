@@ -32,6 +32,8 @@ public class UserInfo {
 
     private UserType userType;
 
+    private String username;
+
     private String address;
 
     private Status status = Status.ACTIVE;
@@ -42,9 +44,10 @@ public class UserInfo {
     public UserInfo() {
     }
 
-    public UserInfo(String fullName, String email) {
+    public UserInfo(String fullName, String email, String username) {
         this.fullName = fullName;
         this.email = email;
+        this.username = username;
     }
 
     // Getters and Setters
@@ -126,6 +129,14 @@ public class UserInfo {
 
     public void setDateOfRegister(LocalDate dateOfRegister) {
         this.dateOfRegister = dateOfRegister;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public enum Status {
