@@ -71,8 +71,8 @@
                         <th class="px-4 py-2">Start Time</th>
                         <th class="px-4 py-2">End Time</th>
                         <th class="px-4 py-2">Status</th>
-                        <th class="px-4 py-2">Total Amount</th> <!-- New Column for Total Amount -->
-                        <th class="px-4 py-2">Action</th> <!-- New Column for Pay Button -->
+                        <th class="px-4 py-2">Total Amount</th>
+                        <th class="px-4 py-2">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -86,9 +86,10 @@
                         <td class="px-4 py-2 text-center" th:text="${booking.startTime}"></td>
                         <td class="px-4 py-2 text-center" th:text="${booking.endTime}"></td>
                         <td class="px-4 py-2 text-center" th:text="${booking.status}"></td>
-                        <td class="px-4 py-2 text-center">₹<span th:text="${booking.totalAmount}"></span>/-</td> <!-- Display Total Amount -->
+                        <td class="px-4 py-2 text-center">₹<span th:text="${booking.totalAmount}"></span>/-</td>
                         <td class="px-4 py-2 text-center">
-                            <button class="py-1 px-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                            <button th:if="${booking.status != 'cancelled'}"
+                                    class="py-1 px-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
                                     th:data-bookingid="${booking.bookingId}"
                                     th:text="'Pay ₹' + ${booking.totalAmount} + '/-'">
                             </button>
@@ -115,7 +116,5 @@
             });
         });
     </script>
-    
-
 </body>
 </html>

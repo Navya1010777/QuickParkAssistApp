@@ -3,11 +3,8 @@ package com.qpa.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.qpa.entity.SpotBookingInfo;
-import com.qpa.exception.InvalidEntityException;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 // import org.springframework.http.MediaType;
@@ -373,35 +370,32 @@ private String extractMessage(String responseBody) {
 
  // Handle form submission and redirect to viewMyBooking.html
 
-@GetMapping("/cancelledBookings")
-public String viewMyCancelledBookings(@RequestParam String contactNumber, Model model) {
-    try {
-        // Call backend API to fetch cancelled bookings
-        ResponseEntity<List<SpotBookingInfo>> response = restTemplate.exchange(
-                BASE_URL + "/viewCancelledBookings/" + contactNumber,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<SpotBookingInfo>>() {}
-        );
+ @GetMapping("/cancelledBookings")
+ public String viewMyCancelledBookings(@RequestParam(required = false) String contactNumber, Model model) {
+     if (contactNumber == null || contactNumber.trim().isEmpty()) {
+         // Initial page load without data
+         return "viewCancelledBookings";
+     }
 
-        List<SpotBookingInfo> cancelledBookings = response.getBody();
+     try {
+         // Call backend API to fetch cancelled bookings
+         ResponseEntity<List<SpotBookingInfo>> response = restTemplate.exchange(
+                 BASE_URL + "/getCancelledBookingByContactNumber/" + contactNumber,
+                 HttpMethod.GET,
+                 null,
+                 new ParameterizedTypeReference<List<SpotBookingInfo>>() {}
+         );
 
-        if (cancelledBookings == null || cancelledBookings.isEmpty()) {
-            model.addAttribute("error", "No cancelled bookings found for the provided contact number.");
-            return "viewCancelledBookingForm"; // Stay on the same page
-        }
+         List<SpotBookingInfo> cancelledBookings = response.getBody();
+         model.addAttribute("cancelledBookings", cancelledBookings);
+     } catch (HttpClientErrorException e) {
+         model.addAttribute("error", "Failed to fetch cancelled bookings: " + e.getMessage());
+     } catch (Exception e) {
+         model.addAttribute("error", "An unexpected error occurred: " + e.getMessage());
+     }
 
-        model.addAttribute("cancelledBookings", cancelledBookings);
-        return "viewMyBooking"; // Redirect to the next page if bookings are found
-    } catch (HttpClientErrorException e) {
-        model.addAttribute("error", "Failed to fetch cancelled bookings. Please try again.");
-        return "viewCancelledBookingForm"; // Stay on the same page in case of error
-    } catch (Exception e) {
-        model.addAttribute("error", "An unexpected error occurred. Please try again.");
-        return "viewCancelledBookingForm"; // Stay on the same page in case of error
-    }
-}
-
+     return "viewCancelledBookings";
+ }
 
 
     private boolean isValidContactNumber(String contactNumber) {
