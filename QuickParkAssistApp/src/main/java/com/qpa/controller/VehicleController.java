@@ -2,7 +2,6 @@ package com.qpa.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +16,6 @@ import com.qpa.dto.ResponseDTO;
 import com.qpa.entity.Vehicle;
 import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
-import com.qpa.exception.UnauthorizedAccessException;
 import com.qpa.service.AuthService;
 import com.qpa.service.VehicleService;
 

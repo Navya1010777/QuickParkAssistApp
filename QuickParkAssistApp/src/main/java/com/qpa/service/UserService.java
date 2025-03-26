@@ -86,6 +86,7 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setFullName(request.getFullName());
         user.setUserType(request.getUserType());
+        user.setUsername(request.getUsername());
         user = addUser(user);
 
         // Create authentication details

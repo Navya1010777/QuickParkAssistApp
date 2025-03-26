@@ -5,10 +5,8 @@ import java.time.LocalTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.node.DoubleNode;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 
 @Entity
 @Table(name = "spot_booking_info") // Explicitly defining the table name
@@ -32,13 +30,9 @@ public class SpotBookingInfo {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm:ss")
     private LocalTime endTime;
 
-   
-
     private String status;
 
     private double TotalAmount;
-
-   
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "spot_id") // Foreign key reference
@@ -57,8 +51,8 @@ public class SpotBookingInfo {
 
     // Parameterized constructor
     public SpotBookingInfo(Long bookingId, LocalDate bookingDate, LocalDate startDate, LocalDate endDate,
-                           LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
-                           Vehicle vehicle,double totalAmount, List<AddOns> addOns) {
+            LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
+            Vehicle vehicle, double totalAmount, List<AddOns> addOns) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.startDate = startDate;

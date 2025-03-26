@@ -29,6 +29,7 @@ public class AuthController {
 
     /**
      * Logs out the user by clearing authentication-related data.
+     * 
      * @param response The HTTP response where logout status may be set.
      * @return ResponseEntity with a success or failure message.
      */
@@ -44,7 +45,8 @@ public class AuthController {
 
     /**
      * Logs in the user by validating credentials.
-     * @param request Contains login details (email/password).
+     * 
+     * @param request  Contains login details (email/password).
      * @param response The HTTP response where authentication details may be set.
      * @return ResponseEntity with success or failure response.
      */
@@ -59,6 +61,7 @@ public class AuthController {
 
     /**
      * Checks if the user is authenticated.
+     * 
      * @param request The HTTP request containing authentication details.
      * @return ResponseEntity with success if the user is authenticated.
      * @throws UnauthorizedAccessException if the user is not authenticated.
@@ -74,31 +77,10 @@ public class AuthController {
 
     /**
      * Checks if the current user has admin privileges.
+     * 
      * @param request The HTTP request containing authentication details.
      * @return ResponseEntity with success if the user is an admin.
      * @throws UnauthorizedAccessException if the user is not an admin.
      */
-    @GetMapping("/check-admin")
-    public ResponseEntity<ResponseDTO<Void>> checkAdmin(HttpServletRequest request) {
-        if (!authService.checkAdmin(request)) {
-            throw new UnauthorizedAccessException("Admin is not authenticated");
-        }
-        return ResponseEntity.ok(new ResponseDTO<>("Admin is authorized", HttpStatus.OK.value(), true));
-    }
 
-    /**
-     * Logs in an admin user by validating credentials.
-     * @param request Contains login details (email/password).
-     * @param response The HTTP response where authentication details may be set.
-     * @return ResponseEntity with success or failure response.
-     */
-    @PostMapping("/login-admin")
-    public ResponseEntity<ResponseDTO<Void>> loginAdmin(@RequestBody AuthUser request, HttpServletResponse response) {
-        ResponseDTO<Void> responseDTO = authService.loginAdmin(request, response);
-        if (!responseDTO.isSuccess()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new ResponseDTO<>("Invalid Credentials", HttpStatus.UNAUTHORIZED.value(), false));
-        }
-        return ResponseEntity.ok(responseDTO);
-    }
 }

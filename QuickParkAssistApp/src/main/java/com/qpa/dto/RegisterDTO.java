@@ -6,7 +6,19 @@ public class RegisterDTO {
     private String fullName;
     private String email;
     private String password;
+    private String username;
     private UserType userType;
+
+    public RegisterDTO() {
+    }
+
+    public RegisterDTO(String fullName, String email, String password, String username, UserType userType) {
+        this.fullName = fullName;
+        this.email = email;
+        this.password = password;
+        this.username = username;
+        this.userType = userType;
+    }
 
     public String getFullName() {
         return fullName;
@@ -30,6 +42,14 @@ public class RegisterDTO {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public UserType getUserType() {
