@@ -54,6 +54,7 @@
                     </option>
                 </select>
             </div>
+            <input type="hidden" name="spot.spotType" th:value="${spot.spotType}">
             
             <!-- City (Read-Only) -->
             <div class="mb-3">
@@ -66,6 +67,8 @@
                     </option>
                 </select>
             </div>
+            <input type="hidden" name="location.city" th:value="${spot.location.city}">
+            <input type="hidden" name="location.state" th:value="${spot.location.state}">
             
             <!-- Street Address (Read-Only) -->
             <div class="mb-3">
@@ -106,7 +109,7 @@
             <!-- Supported Vehicle Type (Read-Only) -->
             <div class="mb-3">
                 <label for="supportedVehicleType" class="form-label">Supported Vehicle Type</label>
-                <select class="form-select" id="supportedVehicleType" name="supportedVehicleType" disabled>
+                <select class="form-select" id="supportedVehicleType" name="supportedVehicleType" readonly>
                     <option th:each="type : ${vehicleTypes}" 
                             th:value="${type}" 
                             th:text="${type}" 
@@ -117,7 +120,7 @@
             
             <!-- Has EV Charging (Read-Only) -->
             <div class="mb-3 form-check">
-                <input type="checkbox" class="form-check-input" id="hasEVCharging" name="hasEVCharging" th:checked="${spot.hasEVCharging}" disabled>
+                <input type="checkbox" class="form-check-input" id="hasEVCharging" name="hasEVCharging" th:checked="${spot.hasEVCharging}" readonly>
                 <label class="form-check-label" for="hasEVCharging">Has EV Charging</label>
             </div>
             
@@ -126,7 +129,13 @@
                 <label class="form-label">Current Image</label>
                 <div class="d-flex flex-wrap">
                     <div class="image-container">
-                        <img th:src="@{'data:image/jpeg;base64,' + ${spot.spotImageBase64}}" class="image-preview" alt="Spot Image">
+                        <img th:if="${spot.spotImage != null and not #strings.isEmpty(spot.spotImage)}" 
+                      th:src="${spot.spotImage}" 
+                      alt="Spot Image">
+
+                        <img th:unless="${spot.spotImage != null and not #strings.isEmpty(spot.spotImage)}"
+                            src="/images/default-parking.jpg"
+                            alt="Default Parking Image">
                     </div>
                 </div>
             </div>
