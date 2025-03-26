@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
@@ -26,22 +27,16 @@ import com.qpa.dto.SpotCreateDTO;
 import com.qpa.dto.SpotResponseDTO;
 import com.qpa.dto.SpotStatistics;
 import com.qpa.dto.LocationDTO;
-import com.qpa.dto.LoginDTO;
-import com.qpa.dto.RegisterDTO;
 import com.qpa.entity.PriceType;
 import com.qpa.entity.SpotStatus;
 import com.qpa.entity.SpotType;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.VehicleType;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -49,189 +44,44 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.qpa.service.UserService;
+
+@RequestMapping("/spots")
 @Controller
 public class SpotUIController {
 
     @Autowired
     private RestTemplate restTemplate;
+    @Autowired
+    private UserService userService;
 
-    private final String BASE_URL = "http://localhost:8080/api";
-    private final int SESSION_TIMEOUT = 60 * 60 * 24 * 7;
+    private final String BASE_URL = "http://localhost:7212/api";
     private static final String LAST_LOCATION_SESSION_KEY = "lastUsedLocation";
 
     // Home Page
     @GetMapping("/")
     public String landingPage(HttpServletRequest request) {
+
         // Check for auto-login via cookie
-        UserInfo UserInfo = getUserInfoFromCookie(request);
+        UserInfo UserInfo = userService.getUserDetails(request).getData();
         if (UserInfo != null) {
-            request.getSession().setAttribute("currentUserInfo", UserInfo);
+            return "redirect:/auth/login";
         }
 
-        return "redirect:/home";
+        return "redirect:/spots/home";
     }
 
     // Home Page
     @GetMapping("/home")
     public String homePage(HttpServletRequest request, Model model) {
         // Check for auto-login via cookie
-        UserInfo UserInfo = getUserInfoFromCookie(request);
-        if (UserInfo != null) {
-            request.getSession().setAttribute("currentUserInfo", UserInfo);
+        UserInfo user = userService.getUserDetails(request).getData();
+        if (user == null) {
+            return "redirect:/auth/login";
         }
 
-        // Check if UserInfo is logged in
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
-        if (currentUserInfo == null) {
-            return "redirect:/login";
-        }
-        model.addAttribute("UserInfo", currentUserInfo);
+        model.addAttribute("UserInfo", user);
         return "home";
-    }
-
-    // Show Login Page
-    @GetMapping("/login")
-    public String showLoginPage(HttpServletRequest request, Model model) {
-        // Check for auto-login via cookie
-        UserInfo UserInfo = getUserInfoFromCookie(request);
-        if (UserInfo != null) {
-            request.getSession().setAttribute("currentUserInfo", UserInfo);
-        }
-
-        // If already logged in, redirect to home
-        if (request.getSession().getAttribute("currentUserInfo") != null) {
-            return "redirect:/home";
-        }
-        model.addAttribute("loginDTO", new LoginDTO());
-        return "login";
-    }
-
-    // Show Register Page
-    @GetMapping("/register")
-    public String showRegisterPage(HttpServletRequest request, Model model) {
-        // Check for auto-login via cookie
-        UserInfo UserInfo = getUserInfoFromCookie(request);
-        if (UserInfo != null) {
-            request.getSession().setAttribute("currentUserInfo", UserInfo);
-        }
-
-        // If already logged in, redirect to home
-        if (request.getSession().getAttribute("currentUserInfo") != null) {
-            return "redirect:/home";
-        }
-        model.addAttribute("registerDTO", new RegisterDTO());
-        return "register";
-    }
-
-    @PostMapping("/register")
-    public String registerUserInfo(@ModelAttribute RegisterDTO registerDTO, Model model,
-            HttpServletRequest request, HttpServletResponse response) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<RegisterDTO> httpRequest = new HttpEntity<>(registerDTO, headers);
-
-            ResponseEntity<UserInfo> httpResponse = restTemplate.postForEntity(
-                    BASE_URL + "/auth/register",
-                    httpRequest,
-                    UserInfo.class);
-
-            if (httpResponse.getStatusCode().is2xxSuccessful()) {
-                // Automatically log in after successful registration
-                UserInfo registeredUserInfo = httpResponse.getBody();
-
-                // Set UserInfo in session
-                HttpSession session = request.getSession(true);
-                session.setAttribute("currentUserInfo", registeredUserInfo);
-                session.setMaxInactiveInterval(SESSION_TIMEOUT);
-
-                // Set persistent cookie
-                Cookie loginCookie = createLoginCookie(registeredUserInfo);
-                response.addCookie(loginCookie);
-
-                return "redirect:/home";
-            } else {
-                model.addAttribute("error", "Registration unsuccessful");
-                return "register";
-            }
-        } catch (HttpClientErrorException e) {
-            String errorMessage = e.getResponseBodyAsString();
-            model.addAttribute("error", "Registration failed: " + errorMessage);
-            return "register";
-        } catch (Exception e) {
-            model.addAttribute("error", "Unexpected error: " + e.getMessage());
-            return "register";
-        }
-    }
-
-    @PostMapping("/perform_login")
-    public String loginUserInfo(@ModelAttribute LoginDTO loginDTO, Model model,
-            HttpServletRequest request, HttpServletResponse response) {
-        try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
-            HttpEntity<LoginDTO> httpRequest = new HttpEntity<>(loginDTO, headers);
-
-            ResponseEntity<UserInfo> httpResponse = restTemplate.postForEntity(
-                    BASE_URL + "/auth/login",
-                    httpRequest,
-                    UserInfo.class);
-
-            if (httpResponse.getStatusCode().is2xxSuccessful()) {
-                // Store UserInfo in session
-                UserInfo loggedInUserInfo = httpResponse.getBody();
-
-                // Set UserInfo in session
-                HttpSession session = request.getSession(true);
-                session.setAttribute("currentUserInfo", loggedInUserInfo);
-                session.setMaxInactiveInterval(SESSION_TIMEOUT);
-
-                // Set persistent cookie
-                Cookie loginCookie = createLoginCookie(loggedInUserInfo);
-                response.addCookie(loginCookie);
-
-                return "redirect:/home";
-            } else {
-                model.addAttribute("error", "Login unsuccessful");
-                return "login";
-            }
-        } catch (HttpClientErrorException e) {
-            String errorMessage = e.getResponseBodyAsString();
-            model.addAttribute("error", "Login failed: " + errorMessage);
-            return "login";
-        } catch (Exception e) {
-            model.addAttribute("error", "Unexpected error: " + e.getMessage());
-            return "login";
-        }
-    }
-
-    // Logout endpoint
-    @GetMapping("/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
-        // Remove UserInfo from session
-        HttpSession session = request.getSession(false);
-        if (session != null) {
-            session.removeAttribute("currentUserInfo");
-            session.invalidate();
-        }
-
-        // Delete the cookie
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("loginInfo".equals(cookie.getName())) {
-                    cookie.setValue("");
-                    cookie.setPath("/");
-                    cookie.setMaxAge(0);
-                    response.addCookie(cookie);
-                    break;
-                }
-            }
-        }
-
-        return "redirect:/login";
     }
 
     @PostMapping("/spots/create")
@@ -241,9 +91,9 @@ public class SpotUIController {
             Model model,
             HttpServletRequest request) {
         // Ensure UserInfo is logged in
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         try {
@@ -253,7 +103,7 @@ public class SpotUIController {
             // Prepare the request with multipart form data
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("spot", spotCreateDTO);
-            body.add("UserInfoId", currentUserInfo.getId());
+            body.add("UserInfoId", currentUserInfo.getUserId());
 
             // Add image file if present
             if (imageFile != null && !imageFile.isEmpty()) {
@@ -262,6 +112,11 @@ public class SpotUIController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            String cookie = request.getHeader(HttpHeaders.COOKIE);
+            if (cookie != null) {
+                headers.add(HttpHeaders.COOKIE, cookie);
+            }
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
@@ -295,9 +150,9 @@ public class SpotUIController {
     @GetMapping("/spots/create")
     public String showCreateSpotPage(Model model, HttpServletRequest request) {
         // Ensure UserInfo is logged in
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         SpotCreateDTO spotCreateDTO = new SpotCreateDTO();
@@ -309,38 +164,38 @@ public class SpotUIController {
         try {
             // Fetch states from backend
             ResponseEntity<List<String>> statesResponse = restTemplate.exchange(
-                BASE_URL + "/locations/states", 
-                HttpMethod.GET, 
-                null, 
-                new ParameterizedTypeReference<List<String>>() {}
-            );
+                    BASE_URL + "/locations/states",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<String>>() {
+                    });
             List<String> states = statesResponse.getBody();
 
             // Fetch all cities from backend (for spot creation)
             ResponseEntity<List<String>> citiesResponse = restTemplate.exchange(
-                BASE_URL + "/locations/cities", 
-                HttpMethod.GET, 
-                null, 
-                new ParameterizedTypeReference<List<String>>() {}
-            );
+                    BASE_URL + "/locations/cities",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<String>>() {
+                    });
             List<String> cities = citiesResponse.getBody();
 
             // Fetch state-city map
             ResponseEntity<Map<String, List<String>>> stateCityMapResponse = restTemplate.exchange(
-                BASE_URL + "/locations/state-city-map", 
-                HttpMethod.GET, 
-                null, 
-                new ParameterizedTypeReference<Map<String, List<String>>>() {}
-            );
+                    BASE_URL + "/locations/state-city-map",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, List<String>>>() {
+                    });
             Map<String, List<String>> stateCityMap = stateCityMapResponse.getBody();
 
             // Fetch city-pincode map
             ResponseEntity<Map<String, String>> cityPincodeMapResponse = restTemplate.exchange(
-                BASE_URL + "/locations/city-pincode-map", 
-                HttpMethod.GET, 
-                null, 
-                new ParameterizedTypeReference<Map<String, String>>() {}
-            );
+                    BASE_URL + "/locations/city-pincode-map",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, String>>() {
+                    });
             Map<String, String> cityPincodeMap = cityPincodeMapResponse.getBody();
 
             model.addAttribute("spotCreateDTO", spotCreateDTO);
@@ -373,11 +228,11 @@ public class SpotUIController {
     public List<Map<String, String>> getCitiesByState(@RequestParam String state) {
         try {
             ResponseEntity<List<Map<String, String>>> response = restTemplate.exchange(
-                BASE_URL + "/locations/cities-by-state?state=" + state,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<List<Map<String, String>>>() {}
-            );
+                    BASE_URL + "/locations/cities-by-state?state=" + state,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<Map<String, String>>>() {
+                    });
             return response.getBody();
         } catch (Exception e) {
             return Collections.emptyList();
@@ -393,26 +248,25 @@ public class SpotUIController {
             @RequestParam(required = false) SpotStatus status,
             Model model,
             HttpServletRequest request) {
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         // Fetch cities with existing spots
         try {
             ResponseEntity<SpotResponseDTO[]> spotsResponse = restTemplate.exchange(
-                BASE_URL + "/spots/all",
-                HttpMethod.GET,
-                null,
-                SpotResponseDTO[].class
-            );
+                    BASE_URL + "/spots/all",
+                    HttpMethod.GET,
+                    null,
+                    SpotResponseDTO[].class);
             SpotResponseDTO[] allSpots = spotsResponse.getBody();
 
             // Extract unique cities with spots
             Set<String> citiesWithSpots = Arrays.stream(allSpots)
-                .map(spot -> spot.getLocation().getCity())
-                .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                    .map(spot -> spot.getLocation().getCity())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
 
             // Sort the cities with spots
             List<String> sortedCitiesWithSpots = new ArrayList<>(citiesWithSpots);
@@ -484,9 +338,9 @@ public class SpotUIController {
 
     @GetMapping("/spots/statistics")
     public String getSpotStatistics(Model model, HttpServletRequest request) {
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         SpotStatistics statistics = restTemplate.getForObject(
@@ -500,13 +354,13 @@ public class SpotUIController {
     // Owner's Spots Page
     @GetMapping("/spots/owner")
     public String getOwnerSpots(Model model, HttpServletRequest request) {
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         SpotResponseDTO[] spots = restTemplate.getForObject(
-                BASE_URL + "/spots/owner?UserInfoId=" + currentUserInfo.getId(),
+                BASE_URL + "/spots/owner?UserInfoId=" + currentUserInfo.getUserId(),
                 SpotResponseDTO[].class);
 
         model.addAttribute("spots", spots);
@@ -517,9 +371,9 @@ public class SpotUIController {
     @GetMapping("/spots/edit/{spotId}")
     public String showEditSpotForm(@PathVariable Long spotId, Model model, HttpServletRequest request) {
         // Ensure UserInfo is logged in
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         try {
@@ -528,17 +382,18 @@ public class SpotUIController {
                     BASE_URL + "/spots/" + spotId,
                     SpotResponseDTO.class);
             ResponseEntity<List<String>> citiesResponse = restTemplate.exchange(
-                BASE_URL + "/locations/cities", 
-                HttpMethod.GET, 
-                null, 
-                        new ParameterizedTypeReference<List<String>>() {}
-            );
+                    BASE_URL + "/locations/cities",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<String>>() {
+                    });
             List<String> cities = citiesResponse.getBody();
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 SpotResponseDTO spot = response.getBody();
                 // Check if the current UserInfo is the owner of this spot
-                if (!spot.getOwner().getId().equals(currentUserInfo.getId())) {
+                if (spot == null || spot.getOwner() == null
+                        || !spot.getOwner().getUserId().equals(currentUserInfo.getUserId())) {
                     return "redirect:/spots/owner?error=unauthorized";
                 }
 
@@ -570,12 +425,12 @@ public class SpotUIController {
             Model model,
             HttpServletRequest request) {
 
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
-        if (!UserInfoId.equals(currentUserInfo.getId())) {
+        if (!UserInfoId.equals(currentUserInfo.getUserId())) {
             return "redirect:/spots/owner?error=unauthorized";
         }
 
@@ -611,6 +466,10 @@ public class SpotUIController {
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            String cookie = request.getHeader(HttpHeaders.COOKIE);
+            if (cookie != null) {
+                headers.add(HttpHeaders.COOKIE, cookie);
+            }
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("spot", spotCreateDTO);
             body.add("UserInfoId", UserInfoId);
@@ -651,9 +510,9 @@ public class SpotUIController {
             HttpServletRequest request,
             Model model) {
         // Ensure UserInfo is logged in
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         try {
@@ -666,12 +525,13 @@ public class SpotUIController {
                 SpotResponseDTO spot = getResponse.getBody();
 
                 // Check if the current UserInfo is the owner
-                if (!spot.getOwner().getId().equals(currentUserInfo.getId())) {
+                if (spot == null || spot.getOwner() == null
+                        || !spot.getOwner().getUserId().equals(currentUserInfo.getUserId())) {
                     return "redirect:/spots/owner?error=unauthorizedDelete";
                 }
 
                 // Make delete request to backend with UserInfoId as parameter
-                String deleteUrl = BASE_URL + "/spots/" + spotId + "?UserInfoId=" + currentUserInfo.getId();
+                String deleteUrl = BASE_URL + "/spots/" + spotId + "?UserInfoId=" + currentUserInfo.getUserId();
                 restTemplate.delete(deleteUrl);
 
                 return "redirect:/spots/owner?success=spotDeleted";
@@ -693,9 +553,9 @@ public class SpotUIController {
 
     ) {
         // Ensure UserInfo is logged in
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         try {
@@ -721,59 +581,11 @@ public class SpotUIController {
         }
     }
 
-    // Helper methods for persistent login
-    private Cookie createLoginCookie(UserInfo UserInfo) {
-        // Create a cookie with UserInfo ID and a simple encoded credential
-        // In a production app, you would use more secure encoding and possibly JWT
-        String UserInfoInfo = UserInfo.getId() + ":" + Base64.getEncoder().encodeToString(
-                (UserInfo.getPassword()).getBytes());
-
-        Cookie cookie = new Cookie("loginInfo", UserInfoInfo);
-        cookie.setMaxAge(SESSION_TIMEOUT);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true); // Prevent JavaScript access
-        // cookie.setSecure(true); // Uncomment for HTTPS
-
-        return cookie;
-    }
-
-    private UserInfo getUserInfoFromCookie(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("loginInfo".equals(cookie.getName())) {
-                    try {
-                        String value = cookie.getValue();
-                        String[] parts = value.split(":", 2);
-
-                        if (parts.length == 2) {
-                            Long UserInfoId = Long.parseLong(parts[0]);
-
-                            // Use the UserInfo ID to fetch fresh UserInfo data from the backend
-                            ResponseEntity<UserInfo> response = restTemplate.getForEntity(
-                                    BASE_URL + "/auth/UserInfo/" + UserInfoId,
-                                    UserInfo.class);
-
-                            if (response.getStatusCode().is2xxSuccessful()) {
-                                return response.getBody();
-                            }
-                        }
-                    } catch (Exception e) {
-                        // Log the error but continue
-                        System.err.println("Error parsing login cookie: " + e.getMessage());
-                    }
-                    break;
-                }
-            }
-        }
-        return null;
-    }
-
     @GetMapping("/booked")
     public String getBookedSpots(Model model, HttpServletRequest request) {
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         String url = BASE_URL + "/spots/booked";
@@ -801,9 +613,9 @@ public class SpotUIController {
             HttpServletRequest request) {
         System.out.println("Navigating to search spot by Booking ID page. Booking ID: " + bookingId);
 
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         if (bookingId == null) {
@@ -841,9 +653,9 @@ public class SpotUIController {
             @RequestParam(required = false) String endDate,
             Model model,
             HttpServletRequest request) {
-        UserInfo currentUserInfo = (UserInfo) request.getSession().getAttribute("currentUserInfo");
+        UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
-            return "redirect:/login";
+            return "redirect:/auth/login";
         }
 
         boolean hasDateFilters = startDate != null && !startDate.isEmpty()

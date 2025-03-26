@@ -2,7 +2,6 @@ package com.qpa.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,7 +16,6 @@ import com.qpa.dto.ResponseDTO;
 import com.qpa.entity.Vehicle;
 import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
-import com.qpa.exception.UnauthorizedAccessException;
 import com.qpa.service.AuthService;
 import com.qpa.service.VehicleService;
 
@@ -35,13 +33,15 @@ public class VehicleController {
     }
 
     @PostMapping("/save")
-    public ResponseEntity<ResponseDTO<Void>> saveVehicle(@RequestBody Vehicle vehicle, HttpServletRequest request) throws InvalidEntityException {
+    public ResponseEntity<ResponseDTO<Void>> saveVehicle(@RequestBody Vehicle vehicle, HttpServletRequest request)
+            throws InvalidEntityException {
         vehicleService.saveVehicle(vehicle, request);
         return ResponseEntity.ok(new ResponseDTO<>("Vehicle registered successfully", 200, true, null));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<ResponseDTO<Void>> deleteVehicle(@PathVariable Long id, HttpServletRequest request) throws InvalidEntityException {
+    public ResponseEntity<ResponseDTO<Void>> deleteVehicle(@PathVariable Long id, HttpServletRequest request)
+            throws InvalidEntityException {
         Long userId = authService.getUserId(request);
         vehicleService.deleteVehicle(id, userId);
         return ResponseEntity.ok(new ResponseDTO<>("Vehicle deleted successfully", 200, true, null));
@@ -56,7 +56,8 @@ public class VehicleController {
 
     @GetMapping("/type/{vehicleType}")
     @ResponseBody
-    public ResponseEntity<ResponseDTO<List<Vehicle>>> viewVehiclesByType(@PathVariable String vehicleType) throws InvalidEntityException {
+    public ResponseEntity<ResponseDTO<List<Vehicle>>> viewVehiclesByType(@PathVariable String vehicleType)
+            throws InvalidEntityException {
         VehicleType type = VehicleType.valueOf(vehicleType.toUpperCase());
         List<Vehicle> vehicles = vehicleService.getVehiclesByType(type);
         return ResponseEntity.ok(new ResponseDTO<>("Vehicles fetched successfully", 200, true, vehicles));
@@ -64,8 +65,8 @@ public class VehicleController {
 
     @GetMapping("/booking/{bookingId}")
     public ResponseEntity<ResponseDTO<Vehicle>> getVehicleByBookingId(@PathVariable Long bookingId,
-                                                                      HttpServletRequest request) throws InvalidEntityException {
-        authService.checkAuthentication(request);
+            HttpServletRequest request) throws InvalidEntityException {
+        authService.isAuthenticated(request);
         Vehicle vehicle = vehicleService.findByBookingId(bookingId);
         return ResponseEntity.ok(new ResponseDTO<>("Vehicles fetched successfully", 200, true, vehicle));
     }

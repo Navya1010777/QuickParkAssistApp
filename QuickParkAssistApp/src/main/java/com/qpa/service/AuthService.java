@@ -3,7 +3,6 @@ package com.qpa.service;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -17,7 +16,6 @@ import com.qpa.exception.InvalidCredentialsException;
 import com.qpa.repository.AuthRepository;
 import com.qpa.security.JwtUtil;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -29,12 +27,6 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final AuthRepository authRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${admin.email}")
-    private String adminEmail;
-
-    @Value("${admin.password}")
-    private String adminPassword;
 
     /**
      * Constructor to initialize AuthService with required dependencies.
@@ -191,58 +183,4 @@ public class AuthService {
         }
     }
 
-    /**
-     * Checks if the authenticated user is an admin.
-     * 
-     * @param request the HttpServletRequest containing authentication information.
-     * @return true if the user is an admin, false otherwise.
-     */
-    public boolean checkAdmin(HttpServletRequest request) {
-        try {
-            // Extract token from cookies
-            String token = jwtUtil.extractTokenFromCookie(request);
-            if (token == null)
-                return false;
-
-            return jwtUtil.extractRole(token).equals(UserType.ADMIN);
-        } catch (Exception e) {
-            System.out.println("Error in checkAdmin: " + e.getMessage());
-            return false;
-        }
-    }
-
-    /**
-     * Logs in an admin user and sets a JWT token in a cookie.
-     * 
-     * @param request  the AuthUser login request containing email and password.
-     * @param response the HttpServletResponse to store the JWT token.
-     * @return ResponseDTO with admin login success status.
-     */
-    public ResponseDTO<Void> loginAdmin(AuthUser request, HttpServletResponse response) {
-
-
-        if (!request.getEmail().equals(adminEmail)) {
-            throw new InvalidCredentialsException("Invalid email or password");
-        }
-        // Verify password
-        if (!passwordEncoder.matches(request.getPassword(), adminPassword)) {
-            throw new InvalidCredentialsException("Invalid email or password");
-        }
-
-        // Generate JWT token
-        String token = jwtUtil.generateToken(request.getEmail(), -1L, UserType.ADMIN);
-
-        // Create and set the cookie properly
-        Cookie jwtCookie = new Cookie("jwt", token);
-        jwtCookie.setPath("/");
-        jwtCookie.setHttpOnly(true);
-        jwtCookie.setMaxAge(86400);
-        jwtCookie.setSecure(false);
-        jwtCookie.setAttribute("SameSite", "None");
-
-        response.addCookie(jwtCookie);
-        response.addHeader("Set-Cookie", jwtCookie.toString());
-
-        return new ResponseDTO<>("Admin Login Successful", HttpStatus.OK.value(), true);
-    }
 }

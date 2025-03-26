@@ -5,19 +5,28 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.qpa.dto.*;
-import com.qpa.entity.*;
-import com.qpa.repository.UserRepository;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.qpa.dto.LocationDTO;
+import com.qpa.dto.SpotCreateDTO;
+import com.qpa.dto.SpotResponseDTO;
+import com.qpa.dto.SpotSearchCriteria;
+import com.qpa.dto.SpotStatistics;
+import com.qpa.entity.Location;
+import com.qpa.entity.Spot;
+import com.qpa.entity.SpotStatus;
+import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
 import com.qpa.exception.ResourceNotFoundException;
+import com.qpa.exception.UnauthorizedAccessException;
+import com.qpa.repository.LocationRepository;
+import com.qpa.repository.SpotBookingInfoRepository;
 import com.qpa.repository.SpotRepository;
-import com.qpa.repository.*;
+import com.qpa.repository.UserRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -26,19 +35,25 @@ public class SpotService {
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
 	private final SpotBookingInfoRepository bookingRepository;
-	private final CloudinaryService cloudinaryService;
+	private final AuthService authService;
 	private final LocationService locationService;
+	private final CloudinaryService cloudinaryService;
 
-	@Autowired
-	public SpotService(SpotRepository spotRepository, UserRepository userRepository, SpotBookingInfoRepository bookingRepository, CloudinaryService cloudinaryService, LocationService locationService) {
+	public SpotService(SpotRepository spotRepository, LocationRepository locationRepository,
+			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService, LocationService locationService, CloudinaryService cloudinaryService) {
 		this.spotRepository = spotRepository;
 		this.userRepository = userRepository;
 		this.bookingRepository = bookingRepository;
-		this.cloudinaryService = cloudinaryService;
+		this.authService = authService;
 		this.locationService = locationService;
+		this.cloudinaryService = cloudinaryService;
 	}
 
-	public SpotResponseDTO createSpot(SpotCreateDTO spotDTO, MultipartFile spotImage, Long userId) throws IOException {
+	public SpotResponseDTO createSpot(SpotCreateDTO spotDTO, MultipartFile spotImage, Long userId,
+			HttpServletRequest request) throws IOException {
+		if (!authService.isAuthenticated(request)) {
+			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
+		}
 		Spot spot = new Spot();
 		spot.setSpotNumber(spotDTO.getSpotNumber());
 		spot.setSpotType(spotDTO.getSpotType());
@@ -65,8 +80,8 @@ public class SpotService {
 		return convertToDTO(spot);
 	}
 
-	// Similar modification for updateSpot method
-	public SpotResponseDTO updateSpot(Long spotId, SpotCreateDTO spotDTO, MultipartFile spotImage) throws InvalidEntityException, IOException {
+	public SpotResponseDTO updateSpot(Long spotId, SpotCreateDTO spotDTO, MultipartFile spotImage)
+			throws InvalidEntityException, IOException {
 		Spot spot = spotRepository.findById(spotId)
 				.orElseThrow(() -> new InvalidEntityException("Spot not found with id : " + spotId));
 
@@ -94,7 +109,10 @@ public class SpotService {
 		return convertToDTO(spot);
 	}
 
-	public void deleteSpot(Long spotId) {
+	public void deleteSpot(Long spotId, HttpServletRequest request) {
+		if (!authService.isAuthenticated(request)) {
+			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
+		}
 		spotRepository.deleteById(spotId);
 	}
 
@@ -137,7 +155,10 @@ public class SpotService {
 				.collect(Collectors.toList());
 	}
 
-	public SpotResponseDTO rateSpot(Long spotId, Double rating) {
+	public SpotResponseDTO rateSpot(Long spotId, Double rating, HttpServletRequest request) {
+		if (!authService.isAuthenticated(request)) {
+			throw new UnauthorizedAccessException("USER IS NOT AUTHENTICATED");
+		}
 		Spot spot = spotRepository.findById(spotId)
 				.orElseThrow(() -> new ResourceNotFoundException("Spot not found with id : " + spotId));
 
