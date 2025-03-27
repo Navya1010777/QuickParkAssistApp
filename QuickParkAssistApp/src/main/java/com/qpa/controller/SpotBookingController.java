@@ -22,7 +22,7 @@ import com.qpa.repository.SpotBookingInfoRepository;
 import com.qpa.service.SpotBookingService;
 
 @RestController
-@RequestMapping("/bookSlot")
+@RequestMapping("/api/bookSlot")
 public class SpotBookingController {
 
     @Autowired
@@ -63,7 +63,7 @@ public class SpotBookingController {
 
     @GetMapping("/viewBookingBySlotId/{spotId}")
     public List<SpotBookingInfo> getBookingsBySpotId(@PathVariable long spotId) throws InvalidEntityException {
-        return spotBookingService.getBookingsBySlotId(spotId); 
+        return spotBookingService.getBookingsBySlotId(spotId);
     }
 
     @GetMapping("/viewByContactNumber/{contactNumber}")
@@ -83,11 +83,12 @@ public class SpotBookingController {
     }
 
     @GetMapping("/getCancelledBookingByContactNumber/{contactNumber}")
-    public ResponseEntity<List<SpotBookingInfo>> getCancelledBookings(@PathVariable("contactNumber") String contactNumber) throws InvalidEntityException {
-       
-            List<SpotBookingInfo> cancelledBookings = spotBookingService.getCancelledBookingsByContactNumber(contactNumber);
-            return ResponseEntity.ok(cancelledBookings);
-       
+    public ResponseEntity<List<SpotBookingInfo>> getCancelledBookings(
+            @PathVariable("contactNumber") String contactNumber) throws InvalidEntityException {
+
+        List<SpotBookingInfo> cancelledBookings = spotBookingService.getCancelledBookingsByContactNumber(contactNumber);
+        return ResponseEntity.ok(cancelledBookings);
+
     }
 
     @DeleteMapping("/cancel/{bookingId}")
@@ -104,28 +105,29 @@ public class SpotBookingController {
     }
 
     @PostMapping("/check-update-conflict/{bookingId}")
-public ResponseEntity<String> checkUpdateConflict(@PathVariable long bookingId, @RequestBody SpotBookingInfo updatedBooking) {
-    try {
-        long spotId = updatedBooking.getSpotInfo().getSpotId();
-        List<SpotBookingInfo> conflictingBookings = spotBookingRepository.findConflictingBookingsforUpdatedbookings(
-                spotId, 
-                updatedBooking.getStartDate(), 
-                updatedBooking.getStartTime(), 
-                updatedBooking.getEndDate(), 
-                updatedBooking.getEndTime(), 
-                bookingId);
+    public ResponseEntity<String> checkUpdateConflict(@PathVariable long bookingId,
+            @RequestBody SpotBookingInfo updatedBooking) {
+        try {
+            long spotId = updatedBooking.getSpotInfo().getSpotId();
+            List<SpotBookingInfo> conflictingBookings = spotBookingRepository.findConflictingBookingsforUpdatedbookings(
+                    spotId,
+                    updatedBooking.getStartDate(),
+                    updatedBooking.getStartTime(),
+                    updatedBooking.getEndDate(),
+                    updatedBooking.getEndTime(),
+                    bookingId);
 
-        if (!conflictingBookings.isEmpty()) {
-            SpotBookingInfo conflict = conflictingBookings.get(0);
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                "The updated booking conflicts with an existing booking for spot " + spotId + ". " +
-                "Conflict details: Start: " + conflict.getStartDate() + " " + conflict.getStartTime() +
-                ", End: " + conflict.getEndDate() + " " + conflict.getEndTime());
+            if (!conflictingBookings.isEmpty()) {
+                SpotBookingInfo conflict = conflictingBookings.get(0);
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(
+                        "The updated booking conflicts with an existing booking for spot " + spotId + ". " +
+                                "Conflict details: Start: " + conflict.getStartDate() + " " + conflict.getStartTime() +
+                                ", End: " + conflict.getEndDate() + " " + conflict.getEndTime());
+            }
+            return ResponseEntity.ok("No conflict");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error checking conflicts.");
         }
-        return ResponseEntity.ok("No conflict");
-    } catch (Exception e) {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error checking conflicts.");
     }
-}
 
 }

@@ -41,10 +41,10 @@ public class GlobalExceptionHandler {
      * Handles invalid entity exceptions
      */
     @ExceptionHandler(InvalidEntityException.class)
-    public ResponseEntity<Map<String, String>> handleEmployeeNotFoundException(InvalidEntityException ex) {
+    public ResponseEntity<ResponseDTO<Void>> handleEmployeeNotFoundException(InvalidEntityException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("message", ex.getMessage());
-        return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+        return ResponseEntity.badRequest().body(new ResponseDTO<>(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), false));
     }
 }
 

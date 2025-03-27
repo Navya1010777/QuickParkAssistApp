@@ -9,12 +9,14 @@ document.addEventListener("DOMContentLoaded", function () {
     console.error("One or both elements are missing!");
     return;
   }
-
-  // Function to trigger change event manually
-  function triggerChange(element, value) {
-    element.value = value;
-    element.dispatchEvent(new Event("input", { bubbles: true })); // Use "input" instead of "change"
+  if (successMessageElement.value) {
+    notyf.success(successMessageElement.value);
   }
+
+  if (errorMessageElement.value) {
+    notyf.error(errorMessageElement.value);
+  }
+  // Function to trigger change event manually
 
   // Event listeners for changes
   successMessageElement.addEventListener("input", (e) => {
@@ -30,3 +32,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   });
 });
+
+function triggerChange(element, value) {
+  element.value = value;
+  element.dispatchEvent(new Event("input", { bubbles: true })); // Use "input" instead of "change"
+}

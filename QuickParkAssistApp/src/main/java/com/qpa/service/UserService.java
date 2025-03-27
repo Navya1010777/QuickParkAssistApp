@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.qpa.dto.RegisterDTO;
 import com.qpa.entity.AuthUser;
+import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.UserType;
 import com.qpa.entity.Vehicle;
@@ -21,6 +22,8 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class UserService {
+
+    private final SpotBookingService spotBookingService;
     private final UserRepository userRepository;
     private final VehicleService vehicleService;
     private final AuthService authService;
@@ -29,12 +32,13 @@ public class UserService {
 
     public UserService(UserRepository userRepository, VehicleService vehicleService,
             AuthService authService, CloudinaryService cloudinaryService,
-            EmailService emailService) {
+            EmailService emailService, SpotBookingService spotBookingService) {
         this.userRepository = userRepository;
         this.vehicleService = vehicleService;
         this.authService = authService;
         this.cloudinaryService = cloudinaryService;
         this.emailService = emailService;
+        this.spotBookingService = spotBookingService;
     }
 
     public UserInfo getCurrentUserProfile(HttpServletRequest request) throws InvalidEntityException {
@@ -70,15 +74,13 @@ public class UserService {
         if (authService.isAuthenticated(httpRequest)) {
             throw new IllegalStateException("User is already logged in");
         }
-
         // Check if email is already registered
         if (existsByEmail(request.getEmail())) {
             throw new DataIntegrityViolationException("Email already exists");
         }
 
-        // Prevent registration as ADMIN
-        if (request.getUserType() == UserType.ADMIN) {
-            throw new IllegalArgumentException("ADMIN Role is forbidden");
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new DataIntegrityViolationException("username already exists");
         }
 
         // Create new user
@@ -114,7 +116,7 @@ public class UserService {
             updateUser(user);
         } catch (DataIntegrityViolationException e) {
             if (e.getMessage().contains("Duplicate entry")) {
-                throw new DataIntegrityViolationException("Duplicate entry for email");
+                throw new InvalidEntityException("Duplicate entry for username");
             }
             throw e;
         }
@@ -163,5 +165,10 @@ public class UserService {
     public UserType checkUserType(Long userId) throws InvalidEntityException {
         UserInfo user = getUserById(userId);
         return user.getUserType();
+    }
+
+    public List<SpotBookingInfo> getUserbookings(HttpServletRequest request) throws InvalidEntityException {
+        UserInfo user = getCurrentUserProfile(request);
+        return spotBookingService.getBookingsByContactNumber(user.getContactNumber());
     }
 }

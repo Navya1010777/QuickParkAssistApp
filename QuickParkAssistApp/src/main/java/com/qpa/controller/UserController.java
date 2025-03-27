@@ -1,6 +1,7 @@
 package com.qpa.controller;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.qpa.dto.RegisterDTO;
 import com.qpa.dto.ResponseDTO;
+import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
 import com.qpa.exception.InvalidEntityException;
+import com.qpa.service.SpotBookingService;
 import com.qpa.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,10 +29,13 @@ import jakarta.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("api/users")
 public class UserController {
+
+    private final SpotBookingService spotBookingService;
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, SpotBookingService spotBookingService) {
         this.userService = userService;
+        this.spotBookingService = spotBookingService;
     }
 
     @GetMapping("/")
@@ -126,6 +132,17 @@ public class UserController {
         } catch (InvalidEntityException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseDTO<>("User not found", HttpStatus.NOT_FOUND.value(), false));
+        }
+    }
+
+    @GetMapping("/booking-history")
+    public ResponseEntity<ResponseDTO<List<SpotBookingInfo>>> getUserBookingHistory(HttpServletRequest request){
+
+        try {
+            return ResponseEntity.ok(new ResponseDTO<>("bookings fetched successfully", 200, true, userService.getUserbookings(request)));
+        } catch (InvalidEntityException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseDTO<>(e.getMessage(), HttpStatus.NOT_FOUND.value(), false));
         }
     }
 }

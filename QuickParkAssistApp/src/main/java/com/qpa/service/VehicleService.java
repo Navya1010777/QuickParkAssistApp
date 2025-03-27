@@ -28,8 +28,7 @@ public class VehicleService {
             VehicleRepository vehicleRepository,
             SpotBookingInfoRepository spotBookingInfoRepository,
             JwtUtil jwtUtil,
-            UserRepository userRepository
-    ) {
+            UserRepository userRepository) {
         this.vehicleRepository = vehicleRepository;
         this.spotBookingInfoRepository = spotBookingInfoRepository;
         this.jwtUtil = jwtUtil;
@@ -50,14 +49,19 @@ public class VehicleService {
         // Check for existing vehicle with same registration number
         Vehicle existingVehicle = vehicleRepository.findByRegistrationNumber(vehicle.getRegistrationNumber());
         if (existingVehicle != null) {
-            throw new InvalidEntityException("Vehicle with registration number " + vehicle.getRegistrationNumber() + " already exists");
+            throw new InvalidEntityException(
+                    "Vehicle with registration number " + vehicle.getRegistrationNumber() + " already exists");
         }
 
         UserInfo user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidEntityException("User not found with ID: " + userId));
 
         vehicle.setUserObj(user);
-        return vehicleRepository.save(vehicle);
+        if (vehicle.getVehicleId() == null) {
+            return vehicleRepository.save(vehicle);
+        } else {
+            return updateVehicle(vehicle);
+        }
     }
 
     public Vehicle getVehicleById(Long id) throws InvalidEntityException {

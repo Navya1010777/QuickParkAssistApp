@@ -73,8 +73,7 @@
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="#">Smart Spots</a></li>
                   <li><a class="dropdown-item" href="#">Booking</a></li>
-                  <li><a class="dropdown-item" href="#">Addon</a></li>
-                  <li><a class="dropdown-item" href="#">EV Recharge</a></li>
+                  <li><a class="dropdown-item" href="#">Payments</a></li>
                 </ul>
               </li>
               <li class="nav-item">
@@ -137,13 +136,8 @@
                 >
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link"
+                <a href="/user/booking-history" class="nav-link"
                   ><i class="fas fa-history"></i> Booking History</a
-                >
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link"
-                  ><i class="fas fa-calendar-check"></i> Current Booking</a
                 >
               </li>
             </ul>
@@ -236,6 +230,7 @@
                         th:value="${formattedRegistrationDate}"
                         th:field="*{registrationDate}"
                         required
+                        th:attr="max=${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}"
                         class="form-control"
                         min="1900-01-01"
                         max="2025-12-31"
@@ -359,9 +354,9 @@
       </footer>
     </div>
 
-    <script th:src="@{/js/script.js}" defer type="module"></script>
-    <script th:src="@{/js/imageChange.js}" defer type="module"></script>
-    <script th:src="@{/js/Toast.js}"></script>
+    <script th:src="@{/js/script.js}" defer></script>
+    <script th:src="@{/js/dashboard_script.js}" defer type="module"></script>
     <script th:src="@{/js/displayMessage.js}" defer></script>
+    <script th:src="@{/js/imageChange.js}" defer></script>
   </body>
 </html>

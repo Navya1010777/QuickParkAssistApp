@@ -14,28 +14,32 @@ import jakarta.servlet.http.HttpServletRequest;
 @Service
 public class VehicleService {
 
-    @Autowired 
+    @Autowired
     private CustomRestTemplateService restTemplate;
 
     /**
      * Retrieves the list of vehicles associated with a user.
      */
     public ResponseDTO<List<Vehicle>> findUserVehicle(HttpServletRequest request) {
-        return restTemplate.get("/vehicles/user", request, new ParameterizedTypeReference<ResponseDTO<List<Vehicle>>>() {}).getBody();
+        return restTemplate
+                .get("/vehicles/user", request, new ParameterizedTypeReference<ResponseDTO<List<Vehicle>>>() {
+                }).getBody();
     }
 
     /**
      * Fetches a vehicle by its ID.
      */
     public ResponseDTO<Vehicle> getVehicleById(Long id, HttpServletRequest request) {
-        return restTemplate.get("/vehicles/" + id, request, new ParameterizedTypeReference<ResponseDTO<Vehicle>>() {}).getBody();
+        return restTemplate.get("/vehicles/" + id, request, new ParameterizedTypeReference<ResponseDTO<Vehicle>>() {
+        }).getBody();
     }
 
     /**
      * Adds a new vehicle.
      */
     public ResponseDTO<Void> addVehicle(Vehicle vehicle, HttpServletRequest request) {
-        System.out.println(vehicle);
-        return restTemplate.post("/vehicles/save", vehicle, request, Void.class).getBody();
+        return restTemplate
+                .post("/vehicles/save", vehicle, request, new ParameterizedTypeReference<ResponseDTO<Void>>() {
+                }).getBody();
     }
 }

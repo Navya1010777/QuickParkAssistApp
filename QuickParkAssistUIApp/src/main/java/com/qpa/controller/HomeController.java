@@ -24,7 +24,7 @@ public class HomeController {
 
     @Autowired
     private AuthService authUiService; // Service for authentication-related operations
-    @Autowired 
+    @Autowired
     private VehicleService vehicleService;
     @Autowired
     private UserService userService; // Service for fetching user details
@@ -35,9 +35,6 @@ public class HomeController {
      */
     @GetMapping("/")
     public String homePage(HttpServletRequest request, Model model) {
-        if (!authUiService.isAuthenticated(request)) {
-            return "redirect:/auth/login"; // Redirects unauthenticated users to the login page
-        }
 
         return "index"; // Loads the home page
     }

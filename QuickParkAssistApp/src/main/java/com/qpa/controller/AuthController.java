@@ -75,12 +75,6 @@ public class AuthController {
         return ResponseEntity.ok(new ResponseDTO<>("User is authorized", HttpStatus.OK.value(), true));
     }
 
-    /**
-     * Checks if the current user has admin privileges.
-     * 
-     * @param request The HTTP request containing authentication details.
-     * @return ResponseEntity with success if the user is an admin.
-     * @throws UnauthorizedAccessException if the user is not an admin.
-     */
+
 
 }
