@@ -31,6 +31,7 @@ import com.qpa.entity.PriceType;
 import com.qpa.entity.SpotStatus;
 import com.qpa.entity.SpotType;
 import com.qpa.entity.UserInfo;
+import com.qpa.entity.UserType;
 import com.qpa.entity.VehicleType;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -153,6 +154,10 @@ public class SpotUIController {
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
             return "redirect:/auth/login";
+        }
+
+        if (currentUserInfo.getUserType() != UserType.ADMIN) {
+            return "redirect:/home?error=unauthorized";
         }
 
         SpotCreateDTO spotCreateDTO = new SpotCreateDTO();
