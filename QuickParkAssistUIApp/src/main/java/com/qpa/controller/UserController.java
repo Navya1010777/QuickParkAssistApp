@@ -16,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qpa.dto.ResponseDTO;
+import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.Vehicle;
 import com.qpa.service.AuthService;
@@ -99,5 +100,20 @@ public class UserController {
             redirectAttributes.addFlashAttribute("error", "Failed to update user details."); // Error message
         }
         return "redirect:/dashboard"; // Redirect to profile page
+    }
+
+    @GetMapping("/booking-history")
+    public String getBookingHistory(HttpServletRequest request, Model model) {
+        ResponseDTO<List<SpotBookingInfo>> listData = userService.getUserBookingHistory(request);
+        ResponseDTO<UserInfo> response = userService.getUserDetails(request);
+
+        if (!response.isSuccess()) {
+            model.addAttribute("error", response.getMessage()); // Adds error message if fetching fails
+        } else {
+            UserInfo user = response.getData(); // Retrieves user info
+            model.addAttribute("user", user); // Pass full name to the view
+        }
+        model.addAttribute("bookingList", listData.getData());
+        return "dashboard/bookingHistory";
     }
 }

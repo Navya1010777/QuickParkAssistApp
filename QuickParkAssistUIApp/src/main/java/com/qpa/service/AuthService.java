@@ -49,7 +49,8 @@ public class AuthService {
      */
     public ResponseDTO<Void> registerUser(RegisterDTO registerDTO, HttpServletRequest request) {
         ResponseEntity<ResponseDTO<Void>> responseEntity = restTemplateService.post(
-                "/users/register", registerDTO, request, Void.class);
+                "/users/register", registerDTO, request, new ParameterizedTypeReference<ResponseDTO<Void>>() {
+                });
         return responseEntity.getBody();
     }
 
@@ -63,7 +64,8 @@ public class AuthService {
      * @return ResponseDTO indicating the success or failure of the login
      */
     public ResponseDTO<Void> login(AuthUser authUser, HttpServletResponse response, HttpServletRequest request) {
-        ResponseEntity<ResponseDTO<Void>> backendResponse = restTemplateService.login("/auth/login", authUser, request, response);
+        ResponseEntity<ResponseDTO<Void>> backendResponse = restTemplateService.login("/auth/login", authUser, request,
+                response);
         return backendResponse.getBody();
     }
 
@@ -78,8 +80,4 @@ public class AuthService {
         return restTemplateService.logout(request, response).getBody();
     }
 
-    public ResponseDTO<Void> loginAdmin(HttpServletRequest request, HttpServletResponse
-    response, AuthUser authUser){
-    return restTemplateService.login("/auth/admin-login", authUser, request, response).getBody();
-    }
 }

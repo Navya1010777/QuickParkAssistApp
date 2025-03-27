@@ -20,13 +20,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 /**
- * Controller for handling authentication-related operations such as 
+ * Controller for handling authentication-related operations such as
  * login, registration, and logout.
  */
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
-    
+
     @Autowired
     private AuthService authUiService;
 
@@ -52,8 +52,8 @@ public class AuthController {
      */
     @PostMapping("/register/submit")
     public String registerUser(
-        @Valid @ModelAttribute("registerUserDto") RegisterDTO registerDTO, 
-        RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
+            @Valid @ModelAttribute("registerUserDto") RegisterDTO registerDTO,
+            RedirectAttributes redirectAttributes, HttpServletRequest request, HttpServletResponse response) {
 
         // Check if password and confirm password match
         if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
@@ -84,10 +84,12 @@ public class AuthController {
 
     /**
      * Handles user login form submission.
-     * If successful, redirects to the dashboard; otherwise, returns an error message.
+     * If successful, redirects to the dashboard; otherwise, returns an error
+     * message.
      */
     @PostMapping("/login/submit")
-    public String loginUser(@ModelAttribute LoginDTO loginDTO, RedirectAttributes redirectAttributes, HttpServletResponse response, HttpServletRequest request) {
+    public String loginUser(@ModelAttribute LoginDTO loginDTO, RedirectAttributes redirectAttributes,
+            HttpServletResponse response, HttpServletRequest request) {
         AuthUser authUser = new AuthUser();
         authUser.setPassword(loginDTO.getPassword());
         authUser.setEmail(loginDTO.getEmail());
@@ -99,7 +101,7 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("error", responseData.getMessage());
             return "redirect:/auth/login"; // Redirect back if login fails
         }
-        
+
         redirectAttributes.addFlashAttribute("success", responseData.getMessage());
         return "redirect:/dashboard"; // Redirect to dashboard if login is successful
     }
@@ -109,8 +111,11 @@ public class AuthController {
      * Clears authentication session and redirects to the login page.
      */
     @PostMapping("/logout")
-    public String logoutUser(HttpServletResponse response, HttpServletRequest request) {
-        authUiService.logout(request, response); // Clears session and cookies
+    public String logoutUser(HttpServletResponse response, HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+        ResponseDTO<Void> backendResponse = authUiService.logout(request, response); // Clears session and cookies
+        System.out.println(backendResponse.getMessage());
+        redirectAttributes.addFlashAttribute("success", backendResponse.getMessage());
         return "redirect:/auth/login"; // Redirects to login page after logout
     }
 

@@ -38,6 +38,11 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
 
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <link rel="stylesheet" href="/css/userstyle.css" />
 
     <style></style>
@@ -87,8 +92,7 @@
                 <ul class="dropdown-menu">
                   <li><a class="dropdown-item" href="#">Smart Spots</a></li>
                   <li><a class="dropdown-item" href="#">Booking</a></li>
-                  <li><a class="dropdown-item" href="#">Addon</a></li>
-                  <li><a class="dropdown-item" href="#">EV Recharge</a></li>
+                  <li><a class="dropdown-item" href="#">Payments</a></li>
                 </ul>
               </li>
               <li class="nav-item">
@@ -151,13 +155,8 @@
                 >
               </li>
               <li class="nav-item">
-                <a href="#" class="nav-link"
+                <a href="/user/booking-history" class="nav-link"
                   ><i class="fas fa-history"></i> Booking History</a
-                >
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link"
-                  ><i class="fas fa-calendar-check"></i> Current Booking</a
                 >
               </li>
             </ul>
@@ -193,6 +192,17 @@
                       type="text"
                       class="form-control editable bg-light text-dark"
                       th:field="*{user.fullName}"
+                      readonly
+                    />
+                  </div>
+                  <div class="col-12 col-sm-6 col-lg-4">
+                    <label class="form-label fw-medium text-dark d-block"
+                      >username:</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control bg-light text-dark"
+                      th:field="*{user.username}"
                       readonly
                     />
                   </div>
@@ -503,10 +513,9 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-    <script th:src="@{/js/Toast.js}" defer></script>
     <script th:src="@{/js/script.js}" defer></script>
     <script th:src="@{/js/dashboard_script.js}" defer type="module"></script>
-    <script th:src="@{/js/imageChange.js}"></script>
     <script th:src="@{/js/displayMessage.js}" defer></script>
+    <script th:src="@{/js/imageChange.js}" defer></script>
   </body>
 </html>

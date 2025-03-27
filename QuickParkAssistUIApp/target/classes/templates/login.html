@@ -52,7 +52,7 @@
                 class="appearance-none bg-white border rounded px-3 py-1 w-full focus:ring focus:ring-blue-300 outline-none"
               >
                 <option value="VEHICLE_OWNER" selected>VEHICLE OWNER</option>
-                <option value="SLOT_OWNER">SLOT OWNER</option>
+                <option value="ADMIN">ADMIN</option>
               </select>
               <span class="material-icons absolute right-2 top-1 text-gray-500"
                 >expand_more</span
@@ -79,9 +79,7 @@
             </div>
           </div>
           <div>
-            <label class="block text-gray-700 font-medium mb-1"
-              >username</label
-            >
+            <label class="block text-gray-700 font-medium mb-1">username</label>
             <div class="relative">
               <span class="material-icons absolute left-3 top-2 text-gray-500"
                 >person</span
@@ -338,6 +336,6 @@
     </div>
 
     <script th:src="@{/js/login_script.js}" defer></script>
-    <script th:src="@{/js/displayMessage.js}"></script>
+    <script th:src="@{/js/displayMessage.js}" defer></script>
   </body>
 </html>

@@ -23,6 +23,8 @@ fileInput.onchange = async (e) => {
       } else {
         triggerChange(document.getElementById("error-message"), data.message);
       }
-    } catch (error) {}
+    } catch (error) {
+      triggerChange(document.getElementById("success-message", "error uploading image"));
+    }
   }
 };

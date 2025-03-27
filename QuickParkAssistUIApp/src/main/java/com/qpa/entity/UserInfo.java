@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -23,7 +23,7 @@ public class UserInfo {
 
     private LocalDate dateOfRegister;
 
-    @Past(message = "Date of birth must be in the past")
+    @PastOrPresent(message = "date must be past or present")
     private String dob;
 
     @Size(min = 10, max = 10, message = "Contact number must be between 10 and 13 digits")

@@ -1,8 +1,6 @@
 package com.qpa.entity;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +14,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -46,9 +45,9 @@ public class Vehicle {
     private String model;
 
     @NotNull
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}", message = "Date must be in yyyy-MM-dd format")
     @Column(nullable = false)
-    private String registrationDate; // Now stored as String
+    @PastOrPresent(message = "date must be past or present")
+    private LocalDate registrationDate; // Now stored as String
 
     @Column(nullable = false)
     private boolean isActive = true;
@@ -103,16 +102,12 @@ public class Vehicle {
         this.model = model;
     }
 
-    public String getRegistrationDate() {
+    public LocalDate getRegistrationDate() {
         return registrationDate;
     }
 
-    public void setRegistrationDate(String registrationDate) {
-        this.registrationDate = registrationDate;
-    }
-
     public void setRegistrationDate(LocalDate registrationDate) {
-        this.registrationDate = registrationDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        this.registrationDate = registrationDate;
     }
 
     public boolean isActive() {

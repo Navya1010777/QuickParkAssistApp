@@ -1,7 +1,6 @@
 package com.qpa.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -24,8 +23,8 @@ public class SpotBookingInfo {
 
     // Parameterized constructor
     public SpotBookingInfo(Long bookingId, LocalDate bookingDate, LocalDate startDate, LocalDate endDate,
-                          LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
-                          Vehicle vehicle, double totalAmount, List<AddOns> addOns) {
+            LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
+            Vehicle vehicle, double totalAmount, List<AddOns> addOns) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.startDate = startDate;
@@ -115,7 +114,7 @@ public class SpotBookingInfo {
     public double getTotalAmount() {
         return TotalAmount;
     }
-     
+
     public void setTotalAmount(double totalAmount) {
         this.TotalAmount = totalAmount;
     }
@@ -126,5 +125,22 @@ public class SpotBookingInfo {
 
     public void setAddOns(List<AddOns> addOns) {
         this.addOns = addOns;
+    }
+
+    @Override
+    public String toString() {
+        return "SpotBookingInfo{" +
+                "bookingId=" + bookingId +
+                ", bookingDate=" + bookingDate +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", status='" + status + '\'' +
+                ", totalAmount=" + TotalAmount +
+                ", spotInfo=" + (spotInfo != null ? spotInfo.toString() : "null") +
+                ", vehicle=" + (vehicle != null ? vehicle.toString() : "null") +
+                ", addOns=" + (addOns != null ? addOns.toString() : "null") +
+                '}';
     }
 }

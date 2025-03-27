@@ -1,21 +1,22 @@
 package com.qpa.service;
 
-import com.qpa.dto.LocationDTO;
-import com.qpa.entity.Location;
-import com.qpa.repository.CityRepository;
-import com.qpa.repository.LocationRepository;
-import com.qpa.repository.StateRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.qpa.entity.State;
-import com.qpa.entity.City;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.BeanUtils;
+import org.springframework.stereotype.Service;
+
+import com.qpa.dto.LocationDTO;
+import com.qpa.entity.City;
+import com.qpa.entity.Location;
+import com.qpa.entity.State;
+import com.qpa.repository.CityRepository;
+import com.qpa.repository.LocationRepository;
+import com.qpa.repository.StateRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class LocationService {
@@ -24,8 +25,8 @@ public class LocationService {
     private final StateRepository stateRepository;
     private final CityRepository cityRepository;
 
-    @Autowired
-    public LocationService(LocationRepository locationRepository, StateRepository stateRepository, CityRepository cityRepository) {
+    public LocationService(LocationRepository locationRepository, StateRepository stateRepository,
+            CityRepository cityRepository) {
         this.locationRepository = locationRepository;
         this.stateRepository = stateRepository;
         this.cityRepository = cityRepository;
@@ -38,8 +39,7 @@ public class LocationService {
                 locationDTO.getCity(),
                 locationDTO.getState(),
                 locationDTO.getPincode(),
-                locationDTO.getLandmark()
-        );
+                locationDTO.getLandmark());
 
         // If location exists, return the existing one
         if (existingLocation.isPresent()) {
@@ -88,8 +88,7 @@ public class LocationService {
         return cities.stream()
                 .collect(Collectors.groupingBy(
                         City::getStateName,
-                        Collectors.mapping(City::getName, Collectors.toList())
-                ));
+                        Collectors.mapping(City::getName, Collectors.toList())));
     }
 
     public Map<String, String> getCityPincodeMap() {
@@ -98,7 +97,7 @@ public class LocationService {
                 .collect(Collectors.toMap(
                         City::getName,
                         City::getPincode,
-                        (v1, v2) -> v1  // In case of duplicate keys, keep the first value
+                        (v1, v2) -> v1 // In case of duplicate keys, keep the first value
                 ));
     }
 
