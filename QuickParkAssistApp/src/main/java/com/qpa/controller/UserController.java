@@ -20,7 +20,6 @@ import com.qpa.dto.ResponseDTO;
 import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
 import com.qpa.exception.InvalidEntityException;
-import com.qpa.service.SpotBookingService;
 import com.qpa.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,12 +29,10 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("api/users")
 public class UserController {
 
-    private final SpotBookingService spotBookingService;
     private final UserService userService;
 
-    public UserController(UserService userService, SpotBookingService spotBookingService) {
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.spotBookingService = spotBookingService;
     }
 
     @GetMapping("/")
@@ -136,10 +133,11 @@ public class UserController {
     }
 
     @GetMapping("/booking-history")
-    public ResponseEntity<ResponseDTO<List<SpotBookingInfo>>> getUserBookingHistory(HttpServletRequest request){
+    public ResponseEntity<ResponseDTO<List<SpotBookingInfo>>> getUserBookingHistory(HttpServletRequest request) {
 
         try {
-            return ResponseEntity.ok(new ResponseDTO<>("bookings fetched successfully", 200, true, userService.getUserbookings(request)));
+            return ResponseEntity.ok(new ResponseDTO<>("bookings fetched successfully", 200, true,
+                    userService.getUserbookings(request)));
         } catch (InvalidEntityException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseDTO<>(e.getMessage(), HttpStatus.NOT_FOUND.value(), false));

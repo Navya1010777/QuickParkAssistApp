@@ -34,8 +34,7 @@ public class CloudinaryService {
                 "cloud_name", cloudName,
                 "api_key", apiKey,
                 "api_secret", apiSecret,
-                "secure", true
-        ));
+                "secure", true));
     }
 
     public String uploadImage(MultipartFile file, String folder, String identifier) throws IOException {
@@ -46,8 +45,7 @@ public class CloudinaryService {
                 "public_id", publicId,
                 "folder", folder != null ? folder : "default",
                 "overwrite", true,
-                "resource_type", "auto"
-        );
+                "resource_type", "auto");
 
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), params);
         return (String) uploadResult.get("secure_url");
@@ -112,7 +110,7 @@ public class CloudinaryService {
         }
 
         // Allowed image types
-        String[] allowedTypes = {"image/jpeg", "image/png", "image/webp"};
+        String[] allowedTypes = { "image/jpeg", "image/png", "image/webp" };
         String contentType = file.getContentType();
         if (contentType == null || !Arrays.asList(allowedTypes).contains(contentType)) {
             throw new IllegalArgumentException("Invalid file type. Only JPEG, PNG, and WebP are allowed");
