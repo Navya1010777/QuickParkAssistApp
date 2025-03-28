@@ -1,10 +1,16 @@
 package com.qpa.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+@Entity
+@Table(name = "payments")
 public class Payment {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String  bookingId;
     private String userEmail;
     private Double TotalAmount;
@@ -12,10 +18,11 @@ public class Payment {
     private String paymentStatus;
     private LocalDateTime paymentTime;
 
+    // Constructors
     public Payment() {}
 
     public Payment(String  bookingId, String userEmail, Double TotalAmount, String orderId, String paymentStatus) {
-        this.bookingId = bookingId;
+        this. bookingId =  bookingId;
         this.userEmail = userEmail;
         this.TotalAmount = TotalAmount;
         this.orderId = orderId;
@@ -80,5 +87,4 @@ public class Payment {
     }
 
     
-
 }
