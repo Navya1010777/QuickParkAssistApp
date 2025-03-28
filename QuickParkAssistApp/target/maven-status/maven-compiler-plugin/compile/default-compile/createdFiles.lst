@@ -21,6 +21,7 @@ com\qpa\service\PaymentService.class
 com\qpa\controller\LocationController.class
 com\qpa\entity\AuthUser.class
 com\qpa\service\UserService.class
+com\qpa\controller\PaymentController.class
 com\qpa\repository\UserRepository.class
 com\qpa\config\LocationDataInitializer$1.class
 com\qpa\config\CloudinaryConfig.class
@@ -33,8 +34,8 @@ com\qpa\service\SpotService.class
 com\qpa\dto\ResponseDTO.class
 com\qpa\entity\Payment.class
 com\qpa\entity\Spot.class
-com\qpa\controller\Payment.class
 com\qpa\dto\SpotStatistics.class
+com\qpa\repository\PaymentRepository.class
 com\qpa\repository\AuthRepository.class
 com\qpa\entity\SpotBookingInfo.class
 com\qpa\QuickParkAssistAppApplication.class
@@ -51,6 +52,7 @@ com\qpa\entity\UserType.class
 com\qpa\repository\StateRepository.class
 com\qpa\entity\VehicleType.class
 com\qpa\service\SpotBookingService.class
+com\qpa\service\PayEmailService.class
 com\qpa\service\CloudinaryService.class
 com\qpa\exception\InvalidVehicleTypeException.class
 com\qpa\dto\SpotCreateDTO.class
