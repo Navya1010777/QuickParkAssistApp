@@ -31,7 +31,7 @@ import java.util.List;
 public class SpotBookingUIController {
 
     private final RestTemplate restTemplate;
-    private final String BASE_URL = "http://localhost:7212/bookSlot"; // Backend base URL
+    private final String BASE_URL = "http://localhost:7212/api/bookSlot"; // Backend base URL
 
     public SpotBookingUIController(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
@@ -39,12 +39,12 @@ public class SpotBookingUIController {
 
     @GetMapping("/home")
     public String homePage() {
-        return "home";
+        return "bookings/home";
     }
 
     @GetMapping("/add")
     public String showAddBookingPage(Model model) {
-        return "addBooking";
+        return "bookings/addBooking";
     }
 
     @PostMapping("/save")
@@ -101,7 +101,7 @@ public class SpotBookingUIController {
             model.addAttribute("error", "❌ Unexpected error: " + e.getMessage());
         }
 
-        return "addBooking"; // Return to form with error message if booking fails
+        return "bookings/addBooking"; // Return to form with error message if booking fails
     }
 
     /**
@@ -194,7 +194,7 @@ public class SpotBookingUIController {
             model.addAttribute("bookings", Collections.emptyList());
         }
 
-        return "viewAllBooking";
+        return "bookings/viewAllBooking";
     }
 
     @GetMapping("/fetchBooking")
