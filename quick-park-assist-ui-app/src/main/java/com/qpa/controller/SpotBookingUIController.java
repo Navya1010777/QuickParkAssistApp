@@ -50,8 +50,9 @@ public class SpotBookingUIController {
     }
 
     @GetMapping("/add")
-    public String showAddBookingPage(Model model, HttpServletRequest request) {
+    public String showAddBookingPage(Model model, HttpServletRequest request, @RequestParam Long spotId) {
         model.addAttribute("vehicles", vehicleService.findUserVehicle(request).getData());
+        model.addAttribute("spotId", spotId);
         return "bookings/addBooking";
     }
 

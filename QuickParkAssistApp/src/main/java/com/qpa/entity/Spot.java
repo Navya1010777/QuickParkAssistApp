@@ -40,7 +40,7 @@ public class Spot {
 	private SpotType spotType;
 
 	@Enumerated(EnumType.STRING)
-	private SpotStatus status;
+	private SpotStatus status=SpotStatus.AVAILABLE;
 
 	@Column(columnDefinition = "BOOLEAN")
 	private boolean isActive = true;

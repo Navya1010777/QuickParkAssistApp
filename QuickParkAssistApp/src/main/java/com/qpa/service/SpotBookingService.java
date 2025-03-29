@@ -86,6 +86,7 @@ public class SpotBookingService {
 
         // Check spot status
         SpotStatus spotStatus = spot.getStatus();
+        System.out.println("spot status: "+spotStatus);
         if (spotStatus == null || spotStatus != SpotStatus.AVAILABLE) {
             throw new InvalidEntityException(
                     "Spot with ID " + spotId + " is not available for booking. Current status: " +

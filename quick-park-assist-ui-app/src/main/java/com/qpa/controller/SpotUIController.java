@@ -85,7 +85,7 @@ public class SpotUIController {
         return "home";
     }
 
-    @PostMapping("/spots/create")
+    @PostMapping("/create")
     public String createSpot(
             @ModelAttribute SpotCreateDTO spotCreateDTO,
             @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
@@ -148,7 +148,7 @@ public class SpotUIController {
     }
 
     // Show Spot Creation Page
-    @GetMapping("/spots/create")
+    @GetMapping("/create")
     public String showCreateSpotPage(Model model, HttpServletRequest request) {
         // Ensure UserInfo is logged in
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
@@ -222,7 +222,7 @@ public class SpotUIController {
     }
 
     // Optional: Method to clear last used location
-    @GetMapping("/spots/clear-last-location")
+    @GetMapping("/clear-last-location")
     public String clearLastLocation(HttpServletRequest request) {
         request.getSession().removeAttribute(LAST_LOCATION_SESSION_KEY);
         return "redirect:/spots/create";
@@ -244,7 +244,7 @@ public class SpotUIController {
         }
     }
 
-    @GetMapping("/spots/search")
+    @GetMapping("/search")
     public String combinedSpotsView(
             @RequestParam(required = false) String city,
             @RequestParam(required = false) SpotType spotType,
@@ -266,6 +266,10 @@ public class SpotUIController {
                     null,
                     SpotResponseDTO[].class);
             SpotResponseDTO[] allSpots = spotsResponse.getBody();
+
+            for (SpotResponseDTO spot : allSpots) {
+                System.out.println(spot.getSpotImage());
+            }
 
             // Extract unique cities with spots
             Set<String> citiesWithSpots = Arrays.stream(allSpots)
@@ -332,16 +336,16 @@ public class SpotUIController {
             model.addAttribute("vehicleTypes", VehicleType.values());
             model.addAttribute("status", SpotStatus.values());
             model.addAttribute("cities", sortedCitiesWithSpots); // Now uses only cities with spots
+            model.addAttribute("userType", userService.getUserDetails(request).getData().getUserType());
 
         } catch (Exception e) {
             model.addAttribute("error", "Error fetching spots: " + e.getMessage());
             model.addAttribute("cities", Collections.emptyList());
         }
-
         return "search_spots";
     }
 
-    @GetMapping("/spots/statistics")
+    @GetMapping("/statistics")
     public String getSpotStatistics(Model model, HttpServletRequest request) {
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
@@ -357,7 +361,7 @@ public class SpotUIController {
     }
 
     // Owner's Spots Page
-    @GetMapping("/spots/owner")
+    @GetMapping("/owner")
     public String getOwnerSpots(Model model, HttpServletRequest request) {
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
@@ -365,7 +369,7 @@ public class SpotUIController {
         }
 
         SpotResponseDTO[] spots = restTemplate.getForObject(
-                BASE_URL + "/spots/owner?UserInfoId=" + currentUserInfo.getUserId(),
+                BASE_URL + "/spots/owner?userId=" + currentUserInfo.getUserId(),
                 SpotResponseDTO[].class);
 
         model.addAttribute("spots", spots);
@@ -373,7 +377,7 @@ public class SpotUIController {
     }
 
     // Show Edit Spot Form
-    @GetMapping("/spots/edit/{spotId}")
+    @GetMapping("/edit/{spotId}")
     public String showEditSpotForm(@PathVariable Long spotId, Model model, HttpServletRequest request) {
         // Ensure UserInfo is logged in
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
@@ -409,7 +413,8 @@ public class SpotUIController {
                 model.addAttribute("vehicleTypes", VehicleType.values());
                 model.addAttribute("cities", cities);
                 model.addAttribute("status", SpotStatus.values());
-
+                model.addAttribute("userType", userService.getUserDetails(request).getData().getUserType());
+                System.out.println(userService.getUserDetails(request).getData().getUserType());
                 return "update_spot";
             } else {
                 return "redirect:/spots/owner?error=spotNotFound";
@@ -421,7 +426,7 @@ public class SpotUIController {
     }
 
     // Process Spot Update
-    @PostMapping("/spots/update")
+    @PostMapping("/update")
     public String updateSpot(
             @RequestParam Long spotId,
             @ModelAttribute SpotCreateDTO spotCreateDTO,
@@ -509,7 +514,7 @@ public class SpotUIController {
     }
 
     // Process Spot Delete
-    @GetMapping("/spots/delete/{spotId}")
+    @GetMapping("/delete/{spotId}")
     public String deleteSpot(
             @PathVariable Long spotId,
             HttpServletRequest request,
@@ -549,7 +554,7 @@ public class SpotUIController {
         }
     }
 
-    @GetMapping(value = "/spots/toggle")
+    @GetMapping(value = "/toggle")
     public String toggleSpotActivation(
 
             @RequestParam Long spotId,
@@ -613,10 +618,9 @@ public class SpotUIController {
         return "booked_spots_list";
     }
 
-    @GetMapping("/spots/by-booking")
+    @GetMapping("/by-booking")
     public String getSpotByBookingIdPage(@RequestParam(required = false) Long bookingId, Model model,
             HttpServletRequest request) {
-        System.out.println("Navigating to search spot by Booking ID page. Booking ID: " + bookingId);
 
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
@@ -629,7 +633,6 @@ public class SpotUIController {
 
         try {
             String url = BASE_URL + "/spots/by-booking/" + bookingId;
-            System.out.println("Calling backend API: " + url);
 
             ResponseEntity<SpotResponseDTO> response = restTemplate.exchange(
                     url, HttpMethod.GET, null, SpotResponseDTO.class);
@@ -637,22 +640,19 @@ public class SpotUIController {
             SpotResponseDTO spot = response.getBody();
 
             if (spot != null) {
-                System.out.println("Spot found: " + spot.getSpotNumber());
             }
 
             model.addAttribute("spot", spot);
         } catch (HttpClientErrorException.NotFound ex) {
-            System.out.println("Error: " + ex.getResponseBodyAsString());
             model.addAttribute("errorMessage", "No spot found for booking ID: " + bookingId);
         } catch (Exception e) {
-            System.out.println("Unexpected error: " + e.getMessage());
             model.addAttribute("errorMessage", "An error occurred while fetching spot details.");
         }
 
         return "search_spot_bookingId";
     }
 
-    @GetMapping("/spots/search-by-date")
+    @GetMapping("/search-by-date")
     public String searchSpotsByDate(
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,

@@ -63,7 +63,6 @@ public class HomeController {
                 return "admin/index";
             }
             List<Vehicle> vehicles = vehicleService.findUserVehicle(request).getData();
-            vehicles.forEach(System.out::println); // Debugging: Print vehicles list
 
             model.addAttribute("vehicles", vehicles);
             return "dashboard/dashboard"; // Loads the dashboard view

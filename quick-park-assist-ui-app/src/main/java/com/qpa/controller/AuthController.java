@@ -57,7 +57,6 @@ public class AuthController {
 
         // Check if password and confirm password match
         if (!registerDTO.getPassword().equals(registerDTO.getConfirmPassword())) {
-            System.out.println("password doesn't match");
             redirectAttributes.addFlashAttribute("error", "Passwords don't match.");
             return "redirect:/auth/login";
         }
@@ -114,7 +113,6 @@ public class AuthController {
     public String logoutUser(HttpServletResponse response, HttpServletRequest request,
             RedirectAttributes redirectAttributes) {
         ResponseDTO<Void> backendResponse = authUiService.logout(request, response); // Clears session and cookies
-        System.out.println(backendResponse.getMessage());
         redirectAttributes.addFlashAttribute("success", backendResponse.getMessage());
         return "redirect:/auth/login"; // Redirects to login page after logout
     }

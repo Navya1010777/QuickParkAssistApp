@@ -34,11 +34,13 @@
       >
         <!-- Slot ID -->
         <div>
-          <label class="block text-sm font-medium">Slot ID</label>
+          <label class="block text-sm font-medium">Spot ID</label>
           <input
             type="number"
             name="slotId"
             required
+            readonly
+            th:value="${spotId}"
             class="w-full p-2 border rounded"
           />
         </div>
