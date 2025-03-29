@@ -117,6 +117,13 @@ public class UserService {
         List<UserInfo> inactiveUsers = userRepository.findInactiveUsers(cutoffDate);
 
         for (UserInfo user : inactiveUsers) {
+            String subject = "Account Deactivation Due to Inactivity";
+            String body = "Dear " + user.getFullName() + ",\n\n" +
+                    "We noticed that your account has been inactive for over a year. " +
+                    "As a result, your account has been deactivated. If you wish to reactivate your account, " +
+                    "please contact our support team.\n\n" +
+                    "Thank you,\nQuickParkAssist Team";
+            emailService.sendSimpleMail(user.getEmail(), subject, body);
             user.setStatus(UserInfo.Status.INACTIVE);
         }
 
