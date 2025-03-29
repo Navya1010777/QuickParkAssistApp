@@ -70,11 +70,10 @@ public class AuthController {
     public ResponseEntity<ResponseDTO<Void>> checkAuth(HttpServletRequest request) {
         boolean isAuthenticated = authService.isAuthenticated(request);
         if (!isAuthenticated) {
-            throw new UnauthorizedAccessException("User is not authenticated");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new ResponseDTO<>("USER IS UNAUTHORIZED", HttpStatus.UNAUTHORIZED.value(), false));
         }
-        return ResponseEntity.ok(new ResponseDTO<>("User is authorized", HttpStatus.OK.value(), true));
+        return ResponseEntity.ok(new ResponseDTO<>("USER IS AUTHORIZED", HttpStatus.OK.value(), true));
     }
-
-
 
 }

@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class QuickParkAssistAppApplication {
+public class QuickParkAssistUiAppApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(QuickParkAssistAppApplication.class, args);
+		SpringApplication.run(QuickParkAssistUiAppApplication.class, args);
 	}
 
 }
