@@ -14,38 +14,54 @@ import com.qpa.dto.ResponseDTO;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Handles validation errors for input fields
-     */
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ResponseDTO<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(fieldError ->
-                errors.put(fieldError.getField(), fieldError.getDefaultMessage())
-        );
+        /**
+         * Handles validation errors for input fields
+         */
+        @ExceptionHandler(MethodArgumentNotValidException.class)
+        public ResponseEntity<ResponseDTO<Map<String, String>>> handleValidationExceptions(
+                        MethodArgumentNotValidException ex) {
+                Map<String, String> errors = new HashMap<>();
+                ex.getBindingResult().getFieldErrors()
+                                .forEach(fieldError -> errors.put(fieldError.getField(),
+                                                fieldError.getDefaultMessage()));
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ResponseDTO<>("Validation failed", HttpStatus.BAD_REQUEST.value(), false, errors));
-    }
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                                .body(new ResponseDTO<>("Validation failed", HttpStatus.BAD_REQUEST.value(), false,
+                                                errors));
+        }
 
-    /**
-     * Handles resource not found exceptions
-     */
-    @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ResponseDTO<Void>> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ResponseDTO<>(ex.getMessage(), HttpStatus.NOT_FOUND.value(), false));
-    }
+        /**
+         * Handles resource not found exceptions
+         */
+        @ExceptionHandler(ResourceNotFoundException.class)
+        public ResponseEntity<ResponseDTO<Void>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(new ResponseDTO<>(ex.getMessage(), HttpStatus.NOT_FOUND.value(), false));
+        }
 
-    /**
-     * Handles invalid entity exceptions
-     */
-    @ExceptionHandler(InvalidEntityException.class)
-    public ResponseEntity<ResponseDTO<Void>> handleEmployeeNotFoundException(InvalidEntityException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put("message", ex.getMessage());
-        return ResponseEntity.badRequest().body(new ResponseDTO<>(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), false));
-    }
+        /**
+         * Handles invalid entity exceptions
+         */
+        @ExceptionHandler(InvalidEntityException.class)
+        public ResponseEntity<ResponseDTO<Void>> handleEmployeeNotFoundException(InvalidEntityException ex) {
+                Map<String, String> error = new HashMap<>();
+                error.put("message", ex.getMessage());
+                return ResponseEntity.badRequest()
+                                .body(new ResponseDTO<>(ex.getMessage(), HttpStatus.BAD_REQUEST.value(), false));
+        }
+
+        @ExceptionHandler(UnauthorizedAccessException.class)
+        public ResponseEntity<ResponseDTO<Void>> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(new ResponseDTO<>(ex.getMessage(), 401, false));
+        }
+
+        @ExceptionHandler(InvalidCredentialsException.class)
+        public ResponseEntity<ResponseDTO<Void>> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                                .body(new ResponseDTO<>(ex.getMessage(), HttpStatus.UNAUTHORIZED.value(), false));
+        }
+
 }
 
 /*
@@ -131,20 +147,8 @@ public class GlobalExceptionHandler {
  * .body(new ResponseDTO<>(ex.getMessage(), 400, false));
  * }
  * 
- * @ExceptionHandler(UnauthorizedAccessException.class)
- * public ResponseEntity<ResponseDTO<Void>>
- * handleUnauthorizedAccess(UnauthorizedAccessException ex) {
- * return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
- * .body(new ResponseDTO<>(ex.getMessage(), 401, false));
- * }
  * 
- * @ExceptionHandler(InvalidCredentialsException.class)
- * public ResponseEntity<ResponseDTO<Void>>
- * handleInvalidCredentials(InvalidCredentialsException ex) {
- * return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
- * .body(new ResponseDTO<>(ex.getMessage(), HttpStatus.UNAUTHORIZED.value(),
- * false));
- * }
+ * 
  * 
  * @ExceptionHandler(ResourceNotFoundException.class)
  * public ResponseEntity<ResponseDTO<Void>>
