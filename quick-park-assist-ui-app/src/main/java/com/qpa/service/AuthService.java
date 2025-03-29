@@ -34,7 +34,6 @@ public class AuthService {
             ResponseDTO<Void> responseData = response.getBody();
             return responseData != null && responseData.isSuccess();
         } catch (Exception e) {
-            System.err.println("Authentication check failed: " + e.getMessage());
             return false;
         }
     }

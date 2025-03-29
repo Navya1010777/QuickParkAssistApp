@@ -199,7 +199,7 @@
 
             <!-- Admin-specific links -->
             <th:block
-              th:if="${@userService.getUserDetails(request).data != null and @userService.getUserDetails(request).data.userType == T(com.qpa.entity.UserType).ADMIN}"
+              th:if="${userType != null and userType == T(com.qpa.entity.UserType).ADMIN}"
             >
               <li class="nav-item">
                 <a class="nav-link nav-icon-hover" th:href="@{/spots/create}"
@@ -222,7 +222,7 @@
 
             <!-- Vehicle Owner-specific links -->
             <th:block
-              th:if="${@userService.getUserDetails(request).data != null and @userService.getUserDetails(request).data.userType == T(com.qpa.entity.UserType).VEHICLE_OWNER}"
+              th:if="${userType != null and userType == T(com.qpa.entity.UserType).VEHICLE_OWNER}"
             >
               <li class="nav-item">
                 <a class="nav-link nav-icon-hover" th:href="@{/spots/search}"

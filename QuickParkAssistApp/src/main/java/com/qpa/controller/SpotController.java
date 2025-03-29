@@ -22,9 +22,13 @@ import com.qpa.dto.SpotCreateDTO;
 import com.qpa.dto.SpotResponseDTO;
 import com.qpa.dto.SpotSearchCriteria;
 import com.qpa.dto.SpotStatistics;
+import com.qpa.entity.UserType;
 import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
+import com.qpa.exception.UnauthorizedAccessException;
+import com.qpa.service.AuthService;
 import com.qpa.service.SpotService;
+import com.qpa.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -34,18 +38,19 @@ import jakarta.validation.Valid;
 public class SpotController {
 
     private final SpotService spotService;
-    
-    public SpotController(SpotService spotService) {
-        this.spotService = spotService;
-    }
+    private final AuthService authService;
 
+    public SpotController(SpotService spotService, AuthService authService) {
+        this.spotService = spotService;
+        this.authService = authService;
+    }
 
     @PostMapping("/create")
     public ResponseEntity<SpotResponseDTO> createSpot(
             @Valid @RequestPart("spot") SpotCreateDTO spotDTO,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestParam Long userId, HttpServletRequest request) throws IOException {
-        
+            HttpServletRequest request) throws IOException {
+        Long userId = authService.getUserId(request);
         return ResponseEntity.ok(spotService.createSpot(spotDTO, image, userId, request));
     }
 
@@ -54,8 +59,12 @@ public class SpotController {
             @PathVariable Long spotId,
             @RequestPart("spot") SpotCreateDTO spotDTO,
             @RequestPart(value = "image", required = false) MultipartFile image,
-            @RequestParam Long userId, HttpServletRequest request) throws InvalidEntityException, IOException {
+            HttpServletRequest request) throws InvalidEntityException, IOException {
         // If needed, you can add a check to ensure the user owns the spot
+        if (!authService.isAuthenticated(request) || authService.getUserType(request) != UserType.ADMIN) {
+            throw new UnauthorizedAccessException("user is not authenticated");
+        }
+
         return ResponseEntity.ok(spotService.updateSpot(spotId, spotDTO, image));
     }
 
@@ -84,7 +93,6 @@ public class SpotController {
         return ResponseEntity.ok(spotService.toggleSpotActivation(spotId));
     }
 
-
     // Vehicle Owner endpoints
     @PatchMapping("/{spotId}/rate")
     public ResponseEntity<SpotResponseDTO> rate(
@@ -103,7 +111,12 @@ public class SpotController {
 
     @GetMapping("/all")
     public ResponseEntity<List<SpotResponseDTO>> getAllSpots() {
-        return ResponseEntity.ok(spotService.getAllSpots());
+        List<SpotResponseDTO> spotList = spotService.getAllSpots();
+        System.out.println("my true inside getAlSpots: "+spotList.isEmpty());
+        for (SpotResponseDTO spot: spotList){
+            System.out.println(spot.getSpotNumber());
+        }
+        return ResponseEntity.ok(spotList);
     }
 
     @GetMapping("/search")
@@ -134,7 +147,8 @@ public class SpotController {
     }
 
     @GetMapping("/by-booking/{bookingId}")
-    public ResponseEntity<SpotResponseDTO> getSpotByBookingId(@PathVariable long bookingId) throws InvalidEntityException{
+    public ResponseEntity<SpotResponseDTO> getSpotByBookingId(@PathVariable long bookingId)
+            throws InvalidEntityException {
 
         return new ResponseEntity<>(spotService.getSpotByBookingId(bookingId), HttpStatus.OK);
 

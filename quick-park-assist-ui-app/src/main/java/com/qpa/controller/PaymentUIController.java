@@ -18,7 +18,6 @@ import jakarta.servlet.http.HttpServletRequest;
 public class PaymentUIController {
 
     private final CustomRestTemplateService restTemplate;
-    private final String BASE_URL = "http://localhost:7212/PAYMENT";
 
     public PaymentUIController(CustomRestTemplateService restTemplate) {
         this.restTemplate = restTemplate;
