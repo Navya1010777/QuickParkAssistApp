@@ -12,8 +12,6 @@ import com.qpa.entity.Payment;
 import com.qpa.service.PayEmailService;
 import com.qpa.service.PaymentService;
 
-import jakarta.mail.MessagingException;
-
 @RestController
 @RequestMapping("/api/PAYMENT")
 public class PaymentController {
@@ -31,8 +29,8 @@ public class PaymentController {
             Model model) {
 
         try {
-            paymentService.processPayment(bookId, userEmail, amount);
-            // emailService.sendReceipt(userEmail, payment.getOrderId(), bookId, amount);
+            Payment payment = paymentService.processPayment(bookId, userEmail, amount);
+            emailService.sendReceipt(userEmail, payment.getOrderId(), bookId, amount);
             return ResponseEntity.ok(true);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(false);

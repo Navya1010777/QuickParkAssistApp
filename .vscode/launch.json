@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-QuickParkAssistUiAppApplication<quick-park-assist-ui-app>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.qpa.QuickParkAssistUiAppApplication",
+      "projectName": "quick-park-assist-ui-app",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}
