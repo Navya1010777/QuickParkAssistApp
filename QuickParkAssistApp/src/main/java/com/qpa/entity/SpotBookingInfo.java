@@ -25,7 +25,7 @@ public class SpotBookingInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookingId;
 
-    private LocalDate bookingDate;
+    private LocalDate bookingDate = LocalDate.now();
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;
