@@ -207,6 +207,7 @@ public class SpotUIController {
             model.addAttribute("spotTypes", SpotType.values());
             model.addAttribute("priceTypes", PriceType.values());
             model.addAttribute("vehicleTypes", VehicleType.values());
+            model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
 
             // Add states, cities, and pincode mappings
             model.addAttribute("states", states);
@@ -336,7 +337,7 @@ public class SpotUIController {
             model.addAttribute("vehicleTypes", VehicleType.values());
             model.addAttribute("status", SpotStatus.values());
             model.addAttribute("cities", sortedCitiesWithSpots); // Now uses only cities with spots
-            model.addAttribute("userType", userService.getUserDetails(request).getData().getUserType());
+            model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
 
         } catch (Exception e) {
             model.addAttribute("error", "Error fetching spots: " + e.getMessage());
@@ -357,6 +358,7 @@ public class SpotUIController {
                 SpotStatistics.class);
 
         model.addAttribute("statistics", statistics);
+        model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
         return "statistics";
     }
 
@@ -373,6 +375,7 @@ public class SpotUIController {
                 SpotResponseDTO[].class);
 
         model.addAttribute("spots", spots);
+        model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
         return "owner_spots";
     }
 
