@@ -58,7 +58,7 @@ public class Spot {
 	@Enumerated(EnumType.STRING)
 	private PriceType priceType;
 
-	private Double rating;
+	private Double averageRating;
 
 	private LocalDateTime createdAt;
 
@@ -88,7 +88,7 @@ public class Spot {
 
 	}
 
-	public Spot(Long spotId, String spotNumber, UserInfo owner, SpotType spotType, SpotStatus status, boolean isActive, Location location, boolean hasEVCharging, double price, PriceType priceType, Double rating, LocalDateTime createdAt, LocalDateTime updatedAt, String spotImage, Set<VehicleType> supportedVehicleTypes) {
+	public Spot(Long spotId, String spotNumber, UserInfo owner, SpotType spotType, SpotStatus status, boolean isActive, Location location, boolean hasEVCharging, double price, PriceType priceType, Double averageRating, LocalDateTime createdAt, LocalDateTime updatedAt, String spotImage, Set<VehicleType> supportedVehicleTypes) {
 		this.spotId = spotId;
 		this.spotNumber = spotNumber;
 		this.owner = owner;
@@ -99,7 +99,7 @@ public class Spot {
 		this.hasEVCharging = hasEVCharging;
 		this.price = price;
 		this.priceType = priceType;
-		this.rating = rating;
+		this.averageRating = averageRating;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.spotImage = spotImage;
@@ -170,12 +170,12 @@ public class Spot {
 		this.priceType = priceType;
 	}
 
-	public Double getRating() {
-		return rating;
+	public Double getAverageRating() {
+		return averageRating;
 	}
 
-	public void setRating(Double rating) {
-		this.rating = rating;
+	public void setAverageRating(Double averageRating) {
+		this.averageRating = averageRating;
 	}
 
 	public LocalDateTime getCreatedAt() {

@@ -1,6 +1,5 @@
 package com.qpa.entity;
 
-//import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -26,7 +25,7 @@ public class Spot {
 
 	private PriceType priceType;
 
-	private Double rating;
+	private Double averageRating;
 
 	private LocalDateTime createdAt;
 
@@ -50,7 +49,7 @@ public class Spot {
 	}
 
 	public Spot(Long spotId, String spotNumber, SpotType spotType, SpotStatus status, Location location,
-			boolean hasEVCharging, double price, PriceType priceType, Double rating,
+			boolean hasEVCharging, double price, PriceType priceType, Double averageRating,
 			LocalDateTime createdAt, LocalDateTime updatedAt, String spotImage,
 			Set<VehicleType> supportedVehicleTypes, boolean isActive) {
 		super();
@@ -62,7 +61,7 @@ public class Spot {
 		this.hasEVCharging = hasEVCharging;
 		this.price = price;
 		this.priceType = priceType;
-		this.rating = rating;
+		this.averageRating = averageRating;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 		this.spotImage = spotImage;
@@ -135,11 +134,11 @@ public class Spot {
 	}
 
 	public Double getRating() {
-		return rating;
+		return averageRating;
 	}
 
-	public void setRating(Double rating) {
-		this.rating = rating;
+	public void setRating(Double averageRating) {
+		this.averageRating = averageRating;
 	}
 
 	public LocalDateTime getCreatedAt() {

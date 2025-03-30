@@ -20,7 +20,7 @@ public class SpotResponseDTO {
 	private boolean hasEVCharging;
 	private double price;
 	private PriceType priceType;
-	private Double rating;
+	private Double averageRating;
 	private String spotImage;
 	private Set<VehicleType> supportedVehicleTypes;
 	
@@ -31,7 +31,7 @@ public class SpotResponseDTO {
 	
 
 	public SpotResponseDTO(Long spotId, String spotNumber, SpotType spotType, SpotStatus status, UserInfo owner,
-			LocationDTO location, boolean hasEVCharging, double price, PriceType priceType, Double rating,
+			LocationDTO location, boolean hasEVCharging, double price, PriceType priceType, Double averageRating,
 			String spotImage, Set<VehicleType> supportedVehicleTypes, boolean isActive) {
 		this.spotId = spotId;
 		this.spotNumber = spotNumber;
@@ -42,7 +42,7 @@ public class SpotResponseDTO {
 		this.hasEVCharging = hasEVCharging;
 		this.price = price;
 		this.priceType = priceType;
-		this.rating = rating;
+		this.averageRating = averageRating;
 		this.spotImage = spotImage;
 		this.supportedVehicleTypes = supportedVehicleTypes;
 		this.isActive = isActive;
@@ -114,12 +114,12 @@ public class SpotResponseDTO {
 		this.priceType = priceType;
 	}
 
-	public Double getRating() {
-		return rating;
+	public Double getAverageRating() {
+		return averageRating;
 	}
 
-	public void setRating(Double rating) {
-		this.rating = rating;
+	public void setAverageRating(Double averageRating) {
+		this.averageRating = averageRating;
 	}	
 
 	public Set<VehicleType> getSupportedVehicleTypes() {
