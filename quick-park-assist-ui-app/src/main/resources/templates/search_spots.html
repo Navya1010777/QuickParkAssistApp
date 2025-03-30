@@ -457,10 +457,11 @@
       >
         <div th:each="spot : ${spots}" class="parking-spot">
           <div
-            class="card"
-            th:data-url="@{/ui/booking/add(spotId=${spot.spotId})}"
-            onclick="redirectToBooking(this)"
+              class="card"
+              th:data-url="@{/spots/details/{id}(id=${spot.spotId})}"
+              onclick="redirectToBooking(this)"
           >
+
             <div class="card-img-wrapper">
               <div
                 th:class="${spot.status == 'AVAILABLE' ? 'status-badge status-available' : 'status-badge status-occupied'}"
