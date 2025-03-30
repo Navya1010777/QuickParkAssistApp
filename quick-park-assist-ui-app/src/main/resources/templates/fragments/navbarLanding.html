@@ -192,15 +192,13 @@
           <ul class="navbar-nav">
             <!-- Home is always visible -->
             <li class="nav-item">
-              <a class="nav-link nav-icon-hover" th:href="@{/home}"
+              <a class="nav-link nav-icon-hover" th:href="@{/spots/home}"
                 ><i class="fas fa-home me-1"></i> Home</a
               >
             </li>
 
             <!-- Admin-specific links -->
-            <th:block
-              th:if="${userType != null and userType == T(com.qpa.entity.UserType).ADMIN}"
-            >
+            <th:block th:if="${UserInfo != null and UserInfo.userType == T(com.qpa.entity.UserType).ADMIN}">
               <li class="nav-item">
                 <a class="nav-link nav-icon-hover" th:href="@{/spots/create}"
                   ><i class="fas fa-plus-circle me-1"></i> Add Spot</a
@@ -221,9 +219,7 @@
             </th:block>
 
             <!-- Vehicle Owner-specific links -->
-            <th:block
-              th:if="${userType != null and userType == T(com.qpa.entity.UserType).VEHICLE_OWNER}"
-            >
+            <th:block th:if="${UserInfo != null and UserInfo.userType == T(com.qpa.entity.UserType).VEHICLE_OWNER}">
               <li class="nav-item">
                 <a class="nav-link nav-icon-hover" th:href="@{/spots/search}"
                   ><i class="fas fa-search me-1"></i> Search Spots</a
