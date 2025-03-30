@@ -42,7 +42,7 @@ public class AuthController {
         }
         model.addAttribute("registerUserDto", new RegisterDTO()); // Empty registration DTO
         model.addAttribute("loginDto", new LoginDTO()); // Empty login DTO
-        return "Login"; // Returns login page view
+        return "login"; // Returns login page view
     }
 
     /**
