@@ -453,6 +453,7 @@ public class SpotUIController {
         }
 
         try {
+            
             ResponseEntity<SpotResponseDTO> currentSpotResponse = restTemplate.getForEntity(
                     BASE_URL + "/spots/" + spotId,
                     SpotResponseDTO.class);
@@ -478,6 +479,9 @@ public class SpotUIController {
                     }
                     if (spotCreateDTO.getLocation().getLandmark() == null) {
                         spotCreateDTO.getLocation().setLandmark(currentSpot.getLocation().getLandmark());
+                    }
+                    if (spotCreateDTO.getSupportedVehicle() == null) {
+                        spotCreateDTO.setSupportedVehicle(currentSpot.getSupportedVehicleTypes());
                     }
                 }
             }
@@ -617,6 +621,7 @@ public class SpotUIController {
 
             SpotResponseDTO[] bookedSpots = response.getBody();
             model.addAttribute("bookedSpots", bookedSpots);
+            model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
         } catch (HttpClientErrorException.NotFound ex) {
             // Handle the 404 case - no booked spots found
             model.addAttribute("bookedSpots", new SpotResponseDTO[0]); // Empty array
@@ -651,6 +656,7 @@ public class SpotUIController {
             }
 
             model.addAttribute("spot", spot);
+            model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
         } catch (HttpClientErrorException.NotFound ex) {
             model.addAttribute("errorMessage", "No spot found for booking ID: " + bookingId);
         } catch (Exception e) {
