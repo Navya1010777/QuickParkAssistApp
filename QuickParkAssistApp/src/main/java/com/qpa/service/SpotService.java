@@ -165,7 +165,7 @@ public class SpotService {
 		Spot spot = spotRepository.findById(spotId)
 				.orElseThrow(() -> new ResourceNotFoundException("Spot not found with id : " + spotId));
 
-		spot.setRating(rating);
+		spot.setAverageRating(rating);
 		spot = spotRepository.save(spot);
 
 		return convertToDTO(spot);

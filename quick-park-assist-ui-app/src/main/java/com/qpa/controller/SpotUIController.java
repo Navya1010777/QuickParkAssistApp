@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -27,6 +28,8 @@ import com.qpa.dto.SpotCreateDTO;
 import com.qpa.dto.SpotResponseDTO;
 import com.qpa.dto.SpotStatistics;
 import com.qpa.dto.LocationDTO;
+import com.qpa.dto.RatingRequestDTO;
+import com.qpa.dto.ResponseDTO;
 import com.qpa.entity.PriceType;
 import com.qpa.entity.SpotStatus;
 import com.qpa.entity.SpotType;
@@ -704,5 +707,97 @@ public class SpotUIController {
         model.addAttribute("spots", spots);
 
         return "search_spots_by_date";
+    }
+
+    // New endpoint to view single spot details
+    @GetMapping("/details/{spotId}")
+    public String viewSpotDetails(@PathVariable Long spotId, Model model, HttpServletRequest request) {
+        // Ensure user is logged in
+        UserInfo currentUser = userService.getUserDetails(request).getData();
+        if (currentUser == null) {
+            return "redirect:/auth/login";
+        }
+
+        try {
+            // Fetch the spot details from the backend
+            ResponseEntity<SpotResponseDTO> response = restTemplate.getForEntity(
+                    BASE_URL + "/spots/" + spotId,
+                    SpotResponseDTO.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                SpotResponseDTO spot = response.getBody();
+                model.addAttribute("spot", spot);
+                model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
+                return "spot_details";
+            } else {
+                return "redirect:/spots/search?error=spotNotFound";
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Error retrieving spot: " + e.getMessage());
+            return "redirect:/spots/search?error=retrievalError";
+        }
+    }
+
+     // API endpoint to get user's rating for a spot
+    @GetMapping("/api/ratings/{spotId}/user-rating")
+    @ResponseBody
+    public ResponseDTO<Integer> getUserRatingForSpot(@PathVariable Long spotId, HttpServletRequest request) {
+        UserInfo currentUser = userService.getUserDetails(request).getData();
+        if (currentUser == null) {
+            return new ResponseDTO<>("Unauthorized", 401, false);
+        }
+
+        try {
+            // Forward the request to the backend API
+            HttpHeaders headers = new HttpHeaders();
+            String cookie = request.getHeader(HttpHeaders.COOKIE);
+            if (cookie != null) {
+                headers.add(HttpHeaders.COOKIE, cookie);
+            }
+
+            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            ResponseEntity<ResponseDTO<Integer>> response = restTemplate.exchange(
+                    BASE_URL + "/ratings/" + spotId + "/user",
+                    HttpMethod.GET,
+                    requestEntity,
+                    new ParameterizedTypeReference<ResponseDTO<Integer>>() {});
+
+            return response.getBody();
+        } catch (HttpClientErrorException.NotFound ex) {
+            return new ResponseDTO<>("No rating found", 404, false);
+        } catch (Exception e) {
+            return new ResponseDTO<>("Error: " + e.getMessage(), 500, false);
+        }
+    }
+
+    // API endpoint to submit a rating
+    @PostMapping("/api/ratings/{spotId}/submit")
+    @ResponseBody
+    public ResponseDTO<?> submitRating(@PathVariable Long spotId, @RequestBody RatingRequestDTO ratingRequest, HttpServletRequest request) {
+        UserInfo currentUser = userService.getUserDetails(request).getData();
+        if (currentUser == null) {
+            return new ResponseDTO<>("Unauthorized", 401, false);
+        }
+
+        try {
+            // Forward the request to the backend API
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            String cookie = request.getHeader(HttpHeaders.COOKIE);
+            if (cookie != null) {
+                headers.add(HttpHeaders.COOKIE, cookie);
+            }
+
+            HttpEntity<RatingRequestDTO> requestEntity = new HttpEntity<>(ratingRequest, headers);
+            ResponseEntity<ResponseDTO<?>> response = restTemplate.exchange(
+                    BASE_URL + "/ratings/" + spotId,
+                    HttpMethod.POST,
+                    requestEntity,
+                    new ParameterizedTypeReference<ResponseDTO<?>>() {});
+
+            return response.getBody();
+        } catch (Exception e) {
+            return new ResponseDTO<>("Error submitting rating: " + e.getMessage(), 500, false);
+        }
     }
 }

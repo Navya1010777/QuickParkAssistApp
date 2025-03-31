@@ -459,8 +459,8 @@
           <div
             class="card"
             th:data-url="@{/ui/booking/add(spotId=${spot.spotId})}"
-            th:attr="onclick=${user != null and user.userType.toString()=='VEHICLE_OWNER'?'redirectToBooking(this)' : null}"
-          >
+            th:attr="onclick=${user != null and user.userType.toString()=='VEHICLE_OWNER'?'redirectToBooking(this)' : null}>
+
             <div class="card-img-wrapper">
               <div
                 th:class="${spot.status == 'AVAILABLE' ? 'status-badge status-available' : 'status-badge status-occupied'}"
