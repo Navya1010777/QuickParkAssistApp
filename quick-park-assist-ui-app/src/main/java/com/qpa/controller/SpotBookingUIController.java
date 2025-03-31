@@ -67,10 +67,10 @@ public class SpotBookingUIController {
             booking.setEndDate(spotBookingDTO.getEndDate());
             booking.setStartTime(spotBookingDTO.getStartTime());
             booking.setEndTime(spotBookingDTO.getEndTime());
-
+            System.out.println(spotBookingDTO.getSpotId());
             // ✅ Call Backend API
             restTemplate.postForEntity(
-                    BASE_URL + "/add/" + spotBookingDTO.getSlotId() + "/" + spotBookingDTO.getRegistrationNumber(),
+                    BASE_URL + "/add/" + spotBookingDTO.getSpotId() + "/" + spotBookingDTO.getRegistrationNumber(),
                     booking,
                     SpotBookingInfo.class);
             return "redirect:/ui/booking/viewAll";
@@ -83,10 +83,10 @@ public class SpotBookingUIController {
             // ✅ Handle Specific Backend Errors with Detailed Messages
             if (errorMessage.contains("Spot is not available")) {
                 model.addAttribute("error",
-                        "❌ Spot with ID " + spotBookingDTO.getSlotId()
+                        "❌ Spot with ID " + spotBookingDTO.getSpotId()
                                 + " is not available. Please select another spot. any ");
             } else if (errorMessage.contains("Spot is already booked")) {
-                model.addAttribute("error", "❌ Spot with ID " + spotBookingDTO.getSlotId()
+                model.addAttribute("error", "❌ Spot with ID " + spotBookingDTO.getSpotId()
                         + " is already booked for the given time. Please choose a different time slot.");
             } else if (errorMessage.contains("Start date, start time, and end time must be provided")) {
                 model.addAttribute("error",
@@ -99,7 +99,7 @@ public class SpotBookingUIController {
                                 + ". Please check and try again.");
             } else if (errorMessage.contains("Spot with ID")) {
                 model.addAttribute("error",
-                        "❌ Spot with ID " + spotBookingDTO.getSlotId()
+                        "❌ Spot with ID " + spotBookingDTO.getSpotId()
                                 + " does not exist. Please enter a valid Spot ID.");
             } else {
                 model.addAttribute("error", "❌ " + errorMessage); // Show the exact backend error

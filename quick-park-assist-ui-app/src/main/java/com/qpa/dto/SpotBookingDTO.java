@@ -4,13 +4,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class SpotBookingDTO {
-    private String razorpayPaymentId;
     private double bookingTime;
     private LocalDate startDate;
     private LocalDate endDate;
     private LocalTime startTime;
     private LocalTime endTime;
-    private long slotId;
+    private long spotId;
     private String registrationNumber;
 
     // ✅ No-Args Constructor
@@ -18,26 +17,19 @@ public class SpotBookingDTO {
     }
 
     // ✅ All-Args Constructor
-    public SpotBookingDTO(String razorpayPaymentId, double bookingTime, LocalDate startDate, LocalDate endDate,
-            LocalTime startTime, LocalTime endTime, long slotId, String registrationNumber) {
-        this.razorpayPaymentId = razorpayPaymentId;
+    public SpotBookingDTO(double bookingTime, LocalDate startDate, LocalDate endDate,
+            LocalTime startTime, LocalTime endTime, long spotId, String registrationNumber) {
         this.bookingTime = bookingTime;
         this.startDate = startDate;
         this.endDate = endDate;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.slotId = slotId;
+        this.spotId = spotId;
         this.registrationNumber = registrationNumber;
     }
 
     // ✅ Getters and Setters
-    public String getRazorpayPaymentId() {
-        return razorpayPaymentId;
-    }
 
-    public void setRazorpayPaymentId(String razorpayPaymentId) {
-        this.razorpayPaymentId = razorpayPaymentId;
-    }
 
     public double getBookingTime() {
         return bookingTime;
@@ -79,12 +71,12 @@ public class SpotBookingDTO {
         this.endTime = endTime;
     }
 
-    public long getSlotId() {
-        return slotId;
+    public long getSpotId() {
+        return spotId;
     }
 
-    public void setSlotId(long slotId) {
-        this.slotId = slotId;
+    public void setSpotId(long spotId) {
+        this.spotId = spotId;
     }
 
     public String getRegistrationNumber() {
@@ -94,6 +86,5 @@ public class SpotBookingDTO {
     public void setRegistrationNumber(String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
-
 
 }
