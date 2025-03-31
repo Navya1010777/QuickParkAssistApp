@@ -67,8 +67,8 @@ public class SpotUIController {
     public String landingPage(HttpServletRequest request) {
 
         // Check for auto-login via cookie
-        UserInfo UserInfo = userService.getUserDetails(request).getData();
-        if (UserInfo != null) {
+        UserInfo userInfo = userService.getUserDetails(request).getData();
+        if (userInfo == null) {
             return "redirect:/auth/login";
         }
 
@@ -340,7 +340,9 @@ public class SpotUIController {
             model.addAttribute("vehicleTypes", VehicleType.values());
             model.addAttribute("status", SpotStatus.values());
             model.addAttribute("cities", sortedCitiesWithSpots); // Now uses only cities with spots
-            model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
+            UserInfo user = userService.getUserDetails(request).getData();
+            System.out.println(user);
+            model.addAttribute("user", user);
 
         } catch (Exception e) {
             model.addAttribute("error", "Error fetching spots: " + e.getMessage());

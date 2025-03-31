@@ -1,7 +1,12 @@
 package com.qpa.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "payments")
@@ -11,23 +16,23 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String  bookingId;
-    private String userEmail;
+    private Long bookingId;
     private Double TotalAmount;
-    private String orderId;
+    private String userEmail;
     private String paymentStatus;
-    private LocalDateTime paymentTime;
+    private String orderId;
+    private LocalDateTime paymentTime = LocalDateTime.now();
 
-    // Constructors
-    public Payment() {}
+    public Payment() {
+    }
 
-    public Payment(String  bookingId, String userEmail, Double TotalAmount, String orderId, String paymentStatus) {
-        this. bookingId =  bookingId;
-        this.userEmail = userEmail;
+    public Payment(Long bookingId, Double TotalAmount, String orderId, String userEmail, String paymentStatus) {
+        this.bookingId = bookingId;
         this.TotalAmount = TotalAmount;
         this.orderId = orderId;
-        this.paymentStatus = paymentStatus;
         this.paymentTime = LocalDateTime.now();
+        this.userEmail = userEmail;
+        this.paymentStatus = paymentStatus;
     }
 
     public Long getId() {
@@ -38,20 +43,12 @@ public class Payment {
         this.id = id;
     }
 
-    public String getBookingId() {
+    public Long getBookingId() {
         return bookingId;
     }
 
-    public void setBookingId(String bookingId) {
+    public void setBookingId(Long bookingId) {
         this.bookingId = bookingId;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
     }
 
     public Double getTotalAmount() {
@@ -70,14 +67,6 @@ public class Payment {
         this.orderId = orderId;
     }
 
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
-
-    public void setPaymentStatus(String paymentStatus) {
-        this.paymentStatus = paymentStatus;
-    }
-
     public LocalDateTime getPaymentTime() {
         return paymentTime;
     }
@@ -86,5 +75,20 @@ public class Payment {
         this.paymentTime = paymentTime;
     }
 
-    
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
 }

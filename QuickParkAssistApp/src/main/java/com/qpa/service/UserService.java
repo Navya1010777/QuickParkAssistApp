@@ -1,9 +1,11 @@
 package com.qpa.service;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,7 @@ import com.qpa.repository.UserRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 @Service
 public class UserService {
@@ -105,6 +108,26 @@ public class UserService {
         // Send registration email
         emailService.sendSimpleMail(request.getEmail(), request.getFullName(),
                 "Registration Successful as " + request.getUserType());
+    }
+
+    @Scheduled(cron = "0 0 0 1 * ?")
+    @Transactional
+    public void deactivateInactiveUsers() {
+        LocalDate cutoffDate = LocalDate.now().minusYears(1); // 1 year before today
+        List<UserInfo> inactiveUsers = userRepository.findInactiveUsers(cutoffDate);
+
+        for (UserInfo user : inactiveUsers) {
+            String subject = "Account Deactivation Due to Inactivity";
+            String body = "Dear " + user.getFullName() + ",\n\n" +
+                    "We noticed that your account has been inactive for over a year. " +
+                    "As a result, your account has been deactivated. If you wish to reactivate your account, " +
+                    "please contact our support team.\n\n" +
+                    "Thank you,\nQuickParkAssist Team";
+            emailService.sendSimpleMail(user.getEmail(), subject, body);
+            user.setStatus(UserInfo.Status.INACTIVE);
+        }
+
+        userRepository.saveAll(inactiveUsers);
     }
 
     public void updateUserDetails(UserInfo user, HttpServletRequest request) throws InvalidEntityException {

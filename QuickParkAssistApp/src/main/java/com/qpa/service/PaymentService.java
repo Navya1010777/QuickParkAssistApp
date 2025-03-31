@@ -14,11 +14,11 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    public Payment processPayment(String bookId, String userEmail, Double amount) {
+    public Payment processPayment(Long bookId, String userEmail, Double amount) {
         // Generate unique Order ID
         String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
-        Payment payment = new Payment(bookId, userEmail, amount, orderId, "SUCCESS");
+        Payment payment = new Payment(bookId, amount, orderId, userEmail, "SUCCESS");
         return paymentRepository.save(payment);
     }
-    
+
 }

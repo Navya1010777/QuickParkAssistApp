@@ -30,6 +30,7 @@
             <span class="material-icons">people</span> Users
           </li>
           <li
+            onclick="navigateTo('/spots/home')"
             class="mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
           >
             <span class="material-icons">local_parking</span> Parking Spots
@@ -48,7 +49,9 @@
             class="mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
           >
             <form action="/auth/logout" method="post">
-              <button class="flex items-center gap-2"><span class="material-icons">logout</span> Logout </button>
+              <button class="flex items-center gap-2">
+                <span class="material-icons">logout</span> Logout
+              </button>
             </form>
           </li>
         </ul>
@@ -165,6 +168,9 @@
         .addEventListener("click", function () {
           document.getElementById("profileMenu").classList.toggle("hidden");
         });
+      function navigateTo(route) {
+        window.location.assign(route);
+      }
     </script>
   </body>
 </html>

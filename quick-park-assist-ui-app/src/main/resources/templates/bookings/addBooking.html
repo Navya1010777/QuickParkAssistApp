@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Booking</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
   </head>
   <body class="bg-gray-100">
@@ -14,7 +15,7 @@
 
       <!-- Error Message Display -->
       <div th:if="${error}" class="mb-4 p-3 bg-red-100 text-red-800 rounded">
-        <strong th:text="${error}"></strong>
+        <strong th:text="${error}" id="error-message"></strong>
       </div>
 
       <!-- Success Message Display -->
@@ -22,24 +23,25 @@
         th:if="${message}"
         class="mb-4 p-3 bg-green-100 text-green-800 rounded"
       >
-        <strong th:text="${message}"></strong>
+        <strong th:text="${message}" id="success-message"></strong>
       </div>
 
       <!-- Booking Form -->
       <form
+        id="bookingForm"
         th:action="@{/ui/booking/save}"
         method="post"
         class="space-y-4"
-        onsubmit="return validateForm()"
       >
         <!-- Slot ID -->
         <div>
           <label class="block text-sm font-medium">Spot ID</label>
           <input
             type="number"
-            name="slotId"
+            name="spotId"
             required
             readonly
+            id="spotId"
             th:value="${spotId}"
             class="w-full p-2 border rounded"
           />
@@ -50,6 +52,7 @@
           <label class="block text-sm font-medium">Select Vehicle</label>
           <select
             name="registrationNumber"
+            id="registrationNumber"
             required
             class="w-full p-2 border rounded"
           >
@@ -161,14 +164,6 @@
           }
         });
 
-        startTimeInput.addEventListener("change", function () {
-          validateTime();
-        });
-
-        endTimeInput.addEventListener("change", function () {
-          validateTime();
-        });
-
         function validateTime() {
           const startDate = startDateInput.value;
           const endDate = endDateInput.value;
@@ -181,9 +176,9 @@
           const startDateTime = new Date(`${startDate}T${startTime}`);
           const endDateTime = new Date(`${endDate}T${endTime}`);
 
-          // 🔹 If End Date is after Start Date, it's automatically valid
-          if (endDateTime <= startDateTime && startDate === endDate) {
-            alert("❌ End Time must be after Start Time on the same day.");
+          // Check if end date/time is after start date/time
+          if (endDateTime <= startDateTime) {
+            alert("❌ End Time must be after Start Time.");
             endTimeInput.value = "";
             return;
           }
@@ -194,6 +189,9 @@
             2
           )} hour(s)`;
         }
+
+        startTimeInput.addEventListener("change", validateTime);
+        endTimeInput.addEventListener("change", validateTime);
       });
     </script>
   </body>

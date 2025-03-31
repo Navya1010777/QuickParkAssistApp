@@ -143,4 +143,5 @@ public class SpotBookingInfo {
                 ", addOns=" + (addOns != null ? addOns.toString() : "null") +
                 '}';
     }
+
 }

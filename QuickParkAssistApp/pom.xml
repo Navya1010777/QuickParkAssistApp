@@ -85,6 +85,13 @@
             <version>0.11.5</version>
             <scope>runtime</scope>
         </dependency>
+            <!-- Razorpay Dependencies -->
+        <dependency>
+            <groupId>com.razorpay</groupId>
+            <artifactId>razorpay-java</artifactId>
+            <version>1.4.1</version>
+        </dependency>
+
 
         <!-- Database Dependencies (Fixed) -->
         <dependency>

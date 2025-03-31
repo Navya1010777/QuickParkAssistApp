@@ -12,8 +12,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.qpa.entity.PriceType;
-import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.Spot;
+import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.SpotStatus;
 import com.qpa.entity.Vehicle;
 import com.qpa.entity.VehicleType;
@@ -21,6 +21,7 @@ import com.qpa.exception.InvalidEntityException;
 import com.qpa.repository.SpotBookingInfoRepository;
 import com.qpa.repository.SpotRepository;
 import com.qpa.repository.VehicleRepository;
+
 import jakarta.transaction.Transactional;
 
 @Service
@@ -86,7 +87,7 @@ public class SpotBookingService {
 
         // Check spot status
         SpotStatus spotStatus = spot.getStatus();
-        System.out.println("spot status: "+spotStatus);
+        System.out.println("spot status: " + spotStatus);
         if (spotStatus == null || spotStatus != SpotStatus.AVAILABLE) {
             throw new InvalidEntityException(
                     "Spot with ID " + spotId + " is not available for booking. Current status: " +
@@ -256,14 +257,15 @@ public class SpotBookingService {
         return bookings;
     }
 
-
-    public List<SpotBookingInfo> getCancelledBookingsByContactNumber(String contactNumber) throws InvalidEntityException {
+    public List<SpotBookingInfo> getCancelledBookingsByContactNumber(String contactNumber)
+            throws InvalidEntityException {
         if (contactNumber == null || contactNumber.trim().isEmpty()) {
             throw new InvalidEntityException("Contact number cannot be null or empty.");
         }
 
-        List<SpotBookingInfo> cancelledBookings = spotBookingRepository.findCancelledBookingsByContactNumber(contactNumber);
-        
+        List<SpotBookingInfo> cancelledBookings = spotBookingRepository
+                .findCancelledBookingsByContactNumber(contactNumber);
+
         if (cancelledBookings.isEmpty()) {
             throw new InvalidEntityException("No cancelled bookings found for contact number: " + contactNumber);
         }
@@ -385,7 +387,6 @@ public class SpotBookingService {
         booking.setStatus("cancelled");
         // Step 6: Delete only the booking details
         spotBookingRepository.save(booking);
-      
 
     }
 

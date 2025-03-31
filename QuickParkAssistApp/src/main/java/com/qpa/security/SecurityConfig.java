@@ -16,25 +16,28 @@ import org.springframework.web.cors.CorsConfiguration;
 @Configuration
 public class SecurityConfig {
 
- @Bean 
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .cors(cors -> cors.configurationSource(request -> {
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowedOrigins(List.of("http://localhost:3000"));
-            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-            config.setAllowedHeaders(List.of("*"));
-            config.setAllowCredentials(true); // ✅ Required for cookies
-            return config;
-        }))
-        .csrf(csrf -> csrf.disable())  // ✅ CSRF disabled
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ✅ Ensure stateless session
-        .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // ✅ Allow all requests
-        .formLogin(login -> login.disable())  
-        .httpBasic(basic -> basic.disable()); 
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:3000"));
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true); // ✅ Required for cookies
+                    return config;
+                }))
+                .csrf(csrf -> csrf.disable()) // ✅ CSRF disabled
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // ✅
+                                                                                                              // Ensure
+                                                                                                              // stateless
+                                                                                                              // session
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll()) // ✅ Allow all requests
+                .formLogin(login -> login.disable())
+                .httpBasic(basic -> basic.disable());
 
-    return http.build();
-}
+        return http.build();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -42,7 +45,9 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration)
+            throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
     }
+
 }
