@@ -459,7 +459,7 @@
           <div
             class="card"
             th:data-url="@{/ui/booking/add(spotId=${spot.spotId})}"
-            onclick="redirectToBooking(this)"
+            th:attr="onclick=${user != null and user.userType.toString()=='VEHICLE_OWNER'?'redirectToBooking(this)' : null}"
           >
             <div class="card-img-wrapper">
               <div

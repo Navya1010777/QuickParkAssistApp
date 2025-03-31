@@ -11,7 +11,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-// import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,7 +19,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.lang.String;
 import java.time.LocalDate;
 
 import java.time.LocalTime;
@@ -29,6 +27,8 @@ import java.util.ArrayList;
 
 import java.util.Collections;
 import java.util.List;
+
+import com.qpa.dto.SpotBookingDTO;
 
 @Controller
 @RequestMapping("/ui/booking")
@@ -58,27 +58,22 @@ public class SpotBookingUIController {
 
     @PostMapping("/save")
     public String saveBooking(
-            @ModelAttribute SpotBookingInfo booking,
-            @RequestParam LocalTime startTime,
-            @RequestParam LocalTime endTime,
-            @RequestParam long slotId,
-            @RequestParam String registrationNumber,
+            @ModelAttribute SpotBookingDTO spotBookingDTO,
             Model model) {
 
         try {
-            // ✅ Set start and end times
-            booking.setStartTime(startTime);
-            booking.setEndTime(endTime);
+            SpotBookingInfo booking = new SpotBookingInfo();
+            booking.setStartDate(spotBookingDTO.getStartDate());
+            booking.setEndDate(spotBookingDTO.getEndDate());
+            booking.setStartTime(spotBookingDTO.getStartTime());
+            booking.setEndTime(spotBookingDTO.getEndTime());
 
             // ✅ Call Backend API
-            ResponseEntity<SpotBookingInfo> response = restTemplate.postForEntity(
-                    BASE_URL + "/add/" + slotId + "/" + registrationNumber,
+            restTemplate.postForEntity(
+                    BASE_URL + "/add/" + spotBookingDTO.getSlotId() + "/" + spotBookingDTO.getRegistrationNumber(),
                     booking,
                     SpotBookingInfo.class);
-            SpotBookingInfo bookingResponse = response.getBody();
-            return "redirect:/ui/booking/payment?bookingId=" + bookingResponse.getBookingId() + "&amount="
-                    + bookingResponse.getTotalAmount();
-
+            return "redirect:/ui/booking/viewAll";
             // Redirect to view all bookings on success
 
         } catch (HttpClientErrorException e) {
@@ -88,9 +83,10 @@ public class SpotBookingUIController {
             // ✅ Handle Specific Backend Errors with Detailed Messages
             if (errorMessage.contains("Spot is not available")) {
                 model.addAttribute("error",
-                        "❌ Spot with ID " + slotId + " is not available. Please select another spot.");
+                        "❌ Spot with ID " + spotBookingDTO.getSlotId()
+                                + " is not available. Please select another spot. any ");
             } else if (errorMessage.contains("Spot is already booked")) {
-                model.addAttribute("error", "❌ Spot with ID " + slotId
+                model.addAttribute("error", "❌ Spot with ID " + spotBookingDTO.getSlotId()
                         + " is already booked for the given time. Please choose a different time slot.");
             } else if (errorMessage.contains("Start date, start time, and end time must be provided")) {
                 model.addAttribute("error",
@@ -98,11 +94,13 @@ public class SpotBookingUIController {
             } else if (errorMessage.contains("Start date cannot be in the past")) {
                 model.addAttribute("error", "❌ Start Date cannot be in the past. Please select a future date.");
             } else if (errorMessage.contains("Vehicle with Registration Number")) {
-                model.addAttribute("error", "❌ No vehicle found with Registration Number: " + registrationNumber
-                        + ". Please check and try again.");
+                model.addAttribute("error",
+                        "❌ No vehicle found with Registration Number: " + spotBookingDTO.getRegistrationNumber()
+                                + ". Please check and try again.");
             } else if (errorMessage.contains("Spot with ID")) {
                 model.addAttribute("error",
-                        "❌ Spot with ID " + slotId + " does not exist. Please enter a valid Spot ID.");
+                        "❌ Spot with ID " + spotBookingDTO.getSlotId()
+                                + " does not exist. Please enter a valid Spot ID.");
             } else {
                 model.addAttribute("error", "❌ " + errorMessage); // Show the exact backend error
             }

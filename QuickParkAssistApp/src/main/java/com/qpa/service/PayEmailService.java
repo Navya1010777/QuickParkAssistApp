@@ -15,7 +15,7 @@ public class PayEmailService {
     @Autowired
     private JavaMailSender mailSender;
 
-    public void sendReceipt(String to, String orderId, String bookId, Double amount) throws MessagingException {
+    public void sendReceipt(String to, String orderId, Long bookId, Double amount) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 

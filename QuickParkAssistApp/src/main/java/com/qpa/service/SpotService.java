@@ -2,6 +2,7 @@ package com.qpa.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,6 +16,7 @@ import com.qpa.dto.SpotResponseDTO;
 import com.qpa.dto.SpotSearchCriteria;
 import com.qpa.dto.SpotStatistics;
 import com.qpa.entity.Location;
+import com.qpa.entity.PriceType;
 import com.qpa.entity.Spot;
 import com.qpa.entity.SpotStatus;
 import com.qpa.entity.VehicleType;
@@ -40,7 +42,8 @@ public class SpotService {
 	private final CloudinaryService cloudinaryService;
 
 	public SpotService(SpotRepository spotRepository, LocationRepository locationRepository,
-			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService, LocationService locationService, CloudinaryService cloudinaryService) {
+			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService,
+			LocationService locationService, CloudinaryService cloudinaryService) {
 		this.spotRepository = spotRepository;
 		this.userRepository = userRepository;
 		this.bookingRepository = bookingRepository;
@@ -139,14 +142,14 @@ public class SpotService {
 	public List<SpotResponseDTO> searchSpots(SpotSearchCriteria criteria) {
 		// Implementation for filtering spots based on various criteria
 		List<Spot> spots = spotRepository.findByLocationFilters(
-				criteria.getCity()
-		);
+				criteria.getCity());
 
 		return spots.stream()
 				.filter(spot -> spot.getIsActive())
 				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
 				.filter(spot -> criteria.getSpotType() == null || spot.getSpotType() == criteria.getSpotType())
-				.filter(spot -> criteria.getHasEVCharging() == null || spot.getHasEVCharging() == criteria.getHasEVCharging())
+				.filter(spot -> criteria.getHasEVCharging() == null
+						|| spot.getHasEVCharging() == criteria.getHasEVCharging())
 				.filter(spot -> criteria.getPriceType() == null || spot.getPriceType() == criteria.getPriceType())
 				.filter(spot -> criteria.getSupportedVehicleType() == null ||
 						spot.getSupportedVehicleTypes().contains(criteria.getSupportedVehicleType()))
@@ -183,8 +186,7 @@ public class SpotService {
 		return new SpotStatistics(
 				totalSpots,
 				availableSpots,
-				unavailableSpots
-		);
+				unavailableSpots);
 	}
 
 	private SpotResponseDTO convertToDTO(Spot spot) {
@@ -219,7 +221,7 @@ public class SpotService {
 				.collect(Collectors.toList());
 	}
 
-	public SpotResponseDTO getSpotByBookingId(long bookingId) throws InvalidEntityException{
+	public SpotResponseDTO getSpotByBookingId(long bookingId) throws InvalidEntityException {
 		Spot spot = bookingRepository.findSpotByBookingId(bookingId);
 		if (spot == null) {
 			throw new InvalidEntityException("No spot found for booking ID: " + bookingId);
@@ -240,14 +242,13 @@ public class SpotService {
 	public List<SpotResponseDTO> getAvailableSpotsByStartAndEndDate(LocalDate startDate, LocalDate endDate) {
 		List<Spot> bookedSpots = bookingRepository.findSpotsByStartAndEndDate(startDate, endDate);
 		if (bookedSpots.isEmpty()) {
-			throw new ResourceNotFoundException("No booked spots found between "+ startDate + " and " + endDate);
+			throw new ResourceNotFoundException("No booked spots found between " + startDate + " and " + endDate);
 		}
 		return bookedSpots.stream()
 				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
 				.map(this::convertToDTO)
 				.collect(Collectors.toList());
 	}
-
 
 	public SpotResponseDTO toggleSpotActivation(Long spotId) {
 		Spot spot = spotRepository.findById(spotId)
@@ -256,4 +257,19 @@ public class SpotService {
 		spot = spotRepository.save(spot);
 		return convertToDTO(spot);
 	}
+
+	public Double getTotalAmount(Long spotId, Double bookingHours) {
+		Spot spot = spotRepository.findById(spotId)
+				.orElseThrow(() -> new ResourceNotFoundException("Spot not found with id : " + spotId));
+
+		double price = spot.getPrice();
+
+		if (spot.getPriceType() == PriceType.DAILY) {
+			long days = (long) Math.ceil(bookingHours / 24); // Round up to full days
+			return price * days;
+		} else {
+			return price * bookingHours;
+		}
+	}
+
 }

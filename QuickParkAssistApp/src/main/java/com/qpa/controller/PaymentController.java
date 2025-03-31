@@ -23,7 +23,7 @@ public class PaymentController {
     private PayEmailService emailService;
 
     @PostMapping("/processPayment")
-    public ResponseEntity<Boolean> processPayment(@RequestParam String bookId,
+    public ResponseEntity<Boolean> processPayment(@RequestParam Long bookId,
             @RequestParam String userEmail,
             @RequestParam Double amount,
             Model model) {

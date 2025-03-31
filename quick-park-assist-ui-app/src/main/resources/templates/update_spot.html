@@ -28,6 +28,12 @@
         object-fit: cover;
         margin-top: 10px;
       }
+      .spot-image-js{
+        object-fit: contain;
+        width: 400px;
+        height: 400px;
+        
+      }
     </style>
   </head>
   <body>
@@ -203,6 +209,7 @@
                 th:if="${spot.spotImage != null and not #strings.isEmpty(spot.spotImage)}"
                 th:src="${spot.spotImage}"
                 alt="Spot Image"
+                class="spot-image-js"
               />
 
               <img

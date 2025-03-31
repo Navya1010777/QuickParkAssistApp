@@ -14,7 +14,7 @@ import com.qpa.service.CustomRestTemplateService;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Controller
-@RequestMapping("/ui/booking")
+@RequestMapping("/payment")
 public class PaymentUIController {
 
     private final CustomRestTemplateService restTemplate;
