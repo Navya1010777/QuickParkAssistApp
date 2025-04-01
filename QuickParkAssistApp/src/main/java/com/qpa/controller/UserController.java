@@ -143,4 +143,10 @@ public class UserController {
                     .body(new ResponseDTO<>(e.getMessage(), HttpStatus.NOT_FOUND.value(), false));
         }
     }
+
+    // API to fetch all ADMIN users
+    @GetMapping
+    public List<UserInfo> getAllAdmins() {
+        return userService.getAllAdmins();
+    }
 }

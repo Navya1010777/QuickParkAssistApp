@@ -30,6 +30,7 @@ public String paymentPage(@RequestParam String bookingId, @RequestParam Double a
     return "bookings/payment";
 }
 
+    @SuppressWarnings("null")//warning removed  01/04
     @PostMapping("/processPayment")
     public String processPayment(
             @RequestParam String bookingId,

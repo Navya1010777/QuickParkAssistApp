@@ -3,6 +3,7 @@ package com.qpa.service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -193,5 +194,13 @@ public class UserService {
     public List<SpotBookingInfo> getUserbookings(HttpServletRequest request) throws InvalidEntityException {
         UserInfo user = getCurrentUserProfile(request);
         return spotBookingService.getBookingsByContactNumber(user.getContactNumber());
+    }
+
+    //02-04
+    public List<UserInfo> getAllAdmins() {
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getUserType() == UserType.ADMIN)
+                .collect(Collectors.toList());
     }
 }

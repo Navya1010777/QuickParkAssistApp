@@ -64,6 +64,10 @@ public class HomeController {
             UserInfo user = response.getData(); // Retrieves user info
             model.addAttribute("user", user); // Pass full name to the view
             if (user.getUserType() == UserType.ADMIN) {
+                // Fetch admins from backend API
+                String apiUrl = "http://localhost:7212/api/users"; // Ensure correct backend port
+                List<UserInfo> adminUsers = restTemplate.getForObject(apiUrl, List.class);
+                model.addAttribute("admins", adminUsers); // Send to Thymeleaf
                 return "admin/index";
             }
             List<Vehicle> vehicles = vehicleService.findUserVehicle(request).getData();
