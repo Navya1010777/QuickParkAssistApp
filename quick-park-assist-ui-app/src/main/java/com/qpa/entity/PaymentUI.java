@@ -2,25 +2,24 @@ package com.qpa.entity;
 
 import java.time.LocalDateTime;
 
-public class Payment {
-
+public class PaymentUI {
     private Long id;
-    private Long bookingId;
+    private String  bookingId;
+    private String userEmail;
     private Double TotalAmount;
     private String orderId;
     private String paymentStatus;
     private LocalDateTime paymentTime;
 
-    public Payment() {
-    }
+    public PaymentUI() {}
 
-    public Payment(Long bookingId, Double TotalAmount, String orderId, String paymentStatus,
-            LocalDateTime paymentTime) {
+    public PaymentUI(String  bookingId, String userEmail, Double TotalAmount, String orderId, String paymentStatus) {
         this.bookingId = bookingId;
+        this.userEmail = userEmail;
         this.TotalAmount = TotalAmount;
         this.orderId = orderId;
         this.paymentStatus = paymentStatus;
-        this.paymentTime = paymentTime;
+        this.paymentTime = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -31,12 +30,20 @@ public class Payment {
         this.id = id;
     }
 
-    public Long getBookingId() {
+    public String getBookingId() {
         return bookingId;
     }
 
-    public void setBookingId(Long bookingId) {
+    public void setBookingId(String bookingId) {
         this.bookingId = bookingId;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 
     public Double getTotalAmount() {
@@ -70,5 +77,7 @@ public class Payment {
     public void setPaymentTime(LocalDateTime paymentTime) {
         this.paymentTime = paymentTime;
     }
+
+    
 
 }
