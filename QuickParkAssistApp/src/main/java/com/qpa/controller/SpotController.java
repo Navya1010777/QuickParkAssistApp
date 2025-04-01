@@ -1,7 +1,9 @@
 package com.qpa.controller;
 
+
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -170,5 +172,37 @@ public class SpotController {
         return new ResponseEntity<>(spotService.getAvailableSpotsByStartAndEndDate(startDate, endDate), HttpStatus.OK);
 
     }
+    
+    //to get booked spots based on city and landmark
+    @GetMapping("/booked-by-filters")
+    public ResponseEntity<List<SpotResponseDTO>> getBookedSpots(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String landmark) {
+        return new ResponseEntity<>(spotService.getBookedSpots(city, landmark), HttpStatus.OK);
+    }
+
+    // to get cities for dropdown
+    @GetMapping("/booked/cities")
+    public ResponseEntity<List<String>> getCities() {
+    	System.out.println("==== GET /booked/cities endpoint called ====");
+    	List<String> cities = spotService.getCities();
+    	System.out.println("==== Returning cities: " + cities + " ====");
+        return new ResponseEntity<>(cities, HttpStatus.OK);
+    }
+
+    //to get landmarks for dropdown
+    @GetMapping("/booked/landmarks")
+    public  ResponseEntity<List<String>> getLandmarks(@RequestParam String city) {
+    	System.out.println("==== GET /booked/landmarks endpoint called ====");
+    	if (city == null || city.isEmpty()) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.BAD_REQUEST);
+        }
+    	List<String> landmarks = spotService.getLandmarks(city);
+    	System.out.println("==== Returning landmarks: " + landmarks + " ====");
+        return new ResponseEntity<>(landmarks, HttpStatus.OK);
+    }
+  
+
+
 
 }
