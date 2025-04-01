@@ -1,12 +1,7 @@
 package com.qpa.entity;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "payments")
@@ -16,23 +11,23 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long bookingId;
-    private Double TotalAmount;
+    private String  bookingId;
     private String userEmail;
-    private String paymentStatus;
+    private Double TotalAmount;
     private String orderId;
-    private LocalDateTime paymentTime = LocalDateTime.now();
+    private String paymentStatus;
+    private LocalDateTime paymentTime;
 
-    public Payment() {
-    }
+    // Constructors
+    public Payment() {}
 
-    public Payment(Long bookingId, Double TotalAmount, String orderId, String userEmail, String paymentStatus) {
-        this.bookingId = bookingId;
+    public Payment(String  bookingId, String userEmail, Double TotalAmount, String orderId, String paymentStatus) {
+        this. bookingId =  bookingId;
+        this.userEmail = userEmail;
         this.TotalAmount = TotalAmount;
         this.orderId = orderId;
-        this.paymentTime = LocalDateTime.now();
-        this.userEmail = userEmail;
         this.paymentStatus = paymentStatus;
+        this.paymentTime = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -43,36 +38,12 @@ public class Payment {
         this.id = id;
     }
 
-    public Long getBookingId() {
+    public String getBookingId() {
         return bookingId;
     }
 
-    public void setBookingId(Long bookingId) {
+    public void setBookingId(String bookingId) {
         this.bookingId = bookingId;
-    }
-
-    public Double getTotalAmount() {
-        return TotalAmount;
-    }
-
-    public void setTotalAmount(Double totalAmount) {
-        TotalAmount = totalAmount;
-    }
-
-    public String getOrderId() {
-        return orderId;
-    }
-
-    public void setOrderId(String orderId) {
-        this.orderId = orderId;
-    }
-
-    public LocalDateTime getPaymentTime() {
-        return paymentTime;
-    }
-
-    public void setPaymentTime(LocalDateTime paymentTime) {
-        this.paymentTime = paymentTime;
     }
 
     public String getUserEmail() {
@@ -83,6 +54,22 @@ public class Payment {
         this.userEmail = userEmail;
     }
 
+    public Double getTotalAmount() {
+        return TotalAmount;
+    }
+
+    public void setTotalAmount(Double TotalAmount) {
+        this.TotalAmount = TotalAmount;
+    }
+
+    public String getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(String orderId) {
+        this.orderId = orderId;
+    }
+
     public String getPaymentStatus() {
         return paymentStatus;
     }
@@ -91,4 +78,13 @@ public class Payment {
         this.paymentStatus = paymentStatus;
     }
 
+    public LocalDateTime getPaymentTime() {
+        return paymentTime;
+    }
+
+    public void setPaymentTime(LocalDateTime paymentTime) {
+        this.paymentTime = paymentTime;
+    }
+
+    
 }
