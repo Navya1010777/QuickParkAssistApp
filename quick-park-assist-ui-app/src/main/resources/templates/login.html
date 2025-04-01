@@ -3,7 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register | Quick Park Assist</title>
+    <title>SMART PARK</title>
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_io/favicon-16x16.png">
+    <link rel="manifest" href="/favicon_io/site.webmanifest">
     <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
@@ -15,9 +19,41 @@
     />
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
 
-    <style></style>
+    <style>
+      body{
+        background: linear-gradient(
+          135deg,
+          #1fa3d4,
+          #86c7e2,
+          #206f91,
+          #5b879f,
+          #a4c1ca
+        );
+      }
+
+      .containerlogin {
+    position: relative;
+    width: 897px;
+    height: 630px;
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    overflow: hidden;
+}
+/* Responsive Design */
+@media (max-width: 768px) {
+    .containerlogin {
+        width: auto;
+        height: auto;
+        min-height: 90vh;
+        margin: 5vh 0;
+    }
+  }
+    </style>
   </head>
   <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="containerlogin" id="container"> 
     <!-- Hidden fields for displaying success and error messages -->
     <input type="hidden" id="success-message" th:value="${success}" />
     <input type="hidden" id="error-message" th:value="${error}" />
@@ -26,9 +62,9 @@
       <div
         id="sign-up"
         class="w-full mx-auto max-w-md bg-white max-lg:hidden shadow-md rounded-lg p-6"
-      >
+      style="border-radius: 0;">
         <h2 class="text-2xl font-semibold text-gray-800 text-center mb-4">
-          Register
+          Create Account
         </h2>
 
         <form
@@ -201,7 +237,7 @@
       <div
         id="sign-in"
         class="w-full mx-auto max-w-md bg-white shadow-md rounded-lg p-6"
-      >
+      style="border-radius: 0;">
         <h2 class="text-2xl font-semibold text-gray-800 text-center mb-4">
           Login
         </h2>
@@ -295,16 +331,11 @@
 
       <!-- Overlay Container -->
 
-      <div
+     <div
         id="overlay-container"
         class="shadow-lg max-lg:hidden rounded-lg text-center flex-col px-2 absolute w-1/2 bg-white min-h-full right-0 flex items-center pt-20 transition-transform duration-300 bg-gray-900"
-      >
-        <!-- Logo Section -->
-        <div class="flex items-center mb-6 space-x-2">
-          <h1 class="text-3xl font-extrabold text-blue-600">
-            Quick Park Assist
-          </h1>
-        </div>
+      style="border-radius: 0;">
+        
 
         <h2 class="text-2xl font-bold text-gray-900 mb-4" id="overlay-content">
           Hello, Friend!
@@ -332,9 +363,9 @@
         >
           Sign In
         </button>
-      </div>
+        </div>
     </div>
-
+  </div>
     <script th:src="@{/js/login_script.js}" defer></script>
     <script th:src="@{/js/displayMessage.js}" defer></script>
   </body>
