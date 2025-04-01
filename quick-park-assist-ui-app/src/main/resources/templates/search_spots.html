@@ -458,7 +458,7 @@
         <div th:each="spot : ${spots}" class="parking-spot">
           <div
             class="card"
-            th:data-url="@{/ui/booking/add(spotId=${spot.spotId})}"
+	    th:data-url="@{/spots/details/{spotId}(spotId=${spot.spotId})}"
             th:attr="onclick=${user != null and user.userType.toString()=='VEHICLE_OWNER'?'redirectToBooking(this)' : null}"
           >
             <div class="card-img-wrapper">
