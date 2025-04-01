@@ -806,4 +806,95 @@ public class SpotUIController {
             return new ResponseDTO<>("Error submitting rating: " + e.getMessage(), 500, false);
         }
     }
+    
+
+    @GetMapping("/spots/booked")
+    public String bookedSpotsByCityAndLandmark(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String landmark,
+            Model model,
+            HttpServletRequest request) {
+    	
+        UserInfo currentUser = (UserInfo) request.getSession().getAttribute("currentUser");
+        if (currentUser == null) {
+            return "redirect:/login";
+        }
+
+        // Fetch cities with existing spots
+        try {
+
+        	System.out.println("==== About to call REST API for cities ====");
+        	String cityUrl = BASE_URL + "/spots/booked/cities";
+        	ResponseEntity<List> cityResponse = restTemplate.exchange(
+        	    cityUrl, HttpMethod.GET, null, List.class
+        	);
+        	
+        	System.out.println("==== REST API call completed with status: " + cityResponse.getStatusCode() + " ====");
+        	List<String> cities = cityResponse.getBody();
+        	System.out.println("==== Cities received from API: " + cities + " ====");
+        	
+        	//To check what is being fetched
+        	System.out.println("Cities fetched: " + cities);
+
+            // Sort the cities with spots
+        	if (cities != null) {
+                Collections.sort(cities);
+            } else {
+                cities = new ArrayList<>(); // Initialize if null
+            }
+
+            // Rest of the existing search logic remains the same
+            boolean hasFilters = city != null || landmark != null;
+
+            SpotResponseDTO[] spots;
+
+            if (hasFilters) {
+                // If filters applied, use search endpoint
+                MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+                if (city != null && !city.isEmpty())
+                    params.add("city", city);
+                if (landmark != null && !landmark.isEmpty())
+                    params.add("landmark", landmark);
+                
+                String queryParams = params
+                        .entrySet()
+                        .stream()
+                        .map(entry -> entry.getKey() + "=" + entry.getValue().get(0))
+                        .collect(Collectors.joining("&"));
+
+                String urlWithParams = BASE_URL + "/spots/booked-by-filters?" + queryParams;
+
+                try {
+                    ResponseEntity<SpotResponseDTO[]> response = restTemplate.exchange(
+                            urlWithParams,
+                            HttpMethod.GET,
+                            null,
+                            SpotResponseDTO[].class);
+                    spots = response.getBody();
+                } catch (Exception e) {
+                    spots = new SpotResponseDTO[0]; // Empty array on error
+                    model.addAttribute("error", "Error fetching filtered spots: " + e.getMessage());
+                }
+            } else {
+                // If no filters, get all spots
+                try {
+                    spots = restTemplate.getForObject(BASE_URL + "/spots/booked", SpotResponseDTO[].class);
+                } catch (Exception e) {
+                    spots = new SpotResponseDTO[0]; // Empty array on error
+                    model.addAttribute("error", "Error fetching all spots: " + e.getMessage());
+                }
+            }
+
+            // Add all necessary data to the model
+            model.addAttribute("spots", spots);
+            model.addAttribute("cities", cities); // Now uses only cities with booked spots
+
+        } catch (Exception e) {
+        	System.out.println("==== Exception occurred while calling REST API: " + e.getMessage() + " ====");
+            model.addAttribute("error", "Error fetching spots: " + e.getMessage());
+            model.addAttribute("cities", Collections.emptyList());
+        }
+
+        return "booked_spots_list";
+    }
 }

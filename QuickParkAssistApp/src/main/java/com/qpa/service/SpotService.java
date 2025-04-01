@@ -2,8 +2,12 @@ package com.qpa.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+
 import java.time.LocalDateTime;
+
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
@@ -272,4 +276,60 @@ public class SpotService {
 		}
 	}
 
+
+	//find booked spots based on city and landmark
+	 public List<SpotResponseDTO> getBookedSpots(String city, String landmark) {
+	        List<Spot> spots = bookingRepository.findByCityAndLandmark(city, landmark);
+	        
+	        if (spots.isEmpty()) {
+	        	throw new ResourceNotFoundException("No booked spots for given criteria");
+	        }
+	        
+	        return spots.stream().map(this::convertToDTO).collect(Collectors.toList());
+	 }
+
+	 
+	 //to populate cities dropdown in frontend
+	    public List<String> getCities() {
+	    	System.out.println("==== spotService.getCities() called ====");
+	    	 List<Spot> spots = bookingRepository.findBookedSpots();
+	    	 System.out.println("==== Repository returned " + (spots != null ? spots.size() : 0) + " spots ====");
+	    	    
+	    	    // Debug log to check what spots are being returned
+	    	    System.out.println("Found spots count: " + (spots != null ? spots.size() : 0));
+	    	    
+	    	    if (spots == null || spots.isEmpty()) {
+	    	        return new ArrayList<>(); // Return empty list rather than null
+	    	    }
+	    	    
+	    	    List<String> cities =  spots.stream()
+	    	        .map(spot -> spot.getLocation().getCity())
+	    	        .filter(city -> city != null && !city.isEmpty()) // Filter out null/empty cities
+	    	        .distinct()
+	    	        .collect(Collectors.toList());
+	    	    
+	    	    System.out.println("==== Final distinct cities list: " + cities + " ====");
+	    	    
+	    	    return cities;
+	    }
+
+	    //to populate dropdown for Landmark in frontend
+	    public List<String> getLandmarks(String city) {
+	    	System.out.println("==== spotService.getLandmarks(city) called ====");
+	    	List<Spot> spots = bookingRepository.findByCityAndLandmark(city, null);
+	    	System.out.println("==== Repository returned " + (spots != null ? spots.size() : 0) + " spots ====");
+	    	
+	    	if (spots == null || spots.isEmpty()) {
+    	        return new ArrayList<>(); // Return empty list rather than null
+    	    }
+	        List<String> landmarks = spots.stream()
+	                .map(Spot -> Spot.getLocation().getLandmark())
+	                .filter(Objects::nonNull)
+	                .distinct()
+	                .collect(Collectors.toList());
+	        
+	        System.out.println("==== Final distinct landmarks list: " + landmarks + " ====");
+	        
+	        return landmarks;
+	    }
 }
