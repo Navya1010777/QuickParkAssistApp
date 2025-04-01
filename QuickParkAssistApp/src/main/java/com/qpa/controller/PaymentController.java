@@ -1,19 +1,17 @@
 package com.qpa.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.qpa.entity.Payment;
 import com.qpa.service.PayEmailService;
 import com.qpa.service.PaymentService;
+import jakarta.mail.MessagingException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
-@RequestMapping("/api/PAYMENT")
+@RequestMapping("/api/payments")
 public class PaymentController {
 
     @Autowired
@@ -22,20 +20,26 @@ public class PaymentController {
     @Autowired
     private PayEmailService emailService;
 
-    @PostMapping("/processPayment")
-    public ResponseEntity<Boolean> processPayment(@RequestParam Long bookId,
-            @RequestParam String userEmail,
-            @RequestParam Double amount,
-            Model model) {
-
+    @PostMapping("/process")
+    public Payment processPayment(@RequestBody Payment payment) {
+        Payment processedPayment = paymentService.processPayment(payment.getBookingId(), payment.getUserEmail(), payment.getTotalAmount());
         try {
-            Payment payment = paymentService.processPayment(bookId, userEmail, amount);
-            emailService.sendReceipt(userEmail, payment.getOrderId(), bookId, amount);
-            return ResponseEntity.ok(true);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body(false);
-
+            emailService.sendReceipt(processedPayment.getUserEmail(), processedPayment.getOrderId(), processedPayment.getBookingId(), processedPayment.getTotalAmount());
+        } catch (MessagingException e) {
+            System.out.println("Email failed: " + e.getMessage());
         }
+        return processedPayment;
     }
 
+    @GetMapping("/history")
+    public List<Payment> getPaymentHistory(
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end) {
+        if (start != null && end != null) {
+            LocalDate startDate = LocalDate.parse(start);
+            LocalDate endDate = LocalDate.parse(end);
+            return paymentService.getPaymentsBetweenDates(startDate, endDate);
+        }
+        return paymentService.getAllPayments();
+    }
 }
