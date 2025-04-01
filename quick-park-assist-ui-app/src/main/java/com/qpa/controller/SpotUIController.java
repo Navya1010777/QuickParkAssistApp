@@ -248,6 +248,8 @@ public class SpotUIController {
         }
     }
 
+
+
     @GetMapping("/search")
     public String combinedSpotsView(
             @RequestParam(required = false) String city,
@@ -270,10 +272,6 @@ public class SpotUIController {
                     null,
                     SpotResponseDTO[].class);
             SpotResponseDTO[] allSpots = spotsResponse.getBody();
-
-            for (SpotResponseDTO spot : allSpots) {
-                System.out.println(spot.getSpotImage());
-            }
 
             // Extract unique cities with spots
             Set<String> citiesWithSpots = Arrays.stream(allSpots)
@@ -453,7 +451,7 @@ public class SpotUIController {
         }
 
         try {
-            
+
             ResponseEntity<SpotResponseDTO> currentSpotResponse = restTemplate.getForEntity(
                     BASE_URL + "/spots/" + spotId,
                     SpotResponseDTO.class);
@@ -620,8 +618,17 @@ public class SpotUIController {
                     SpotResponseDTO[].class);
 
             SpotResponseDTO[] bookedSpots = response.getBody();
+            Set<String> citiesWithSpots = Arrays.stream(bookedSpots)
+                    .map(spot -> spot.getLocation().getCity())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            // Sort the cities with spots
+            List<String> sortedCitiesWithSpots = new ArrayList<>(citiesWithSpots);
+            Collections.sort(sortedCitiesWithSpots);
             model.addAttribute("bookedSpots", bookedSpots);
             model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
+            model.addAttribute("cities", sortedCitiesWithSpots);
         } catch (HttpClientErrorException.NotFound ex) {
             // Handle the 404 case - no booked spots found
             model.addAttribute("bookedSpots", new SpotResponseDTO[0]); // Empty array
@@ -744,7 +751,7 @@ public class SpotUIController {
         }
     }
 
-     // API endpoint to get user's rating for a spot
+    // API endpoint to get user's rating for a spot
     @GetMapping("/api/ratings/{spotId}/user-rating")
     @ResponseBody
     public ResponseDTO<Integer> getUserRatingForSpot(@PathVariable Long spotId, HttpServletRequest request) {
@@ -766,7 +773,8 @@ public class SpotUIController {
                     BASE_URL + "/ratings/" + spotId + "/user",
                     HttpMethod.GET,
                     requestEntity,
-                    new ParameterizedTypeReference<ResponseDTO<Integer>>() {});
+                    new ParameterizedTypeReference<ResponseDTO<Integer>>() {
+                    });
 
             return response.getBody();
         } catch (HttpClientErrorException.NotFound ex) {
@@ -779,7 +787,8 @@ public class SpotUIController {
     // API endpoint to submit a rating
     @PostMapping("/api/ratings/{spotId}/submit")
     @ResponseBody
-    public ResponseDTO<?> submitRating(@PathVariable Long spotId, @RequestBody RatingRequestDTO ratingRequest, HttpServletRequest request) {
+    public ResponseDTO<?> submitRating(@PathVariable Long spotId, @RequestBody RatingRequestDTO ratingRequest,
+            HttpServletRequest request) {
         UserInfo currentUser = userService.getUserDetails(request).getData();
         if (currentUser == null) {
             return new ResponseDTO<>("Unauthorized", 401, false);
@@ -799,14 +808,14 @@ public class SpotUIController {
                     BASE_URL + "/ratings/" + spotId,
                     HttpMethod.POST,
                     requestEntity,
-                    new ParameterizedTypeReference<ResponseDTO<?>>() {});
+                    new ParameterizedTypeReference<ResponseDTO<?>>() {
+                    });
 
             return response.getBody();
         } catch (Exception e) {
             return new ResponseDTO<>("Error submitting rating: " + e.getMessage(), 500, false);
         }
     }
-    
 
     @GetMapping("/spots/booked")
     public String bookedSpotsByCityAndLandmark(
@@ -814,7 +823,7 @@ public class SpotUIController {
             @RequestParam(required = false) String landmark,
             Model model,
             HttpServletRequest request) {
-    	
+
         UserInfo currentUser = (UserInfo) request.getSession().getAttribute("currentUser");
         if (currentUser == null) {
             return "redirect:/login";
@@ -823,21 +832,20 @@ public class SpotUIController {
         // Fetch cities with existing spots
         try {
 
-        	System.out.println("==== About to call REST API for cities ====");
-        	String cityUrl = BASE_URL + "/spots/booked/cities";
-        	ResponseEntity<List> cityResponse = restTemplate.exchange(
-        	    cityUrl, HttpMethod.GET, null, List.class
-        	);
-        	
-        	System.out.println("==== REST API call completed with status: " + cityResponse.getStatusCode() + " ====");
-        	List<String> cities = cityResponse.getBody();
-        	System.out.println("==== Cities received from API: " + cities + " ====");
-        	
-        	//To check what is being fetched
-        	System.out.println("Cities fetched: " + cities);
+            System.out.println("==== About to call REST API for cities ====");
+            String cityUrl = BASE_URL + "/spots/booked/cities";
+            ResponseEntity<List> cityResponse = restTemplate.exchange(
+                    cityUrl, HttpMethod.GET, null, List.class);
+
+            System.out.println("==== REST API call completed with status: " + cityResponse.getStatusCode() + " ====");
+            List<String> cities = cityResponse.getBody();
+            System.out.println("==== Cities received from API: " + cities + " ====");
+
+            // To check what is being fetched
+            System.out.println("Cities fetched: " + cities);
 
             // Sort the cities with spots
-        	if (cities != null) {
+            if (cities != null) {
                 Collections.sort(cities);
             } else {
                 cities = new ArrayList<>(); // Initialize if null
@@ -855,7 +863,7 @@ public class SpotUIController {
                     params.add("city", city);
                 if (landmark != null && !landmark.isEmpty())
                     params.add("landmark", landmark);
-                
+
                 String queryParams = params
                         .entrySet()
                         .stream()
@@ -890,7 +898,7 @@ public class SpotUIController {
             model.addAttribute("cities", cities); // Now uses only cities with booked spots
 
         } catch (Exception e) {
-        	System.out.println("==== Exception occurred while calling REST API: " + e.getMessage() + " ====");
+            System.out.println("==== Exception occurred while calling REST API: " + e.getMessage() + " ====");
             model.addAttribute("error", "Error fetching spots: " + e.getMessage());
             model.addAttribute("cities", Collections.emptyList());
         }
