@@ -85,5 +85,14 @@ public interface SpotBookingInfoRepository extends JpaRepository<SpotBookingInfo
             "WHERE sb.vehicle.userObj.contactNumber = :contactNumber " +
             "AND sb.status = 'cancelled'")
     List<SpotBookingInfo> findCancelledBookingsByContactNumber(@Param("contactNumber") String contactNumber);
+    
+
+    @Query("SELECT s.spotInfo FROM SpotBookingInfo s " +
+            "JOIN s.spotInfo sp JOIN sp.location l " +
+            "WHERE s.status = 'CONFIRMED' " +
+            "AND (:city IS NULL OR l.city = :city) " +
+            "AND (:landmark IS NULL OR l.landmark = :landmark) " )
+     List<Spot> findByCityAndLandmark(@Param("city") String city,
+                                  @Param("landmark") String landmark);
 
 }
