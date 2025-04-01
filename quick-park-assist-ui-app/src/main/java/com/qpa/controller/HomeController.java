@@ -6,8 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.RestTemplate;
 
 import com.qpa.dto.ResponseDTO;
+import com.qpa.entity.ContactMessage;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.UserType;
 import com.qpa.entity.Vehicle;
@@ -36,7 +41,6 @@ public class HomeController {
      */
     @GetMapping("/")
     public String homePage(HttpServletRequest request, Model model) {
-
         return "index"; // Loads the home page
     }
 
@@ -63,6 +67,7 @@ public class HomeController {
                 return "admin/index";
             }
             List<Vehicle> vehicles = vehicleService.findUserVehicle(request).getData();
+            vehicles.forEach(System.out::println); // Debugging: Print vehicles list
 
             model.addAttribute("vehicles", vehicles);
             return "dashboard/dashboard"; // Loads the dashboard view
@@ -70,17 +75,24 @@ public class HomeController {
             return "error";
         }
     }
+    @Autowired
+    private RestTemplate restTemplate;
 
-    /**
-     * Handles requests to the contact page.
-     * Redirects to the login page if the user is not authenticated.
-     */
     @GetMapping("/contact")
-    public String contactPage(HttpServletRequest request) {
-        if (!authUiService.isAuthenticated(request)) {
-            return "redirect:/auth/login"; // Redirects unauthenticated users
-        }
-        return "contact"; // Loads the contact page
+    public String getContactPage(Model model) {
+        model.addAttribute("contactMessage", new ContactMessage());
+        return "dashboard/contact";
     }
 
+    @PostMapping("/contact")
+    public String submitContact(@ModelAttribute("contactMessage") ContactMessage message, Model model) {
+        try {
+            restTemplate.postForEntity("http://localhost:7212/api/contact", message, Void.class);
+            model.addAttribute("success", "Your message has been sent successfully.");
+            model.addAttribute("contactMessage", new ContactMessage());
+        } catch (RestClientException e) {
+            model.addAttribute("error", "There was an error sending your message. Please try again later.");
+        }
+        return "dashboard/contact";
+    }
 }
