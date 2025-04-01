@@ -1,60 +1,67 @@
 package com.qpa.controller;
 
-import org.springframework.core.ParameterizedTypeReference;
+
+import com.qpa.entity.PaymentUI;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.client.RestTemplate;
 
-import com.qpa.service.CustomRestTemplateService;
-
-import jakarta.servlet.http.HttpServletRequest;
+// import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 
 @Controller
-@RequestMapping("/payment")
 public class PaymentUIController {
 
-    private final CustomRestTemplateService restTemplate;
+    @Autowired
+    private RestTemplate restTemplate;
 
-    public PaymentUIController(CustomRestTemplateService restTemplate) {
-        this.restTemplate = restTemplate;
-    }
+    private static final String BACKEND_URL = "http://localhost:7212/api/payments";
 
     @GetMapping("/payment")
-    public String paymentPage(@RequestParam("bookingId") Long bookingId,
-            @RequestParam("amount") double amount,
-            Model model) {
-        model.addAttribute("bookingId", bookingId);
-        model.addAttribute("amount", amount);
-        return "payment";
-    }
+public String paymentPage(@RequestParam String bookingId, @RequestParam Double amount, Model model) {
+    model.addAttribute("bookingId", bookingId);
+    model.addAttribute("totalAmount", amount);
+    return "bookings/payment";
+}
 
-    @PostMapping("/paymentProcess")
+    @PostMapping("/processPayment")
     public String processPayment(
-            @RequestParam("bookId") Long bookId,
-            @RequestParam("userEmail") String userEmail,
-            @RequestParam("amount") double amount,
-            @RequestParam("cardNumber") String cardNumber,
-            @RequestParam("expiry") String expiry,
-            @RequestParam("cvv") String cvv,
-            RedirectAttributes redirectAttributes, HttpServletRequest request) {
-        // Payment processing logic here
-        Boolean isSuccessResponse = restTemplate
-                .post("/PAYMENT/processPayment?bookId=" + bookId + "&userEmail=" + userEmail + "&amount=" + amount,
-                        null, request, new ParameterizedTypeReference<Boolean>() {
-                        })
-                .getBody();
-        boolean isSuccess = isSuccessResponse != null && isSuccessResponse;
+            @RequestParam String bookingId,
+            @RequestParam String userEmail,
+            @RequestParam Double totalAmount,
+            Model model) {
+        PaymentUI payment = new PaymentUI(bookingId, userEmail, totalAmount, null, "PENDING");
+        PaymentUI response = restTemplate.postForObject(BACKEND_URL + "/process", payment, PaymentUI.class);
 
-        if (!isSuccess) {
-            redirectAttributes.addFlashAttribute("message", "Payment UnSuccessful for Booking ID: " + bookId);
-        } else {
-            redirectAttributes.addFlashAttribute("message", "Payment successful for Booking ID: " + bookId);
-        }
-        return "redirect:/ui/booking/viewAll";
+        model.addAttribute("orderId", response.getOrderId());
+        model.addAttribute("bookingId", bookingId);
+        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("userEmail", userEmail);
+        return "bookings/success";
     }
 
+    @GetMapping("/history")
+    public String getPaymentHistory(
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end,
+            Model model) {
+                if (start == null || end == null || start.isEmpty() || end.isEmpty()) {
+                    model.addAttribute("errorMessage", "Please select both 'From' and 'To' dates before filtering.");
+                    model.addAttribute("payments", List.of()); // Empty list to prevent errors
+                    return "bookings/history"; // Return the template with an error message
+                }
+            
+                String url = BACKEND_URL + "/history?start=" + start + "&end=" + end;
+                PaymentUI[] payments = restTemplate.getForObject(url, PaymentUI[].class);
+                List<PaymentUI> paymentList = payments != null ? Arrays.asList(payments) : List.of();
+                
+                model.addAttribute("payments", paymentList);
+                return "bookings/history";
+    }
 }
