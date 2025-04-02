@@ -15,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -63,14 +64,13 @@ public class PaymentService {
                         return Stream.empty(); // Return an empty stream if an exception occurs
                     }
                 })
-                .filter(booking -> {
-                    List<Payment> payments = paymentRepository.findByBookingId(booking.getBookingId());
-                    return !payments.isEmpty(); // Check if the list is not empty
-                })
-                .flatMap(booking -> paymentRepository.findByBookingId(booking.getBookingId()).stream()) // Flatten the
-                                                                                                        // payments
+                .map(booking -> paymentRepository.findByBookingId(booking.getBookingId())) // Fetch payments once
+                .filter(Objects::nonNull) // Ensure we only process non-null payments
                 .collect(Collectors.toList());
+    }
 
+    public Payment getPaymentByBookingId(Long bookingId) {
+        return paymentRepository.findByBookingId(bookingId);
     }
 
 }

@@ -137,7 +137,7 @@ public class UserController {
 
         try {
             return ResponseEntity.ok(new ResponseDTO<>("bookings fetched successfully", 200, true,
-                    userService.getUserbookings(request)));
+                    userService.getUsersbookings(request)));
         } catch (InvalidEntityException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseDTO<>(e.getMessage(), HttpStatus.NOT_FOUND.value(), false));

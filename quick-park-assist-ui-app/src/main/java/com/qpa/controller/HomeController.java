@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -15,6 +16,7 @@ import com.qpa.dto.ResponseDTO;
 import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.ContactMessage;
 import com.qpa.entity.PaymentUI;
+import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.UserType;
 import com.qpa.entity.Vehicle;
@@ -113,27 +115,37 @@ public class HomeController {
         return "dashboard/contact";
     }
 
-    @GetMapping("/dashboard/users")
+    @GetMapping("/dashboard/reports")
     public String AdminDashboardUsersPage(HttpServletRequest request, Model model) {
         if (!authUiService.isAuthenticated(request)) {
             return "redirect:/auth/login";
         } else if (userService.getUserDetails(request).getData().getUserType() != UserType.ADMIN) {
             return "redirect:/dashboard";
         } else {
-            List<UserInfo> users = userService.getActiveUsersForAdminParkingSpots(request).getData();
-            model.addAttribute("users", users);
+            List<SpotBookingInfo> bookings = userService.getBookingsForAdmin(request);
+            model.addAttribute("bookings", bookings);
             return "admin/dashboardUsers";
         }
     }
     
-    @GetMapping("/dashboard/userDetails")
-    public String AdminDashboardUserDetailsPage(HttpServletRequest request, Model model) {
+    @GetMapping("/dashboard/userDetails/{bookingId}")
+    public String AdminDashboardUserDetailsPage(HttpServletRequest request, Model model, @PathVariable Long bookingId) {
         if (!authUiService.isAuthenticated(request)) {
             return "redirect:/auth/login";
         } else if (userService.getUserDetails(request).getData().getUserType() != UserType.ADMIN) {
             return "redirect:/dashboard";
         } else {
-            return "admin/userDetails";
+            SpotBookingInfo booking = userService.getBookingByBookingId(bookingId, request);
+            Vehicle vehicle  = booking.getVehicle();
+            UserInfo user = vehicle.getUserObj();
+
+            PaymentUI payment = userService.getPaymentByBookingId(bookingId, request);
+            model.addAttribute("booking", booking);
+            model.addAttribute("user", user);
+            model.addAttribute("vehicle", vehicle);
+            model.addAttribute("payment", payment);
+
+            return "admin/userDetail";
         }
     }
 }

@@ -52,7 +52,7 @@ public class SpotBookingController {
     }
 
     @GetMapping("/viewBookingById/{bookingId}")
-    public ResponseEntity<SpotBookingInfo> viewBookingById(@PathVariable int bookingId) throws InvalidEntityException {
+    public ResponseEntity<SpotBookingInfo> viewBookingById(@PathVariable Long bookingId) throws InvalidEntityException {
         SpotBookingInfo bookingInfo = spotBookingService.findBookingById(bookingId);
         return ResponseEntity.ok(bookingInfo);
     }
@@ -131,4 +131,9 @@ public class SpotBookingController {
         }
     }
 
+    @GetMapping("/admin/{userId}")
+    public ResponseEntity<List<SpotBookingInfo>> getAllAdminBookings(@PathVariable Long userId)
+            throws InvalidEntityException {
+        return ResponseEntity.ok(spotBookingService.getAllAdminBookings(userId));
+    }
 }

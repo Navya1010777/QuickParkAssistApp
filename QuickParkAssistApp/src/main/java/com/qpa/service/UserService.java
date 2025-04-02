@@ -200,9 +200,17 @@ public class UserService {
         return user.getUserType();
     }
 
-    public List<SpotBookingInfo> getUserbookings(HttpServletRequest request) throws InvalidEntityException {
+    public List<SpotBookingInfo> getUsersbookings(HttpServletRequest request) throws InvalidEntityException {
         UserInfo user = getCurrentUserProfile(request);
-        return spotBookingService.getBookingsByContactNumber(user.getContactNumber());
+        List<Vehicle> vehicles = vehicleService.findByUserId(user.getUserId());
+        List<SpotBookingInfo> bookings = vehicles.stream().flatMap((vehicle) -> {
+            try {
+                return spotBookingService.getBookingsByVehicleId(vehicle.getVehicleId()).stream();
+            } catch (InvalidEntityException e) {
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
+        return bookings;
     }
 
     public List<UserInfo> getAllCurrentParkedUser(HttpServletRequest request) {

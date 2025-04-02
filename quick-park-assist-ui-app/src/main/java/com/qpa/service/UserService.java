@@ -106,14 +106,30 @@ public class UserService {
 
     public SpotBookingInfo getBookingByVehicleId(Long vehicleId, HttpServletRequest request) {
         return restTemplate
-                .get("/booking/vehicleId=" + vehicleId, request, new ParameterizedTypeReference<SpotBookingInfo>() {
+                .get("/bookSlot/vehicleId=" + vehicleId, request, new ParameterizedTypeReference<SpotBookingInfo>() {
                 }).getBody();
     }
 
     public PaymentUI getPaymentByBookingId(Long bookingId, HttpServletRequest request) {
         return restTemplate
-                .get("/payment/bookingId=" + bookingId, request, new ParameterizedTypeReference<PaymentUI>() {
+                .get("/payments/viewByBookingId/" + bookingId, request, new ParameterizedTypeReference<PaymentUI>() {
                 }).getBody();
+    }
+
+    public List<SpotBookingInfo> getBookingsForAdmin(HttpServletRequest request) {
+        Long userId = getUserDetails(request).getData().getUserId();
+        return restTemplate
+                .get("/bookSlot/admin/" + userId, request, new ParameterizedTypeReference<List<SpotBookingInfo>>() {
+                }).getBody();
+    }
+
+    public SpotBookingInfo getBookingByBookingId(Long bookingId, HttpServletRequest request) {
+
+        return restTemplate
+                .get("/bookSlot/viewBookingById/" + bookingId, request,
+                        new ParameterizedTypeReference<SpotBookingInfo>() {
+                        })
+                .getBody();
     }
 
 }
