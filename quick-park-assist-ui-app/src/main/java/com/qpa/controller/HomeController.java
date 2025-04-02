@@ -78,7 +78,7 @@ public class HomeController {
 
                 model.addAttribute("totalEarnings", totalCollection);
                 // Fetch admins from backend API
-                String apiUrl = "http://localhost:7212/api/users"; // Ensure correct backend port
+                String apiUrl = "http://localhost:7212/api/users/admin/viewAll"; // Ensure correct backend port
                 List<UserInfo> adminUsers = restTemplate.getForObject(apiUrl, List.class);
                 model.addAttribute("admins", adminUsers); // Send to Thymeleaf
                 return "admin/index";
