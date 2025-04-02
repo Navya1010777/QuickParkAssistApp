@@ -46,6 +46,7 @@ public class CustomRestTemplateService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         String cookie = request.getHeader(HttpHeaders.COOKIE);
         if (cookie != null) {
+            System.out.println("Cookie Header Size: " + cookie.length()); // Debugging the size
             headers.add(HttpHeaders.COOKIE, cookie);
         }
         return headers;
@@ -55,6 +56,7 @@ public class CustomRestTemplateService {
         List<String> cookies = backendHeaders.get(HttpHeaders.SET_COOKIE);
         if (cookies != null) {
             for (String cookie : cookies) {
+                System.out.println("Set-Cookie Header Size: " + cookie.length()); // Debugging the size
                 response.addHeader(HttpHeaders.SET_COOKIE, cookie);
             }
         }

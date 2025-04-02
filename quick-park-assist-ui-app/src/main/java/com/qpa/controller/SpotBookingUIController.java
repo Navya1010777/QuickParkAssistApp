@@ -59,7 +59,7 @@ public class SpotBookingUIController {
     @PostMapping("/save")
     public String saveBooking(
             @ModelAttribute SpotBookingDTO spotBookingDTO,
-            Model model) {
+            RedirectAttributes redirectedAttributes) {
 
         try {
             SpotBookingInfo booking = new SpotBookingInfo();
@@ -82,35 +82,37 @@ public class SpotBookingUIController {
 
             // ✅ Handle Specific Backend Errors with Detailed Messages
             if (errorMessage.contains("Spot is not available")) {
-                model.addAttribute("error",
+                redirectedAttributes.addFlashAttribute("error",
                         "❌ Spot with ID " + spotBookingDTO.getSpotId()
                                 + " is not available. Please select another spot. any ");
             } else if (errorMessage.contains("Spot is already booked")) {
-                model.addAttribute("error", "❌ Spot with ID " + spotBookingDTO.getSpotId()
+                redirectedAttributes.addFlashAttribute("error", "❌ Spot with ID " + spotBookingDTO.getSpotId()
                         + " is already booked for the given time. Please choose a different time slot.");
             } else if (errorMessage.contains("Start date, start time, and end time must be provided")) {
-                model.addAttribute("error",
+                redirectedAttributes.addFlashAttribute("error",
                         "❌ Start Date, Start Time, and End Time are required fields. Please fill them correctly.");
             } else if (errorMessage.contains("Start date cannot be in the past")) {
-                model.addAttribute("error", "❌ Start Date cannot be in the past. Please select a future date.");
+                redirectedAttributes.addFlashAttribute("error",
+                        "❌ Start Date cannot be in the past. Please select a future date.");
             } else if (errorMessage.contains("Vehicle with Registration Number")) {
-                model.addAttribute("error",
+                redirectedAttributes.addFlashAttribute("error",
                         "❌ No vehicle found with Registration Number: " + spotBookingDTO.getRegistrationNumber()
                                 + ". Please check and try again.");
             } else if (errorMessage.contains("Spot with ID")) {
-                model.addAttribute("error",
+                redirectedAttributes.addFlashAttribute("error",
                         "❌ Spot with ID " + spotBookingDTO.getSpotId()
                                 + " does not exist. Please enter a valid Spot ID.");
             } else {
-                model.addAttribute("error", "❌ " + errorMessage); // Show the exact backend error
+                redirectedAttributes.addFlashAttribute("error", "❌ " + errorMessage); // Show the exact backend error
             }
 
         } catch (Exception e) {
             // ✅ Handle any unexpected errors (without generic messages)
-            model.addAttribute("error", "❌ Unexpected error: " + e.getMessage());
+            redirectedAttributes.addFlashAttribute("error", "❌ Unexpected error: " + e.getMessage());
         }
 
-        return "bookings/addBooking"; // Return to form with error message if booking fails
+        return "redirect:/ui/booking/add?spotId=" + spotBookingDTO.getSpotId(); // Return to form with error message if
+                                                                                // booking fails
     }
 
     /**

@@ -171,10 +171,6 @@ public class SpotBookingService {
 
             // Update spot status to UNAVAILABLE
 
-            spot.setStatus(SpotStatus.UNAVAILABLE);
-
-            spotInfoRepository.save(spot);
-
         }
 
         else {
