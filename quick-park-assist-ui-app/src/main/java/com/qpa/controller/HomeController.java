@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import com.qpa.dto.AdminSpotsStatistics;
 import com.qpa.dto.ResponseDTO;
-import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.ContactMessage;
 import com.qpa.entity.PaymentUI;
 import com.qpa.entity.SpotBookingInfo;
@@ -68,10 +68,11 @@ public class HomeController {
             UserInfo user = response.getData(); // Retrieves user info
             model.addAttribute("user", user); // Pass full name to the view
             if (user.getUserType() == UserType.ADMIN) {
-                List<UserInfo> activeUsers = userService.getActiveUsersForAdminParkingSpots(request).getData();
-                model.addAttribute("totalActiveUsers", activeUsers.size());
-                List<SpotResponseDTO> spots = userService.getAdminSpots(request);
-                model.addAttribute("totalParkingSpots", spots.size());
+                AdminSpotsStatistics statistics = userService.getAdminSpotsStatistics(request);
+
+                model.addAttribute("totalActiveUsers", statistics.getActiveBookings());
+
+                model.addAttribute("totalParkingSpots", statistics.getTotalSpots());
 
                 List<PaymentUI> payments = userService.getAllAdminPayments(request);
                 double totalCollection = payments.stream()
@@ -127,7 +128,7 @@ public class HomeController {
             return "admin/dashboardUsers";
         }
     }
-    
+
     @GetMapping("/dashboard/userDetails/{bookingId}")
     public String AdminDashboardUserDetailsPage(HttpServletRequest request, Model model, @PathVariable Long bookingId) {
         if (!authUiService.isAuthenticated(request)) {
@@ -136,7 +137,7 @@ public class HomeController {
             return "redirect:/dashboard";
         } else {
             SpotBookingInfo booking = userService.getBookingByBookingId(bookingId, request);
-            Vehicle vehicle  = booking.getVehicle();
+            Vehicle vehicle = booking.getVehicle();
             UserInfo user = vehicle.getUserObj();
 
             PaymentUI payment = userService.getPaymentByBookingId(bookingId, request);
@@ -148,4 +149,12 @@ public class HomeController {
             return "admin/userDetail";
         }
     }
+
+    @GetMapping("/dashboard/parking-spot")
+    public String getMethodName(HttpServletRequest request, Model model) {
+        AdminSpotsStatistics statistics = userService.getAdminSpotsStatistics(request);
+        model.addAttribute("statistics", statistics);
+        return "admin/parkingSpots";
+    }
+
 }

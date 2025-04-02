@@ -1,16 +1,5 @@
 package com.qpa.service;
 
-import com.qpa.dto.SpotResponseDTO;
-import com.qpa.entity.Payment;
-import com.qpa.entity.UserInfo;
-import com.qpa.exception.InvalidEntityException;
-import com.qpa.repository.PaymentRepository;
-
-import jakarta.servlet.http.HttpServletRequest;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -20,22 +9,28 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.qpa.entity.Spot;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
+import com.qpa.dto.SpotResponseDTO;
+import com.qpa.entity.Payment;
+import com.qpa.exception.InvalidEntityException;
+import com.qpa.repository.PaymentRepository;
 
 @Service
 public class PaymentService {
 
     @Autowired
     private PaymentRepository paymentRepository;
-
+    
+    @Lazy
     @Autowired
     private SpotService spotService;
 
+    
     @Autowired
     private SpotBookingService spotBookingService;
-
-    @Autowired
-    private AuthService authService;
 
     public Payment processPayment(Long bookingId, String userEmail, Double totalAmount) {
         String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
@@ -53,8 +48,8 @@ public class PaymentService {
         return paymentRepository.findAll();
     }
 
-    public List<Payment> getAllPaymentsByAdmin(HttpServletRequest request) {
-        List<SpotResponseDTO> ownerSpots = spotService.getSpotByOwner(authService.getUserId(request));
+    public List<Payment> getAllPaymentsByAdmin(Long userId) {
+        List<SpotResponseDTO> ownerSpots = spotService.getSpotByOwner(userId);
 
         return ownerSpots.stream()
                 .flatMap(spot -> {

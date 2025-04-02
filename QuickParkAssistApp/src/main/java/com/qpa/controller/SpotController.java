@@ -1,6 +1,5 @@
 package com.qpa.controller;
 
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Collections;
@@ -20,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.qpa.dto.AdminSpotsStatistics;
 import com.qpa.dto.SpotCreateDTO;
 import com.qpa.dto.SpotResponseDTO;
 import com.qpa.dto.SpotSearchCriteria;
@@ -30,7 +30,6 @@ import com.qpa.exception.InvalidEntityException;
 import com.qpa.exception.UnauthorizedAccessException;
 import com.qpa.service.AuthService;
 import com.qpa.service.SpotService;
-import com.qpa.service.UserService;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -114,8 +113,8 @@ public class SpotController {
     @GetMapping("/all")
     public ResponseEntity<List<SpotResponseDTO>> getAllSpots() {
         List<SpotResponseDTO> spotList = spotService.getAllSpots();
-        System.out.println("my true inside getAlSpots: "+spotList.isEmpty());
-        for (SpotResponseDTO spot: spotList){
+        System.out.println("my true inside getAlSpots: " + spotList.isEmpty());
+        for (SpotResponseDTO spot : spotList) {
             System.out.println(spot.getSpotNumber());
         }
         return ResponseEntity.ok(spotList);
@@ -172,8 +171,8 @@ public class SpotController {
         return new ResponseEntity<>(spotService.getAvailableSpotsByStartAndEndDate(startDate, endDate), HttpStatus.OK);
 
     }
-    
-    //to get booked spots based on city and landmark
+
+    // to get booked spots based on city and landmark
     @GetMapping("/booked-by-filters")
     public ResponseEntity<List<SpotResponseDTO>> getBookedSpots(
             @RequestParam(required = false) String city,
@@ -184,25 +183,27 @@ public class SpotController {
     // to get cities for dropdown
     @GetMapping("/booked/cities")
     public ResponseEntity<List<String>> getCities() {
-    	System.out.println("==== GET /booked/cities endpoint called ====");
-    	List<String> cities = spotService.getCities();
-    	System.out.println("==== Returning cities: " + cities + " ====");
+        System.out.println("==== GET /booked/cities endpoint called ====");
+        List<String> cities = spotService.getCities();
+        System.out.println("==== Returning cities: " + cities + " ====");
         return new ResponseEntity<>(cities, HttpStatus.OK);
     }
 
-    //to get landmarks for dropdown
+    // to get landmarks for dropdown
     @GetMapping("/booked/landmarks")
-    public  ResponseEntity<List<String>> getLandmarks(@RequestParam String city) {
-    	System.out.println("==== GET /booked/landmarks endpoint called ====");
-    	if (city == null || city.isEmpty()) {
+    public ResponseEntity<List<String>> getLandmarks(@RequestParam String city) {
+        System.out.println("==== GET /booked/landmarks endpoint called ====");
+        if (city == null || city.isEmpty()) {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.BAD_REQUEST);
         }
-    	List<String> landmarks = spotService.getLandmarks(city);
-    	System.out.println("==== Returning landmarks: " + landmarks + " ====");
+        List<String> landmarks = spotService.getLandmarks(city);
+        System.out.println("==== Returning landmarks: " + landmarks + " ====");
         return new ResponseEntity<>(landmarks, HttpStatus.OK);
     }
-  
 
-
+    @GetMapping("/getAdminSpotStatistics/{userId}")
+    public ResponseEntity<AdminSpotsStatistics> getAdminSpotStatistics(@PathVariable Long userId) throws InvalidEntityException {
+        return ResponseEntity.ok(spotService.getAdminSpotsStatistics(userId));
+    }
 
 }
