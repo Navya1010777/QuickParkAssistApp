@@ -157,8 +157,8 @@ public class UserController {
     }
 
     // API to fetch all ADMIN users
-    @GetMapping
-    public List<UserInfo> getAllAdmins() {
-        return userService.getAllAdmins();
+    @GetMapping("/admin/getAll")
+    public ResponseEntity<List<UserInfo>> getAllAdmins() {
+        return ResponseEntity.ok(userService.getAllAdmins());
     }
 }

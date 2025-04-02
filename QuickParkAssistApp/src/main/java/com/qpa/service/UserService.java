@@ -2,8 +2,10 @@ package com.qpa.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.qpa.dto.RegisterDTO;
+import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.AuthUser;
 import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
@@ -202,7 +205,35 @@ public class UserService {
         return spotBookingService.getBookingsByContactNumber(user.getContactNumber());
     }
 
-    //02-04
+    public List<UserInfo> getAllCurrentParkedUser(HttpServletRequest request) {
+        List<SpotResponseDTO> ownerSpots = spotService.getSpotByOwner(authService.getUserId(request));
+
+        return ownerSpots.stream()
+                .flatMap(spot -> {
+                    try {
+                        return spotBookingService.getBookingsBySlotId(spot.getSpotId()).stream();
+                    } catch (InvalidEntityException e) {
+                        return Stream.empty(); // Return an empty stream if an exception occurs
+                    }
+                })
+                .filter(booking -> {
+                    LocalDate today = LocalDate.now();
+                    LocalTime now = LocalTime.now();
+
+                    boolean isSameDay = !booking.getStartDate().isAfter(today)
+                            && !booking.getEndDate().isBefore(today);
+                    boolean isWithinTime = (booking.getStartDate().isBefore(today)
+                            || (booking.getStartDate().isEqual(today) && booking.getStartTime().isBefore(now))) &&
+                            (booking.getEndDate().isAfter(today)
+                                    || (booking.getEndDate().isEqual(today) && booking.getEndTime().isAfter(now)));
+                    return isSameDay && isWithinTime;
+                })
+                .map(booking -> booking.getVehicle().getUserObj())
+                .collect(Collectors.toList());
+
+    }
+
+    // 02-04
     public List<UserInfo> getAllAdmins() {
         return userRepository.findAll()
                 .stream()
