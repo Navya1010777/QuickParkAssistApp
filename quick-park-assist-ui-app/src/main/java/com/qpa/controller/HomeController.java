@@ -12,13 +12,16 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.qpa.dto.ResponseDTO;
+import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.ContactMessage;
+import com.qpa.entity.PaymentUI;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.UserType;
 import com.qpa.entity.Vehicle;
 import com.qpa.service.AuthService;
 import com.qpa.service.UserService;
 import com.qpa.service.VehicleService;
+import com.razorpay.Payment;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -64,17 +67,28 @@ public class HomeController {
             UserInfo user = response.getData(); // Retrieves user info
             model.addAttribute("user", user); // Pass full name to the view
             if (user.getUserType() == UserType.ADMIN) {
+                List<UserInfo> activeUsers = userService.getActiveUsersForAdminParkingSpots(request).getData();
+                model.addAttribute("totalActiveUsers", activeUsers.size());
+                List<SpotResponseDTO> spots = userService.getAdminSpots(request);
+                model.addAttribute("totalParkingSpots", spots.size());
+
+                List<PaymentUI> payments = userService.getAllAdminPayments(request);
+                double totalCollection = payments.stream()
+                        .mapToDouble(payment -> payment.getTotalAmount() != null ? payment.getTotalAmount() : 0.0)
+                        .sum();
+
+                model.addAttribute("totalEarnings", totalCollection);
                 return "admin/index";
             }
             List<Vehicle> vehicles = vehicleService.findUserVehicle(request).getData();
             vehicles.forEach(System.out::println); // Debugging: Print vehicles list
-
             model.addAttribute("vehicles", vehicles);
             return "dashboard/dashboard"; // Loads the dashboard view
         } else {
             return "error";
         }
     }
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -94,5 +108,29 @@ public class HomeController {
             model.addAttribute("error", "There was an error sending your message. Please try again later.");
         }
         return "dashboard/contact";
+    }
+
+    @GetMapping("/dashboard/users")
+    public String AdminDashboardUsersPage(HttpServletRequest request, Model model) {
+        if (!authUiService.isAuthenticated(request)) {
+            return "redirect:/auth/login";
+        } else if (userService.getUserDetails(request).getData().getUserType() != UserType.ADMIN) {
+            return "redirect:/dashboard";
+        } else {
+            List<UserInfo> users = userService.getActiveUsersForAdminParkingSpots(request).getData();
+            model.addAttribute("users", users);
+            return "admin/dashboardUsers";
+        }
+    }
+    
+    @GetMapping("/dashboard/userDetails")
+    public String AdminDashboardUserDetailsPage(HttpServletRequest request, Model model) {
+        if (!authUiService.isAuthenticated(request)) {
+            return "redirect:/auth/login";
+        } else if (userService.getUserDetails(request).getData().getUserType() != UserType.ADMIN) {
+            return "redirect:/dashboard";
+        } else {
+            return "admin/userDetails";
+        }
     }
 }

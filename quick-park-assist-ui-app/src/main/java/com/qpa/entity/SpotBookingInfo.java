@@ -15,7 +15,7 @@ public class SpotBookingInfo {
     private Spot spotInfo;
     private Vehicle vehicle;
     private List<AddOns> addOns;
-    private double TotalAmount;
+    private double totalAmount;
 
     // Default constructor
     public SpotBookingInfo() {
@@ -35,7 +35,7 @@ public class SpotBookingInfo {
         this.spotInfo = spotInfo;
         this.vehicle = vehicle;
         this.addOns = addOns;
-        this.TotalAmount = totalAmount;
+        this.totalAmount = totalAmount;
     }
 
     // Getters and Setters
@@ -112,11 +112,11 @@ public class SpotBookingInfo {
     }
 
     public double getTotalAmount() {
-        return TotalAmount;
+        return totalAmount;
     }
 
     public void setTotalAmount(double totalAmount) {
-        this.TotalAmount = totalAmount;
+        this.totalAmount = totalAmount;
     }
 
     public List<AddOns> getAddOns() {
@@ -137,7 +137,7 @@ public class SpotBookingInfo {
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
                 ", status='" + status + '\'' +
-                ", totalAmount=" + TotalAmount +
+                ", totalAmount=" + totalAmount +
                 ", spotInfo=" + (spotInfo != null ? spotInfo.toString() : "null") +
                 ", vehicle=" + (vehicle != null ? vehicle.toString() : "null") +
                 ", addOns=" + (addOns != null ? addOns.toString() : "null") +

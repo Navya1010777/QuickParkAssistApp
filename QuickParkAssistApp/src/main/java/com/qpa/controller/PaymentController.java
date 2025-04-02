@@ -3,12 +3,19 @@ package com.qpa.controller;
 import com.qpa.entity.Payment;
 import com.qpa.service.PayEmailService;
 import com.qpa.service.PaymentService;
+
 import jakarta.mail.MessagingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/api/payments")
@@ -22,9 +29,11 @@ public class PaymentController {
 
     @PostMapping("/process")
     public Payment processPayment(@RequestBody Payment payment) {
-        Payment processedPayment = paymentService.processPayment(payment.getBookingId(), payment.getUserEmail(), payment.getTotalAmount());
+        Payment processedPayment = paymentService.processPayment(payment.getBookingId(), payment.getUserEmail(),
+                payment.getTotalAmount());
         try {
-            emailService.sendReceipt(processedPayment.getUserEmail(), processedPayment.getOrderId(), processedPayment.getBookingId(), processedPayment.getTotalAmount());
+            emailService.sendReceipt(processedPayment.getUserEmail(), processedPayment.getOrderId(),
+                    processedPayment.getBookingId(), processedPayment.getTotalAmount());
         } catch (MessagingException e) {
             System.out.println("Email failed: " + e.getMessage());
         }
@@ -42,4 +51,10 @@ public class PaymentController {
         }
         return paymentService.getAllPayments();
     }
+
+    @GetMapping("/getAllAdminPayments")
+    public List<Payment> getAdminPayments(HttpServletRequest request) {
+        return paymentService.getAllPaymentsByAdmin(request);
+    }
+
 }

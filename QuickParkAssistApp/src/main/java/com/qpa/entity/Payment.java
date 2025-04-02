@@ -11,9 +11,9 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String  bookingId;
+    private Long  bookingId;
     private String userEmail;
-    private Double TotalAmount;
+    private Double totalAmount;
     private String orderId;
     private String paymentStatus;
     private LocalDateTime paymentTime;
@@ -21,10 +21,10 @@ public class Payment {
     // Constructors
     public Payment() {}
 
-    public Payment(String  bookingId, String userEmail, Double TotalAmount, String orderId, String paymentStatus) {
+    public Payment(Long  bookingId, String userEmail, Double totalAmount, String orderId, String paymentStatus) {
         this. bookingId =  bookingId;
         this.userEmail = userEmail;
-        this.TotalAmount = TotalAmount;
+        this.totalAmount = totalAmount;
         this.orderId = orderId;
         this.paymentStatus = paymentStatus;
         this.paymentTime = LocalDateTime.now();
@@ -38,11 +38,11 @@ public class Payment {
         this.id = id;
     }
 
-    public String getBookingId() {
+    public Long getBookingId() {
         return bookingId;
     }
 
-    public void setBookingId(String bookingId) {
+    public void setBookingId(Long bookingId) {
         this.bookingId = bookingId;
     }
 
@@ -55,11 +55,11 @@ public class Payment {
     }
 
     public Double getTotalAmount() {
-        return TotalAmount;
+        return totalAmount;
     }
 
-    public void setTotalAmount(Double TotalAmount) {
-        this.TotalAmount = TotalAmount;
+    public void setTotalAmount(Double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 
     public String getOrderId() {

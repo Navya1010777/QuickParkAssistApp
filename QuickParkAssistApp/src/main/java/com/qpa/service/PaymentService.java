@@ -1,7 +1,13 @@
 package com.qpa.service;
 
+import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.Payment;
+import com.qpa.entity.UserInfo;
+import com.qpa.exception.InvalidEntityException;
 import com.qpa.repository.PaymentRepository;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +16,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.qpa.entity.Spot;
 
 @Service
 public class PaymentService {
@@ -17,7 +27,16 @@ public class PaymentService {
     @Autowired
     private PaymentRepository paymentRepository;
 
-    public Payment processPayment(String bookingId, String userEmail, Double totalAmount) {
+    @Autowired
+    private SpotService spotService;
+
+    @Autowired
+    private SpotBookingService spotBookingService;
+
+    @Autowired
+    private AuthService authService;
+
+    public Payment processPayment(Long bookingId, String userEmail, Double totalAmount) {
         String orderId = "ORD-" + UUID.randomUUID().toString().substring(0, 8);
         Payment payment = new Payment(bookingId, userEmail, totalAmount, orderId, "SUCCESS");
         return paymentRepository.save(payment);
@@ -32,4 +51,26 @@ public class PaymentService {
     public List<Payment> getAllPayments() {
         return paymentRepository.findAll();
     }
+
+    public List<Payment> getAllPaymentsByAdmin(HttpServletRequest request) {
+        List<SpotResponseDTO> ownerSpots = spotService.getSpotByOwner(authService.getUserId(request));
+
+        return ownerSpots.stream()
+                .flatMap(spot -> {
+                    try {
+                        return spotBookingService.getBookingsBySlotId(spot.getSpotId()).stream();
+                    } catch (InvalidEntityException e) {
+                        return Stream.empty(); // Return an empty stream if an exception occurs
+                    }
+                })
+                .filter(booking -> {
+                    List<Payment> payments = paymentRepository.findByBookingId(booking.getBookingId());
+                    return !payments.isEmpty(); // Check if the list is not empty
+                })
+                .flatMap(booking -> paymentRepository.findByBookingId(booking.getBookingId()).stream()) // Flatten the
+                                                                                                        // payments
+                .collect(Collectors.toList());
+
+    }
+
 }

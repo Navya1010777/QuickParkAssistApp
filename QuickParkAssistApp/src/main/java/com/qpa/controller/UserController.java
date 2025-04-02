@@ -143,4 +143,16 @@ public class UserController {
                     .body(new ResponseDTO<>(e.getMessage(), HttpStatus.NOT_FOUND.value(), false));
         }
     }
+
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<ResponseDTO<List<UserInfo>>> getAllUsers(HttpServletRequest request) {
+        return ResponseEntity
+                .ok(new ResponseDTO<>("users fetched successfully", 200, true, userService.getAllUsers(request)));
+    }
+
+    @GetMapping("/spots/current-active")
+    public ResponseEntity<ResponseDTO<List<UserInfo>>> getAllCurrentActiveUsers(HttpServletRequest request) {
+        return ResponseEntity.ok(new ResponseDTO<>("users fetched successfully", 200, true,
+                userService.getAllCurrentParkedUser(request)));
+    }
 }

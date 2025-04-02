@@ -42,4 +42,9 @@ public class VehicleService {
                 .post("/vehicles/save", vehicle, request, new ParameterizedTypeReference<ResponseDTO<Void>>() {
                 }).getBody();
     }
+
+    public Vehicle getVehicleByUserId(Long userId, HttpServletRequest request){
+        return restTemplate.get("/vehicles/user", request, new ParameterizedTypeReference<Vehicle>() {
+        }).getBody();
+    }
 }
