@@ -16,6 +16,8 @@ import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 
+import com.qpa.service.AuthService;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
@@ -24,6 +26,9 @@ public class PaymentController {
 
     @Autowired
     private PaymentService paymentService;
+
+    @Autowired
+    private AuthService authService;
 
     @Autowired
     private PayEmailService emailService;
@@ -70,7 +75,8 @@ public class PaymentController {
 
     @GetMapping("/getAllAdminPayments")
     public List<Payment> getAdminPayments(HttpServletRequest request) {
-        return paymentService.getAllPaymentsByAdmin(request);
+        Long userId = authService.getUserId(request);
+        return paymentService.getAllPaymentsByAdmin(userId);
     }
 
     @GetMapping("/viewByBookingId/{bookingId}")

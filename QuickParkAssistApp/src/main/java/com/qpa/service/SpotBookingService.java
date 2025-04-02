@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +33,7 @@ public class SpotBookingService {
     @Autowired
     private SpotBookingInfoRepository spotBookingRepository;
 
+    @Lazy
     @Autowired
     private SpotService spotService;
 
@@ -168,10 +170,6 @@ public class SpotBookingService {
             bookingInfo.setStatus("confirmed");
 
             // Update spot status to UNAVAILABLE
-
-            spot.setStatus(SpotStatus.UNAVAILABLE);
-
-            spotInfoRepository.save(spot);
 
         }
 

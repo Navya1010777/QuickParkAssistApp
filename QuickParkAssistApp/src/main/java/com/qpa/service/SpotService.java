@@ -2,26 +2,28 @@ package com.qpa.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
-
-// import java.time.LocalDateTime;
-
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.qpa.dto.AdminSpotsStatistics;
 import com.qpa.dto.LocationDTO;
 import com.qpa.dto.SpotCreateDTO;
 import com.qpa.dto.SpotResponseDTO;
 import com.qpa.dto.SpotSearchCriteria;
 import com.qpa.dto.SpotStatistics;
 import com.qpa.entity.Location;
+import com.qpa.entity.Payment;
 import com.qpa.entity.PriceType;
 import com.qpa.entity.Spot;
+import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.SpotStatus;
 import com.qpa.entity.VehicleType;
 import com.qpa.exception.InvalidEntityException;
@@ -38,22 +40,29 @@ import jakarta.transaction.Transactional;
 @Service
 @Transactional
 public class SpotService {
+
+	private final SpotBookingService spotBookingService;
 	private final SpotRepository spotRepository;
 	private final UserRepository userRepository;
 	private final SpotBookingInfoRepository bookingRepository;
 	private final AuthService authService;
 	private final LocationService locationService;
 	private final CloudinaryService cloudinaryService;
+	private final PaymentService paymentService;
 
+	@Autowired
 	public SpotService(SpotRepository spotRepository, LocationRepository locationRepository,
 			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService,
-			LocationService locationService, CloudinaryService cloudinaryService) {
+			LocationService locationService, CloudinaryService cloudinaryService,
+			SpotBookingService spotBookingService, PaymentService paymentService) {
 		this.spotRepository = spotRepository;
 		this.userRepository = userRepository;
 		this.bookingRepository = bookingRepository;
 		this.authService = authService;
 		this.locationService = locationService;
 		this.cloudinaryService = cloudinaryService;
+		this.spotBookingService = spotBookingService;
+		this.paymentService = paymentService;
 	}
 
 	public SpotResponseDTO createSpot(SpotCreateDTO spotDTO, MultipartFile spotImage, Long userId,
@@ -276,60 +285,118 @@ public class SpotService {
 		}
 	}
 
+	// find booked spots based on city and landmark
+	public List<SpotResponseDTO> getBookedSpots(String city, String landmark) {
+		List<Spot> spots = bookingRepository.findByCityAndLandmark(city, landmark);
 
-	//find booked spots based on city and landmark
-	 public List<SpotResponseDTO> getBookedSpots(String city, String landmark) {
-	        List<Spot> spots = bookingRepository.findByCityAndLandmark(city, landmark);
-	        
-	        if (spots.isEmpty()) {
-	        	throw new ResourceNotFoundException("No booked spots for given criteria");
-	        }
-	        
-	        return spots.stream().map(this::convertToDTO).collect(Collectors.toList());
-	 }
+		if (spots.isEmpty()) {
+			throw new ResourceNotFoundException("No booked spots for given criteria");
+		}
 
-	 
-	 //to populate cities dropdown in frontend
-	    public List<String> getCities() {
-	    	System.out.println("==== spotService.getCities() called ====");
-	    	 List<Spot> spots = bookingRepository.findBookedSpots();
-	    	 System.out.println("==== Repository returned " + (spots != null ? spots.size() : 0) + " spots ====");
-	    	    
-	    	    // Debug log to check what spots are being returned
-	    	    System.out.println("Found spots count: " + (spots != null ? spots.size() : 0));
-	    	    
-	    	    if (spots == null || spots.isEmpty()) {
-	    	        return new ArrayList<>(); // Return empty list rather than null
-	    	    }
-	    	    
-	    	    List<String> cities =  spots.stream()
-	    	        .map(spot -> spot.getLocation().getCity())
-	    	        .filter(city -> city != null && !city.isEmpty()) // Filter out null/empty cities
-	    	        .distinct()
-	    	        .collect(Collectors.toList());
-	    	    
-	    	    System.out.println("==== Final distinct cities list: " + cities + " ====");
-	    	    
-	    	    return cities;
-	    }
+		return spots.stream().map(this::convertToDTO).collect(Collectors.toList());
+	}
 
-	    //to populate dropdown for Landmark in frontend
-	    public List<String> getLandmarks(String city) {
-	    	System.out.println("==== spotService.getLandmarks(city) called ====");
-	    	List<Spot> spots = bookingRepository.findByCityAndLandmark(city, null);
-	    	System.out.println("==== Repository returned " + (spots != null ? spots.size() : 0) + " spots ====");
-	    	
-	    	if (spots == null || spots.isEmpty()) {
-    	        return new ArrayList<>(); // Return empty list rather than null
-    	    }
-	        List<String> landmarks = spots.stream()
-	                .map(Spot -> Spot.getLocation().getLandmark())
-	                .filter(Objects::nonNull)
-	                .distinct()
-	                .collect(Collectors.toList());
-	        
-	        System.out.println("==== Final distinct landmarks list: " + landmarks + " ====");
-	        
-	        return landmarks;
-	    }
+	// to populate cities dropdown in frontend
+	public List<String> getCities() {
+		System.out.println("==== spotService.getCities() called ====");
+		List<Spot> spots = bookingRepository.findBookedSpots();
+		System.out.println("==== Repository returned " + (spots != null ? spots.size() : 0) + " spots ====");
+
+		// Debug log to check what spots are being returned
+		System.out.println("Found spots count: " + (spots != null ? spots.size() : 0));
+
+		if (spots == null || spots.isEmpty()) {
+			return new ArrayList<>(); // Return empty list rather than null
+		}
+
+		List<String> cities = spots.stream()
+				.map(spot -> spot.getLocation().getCity())
+				.filter(city -> city != null && !city.isEmpty()) // Filter out null/empty cities
+				.distinct()
+				.collect(Collectors.toList());
+
+		System.out.println("==== Final distinct cities list: " + cities + " ====");
+
+		return cities;
+	}
+
+	// to populate dropdown for Landmark in frontend
+	public List<String> getLandmarks(String city) {
+		System.out.println("==== spotService.getLandmarks(city) called ====");
+		List<Spot> spots = bookingRepository.findByCityAndLandmark(city, null);
+		System.out.println("==== Repository returned " + (spots != null ? spots.size() : 0) + " spots ====");
+
+		if (spots == null || spots.isEmpty()) {
+			return new ArrayList<>(); // Return empty list rather than null
+		}
+		List<String> landmarks = spots.stream()
+				.map(Spot -> Spot.getLocation().getLandmark())
+				.filter(Objects::nonNull)
+				.distinct()
+				.collect(Collectors.toList());
+
+		System.out.println("==== Final distinct landmarks list: " + landmarks + " ====");
+
+		return landmarks;
+	}
+
+	public AdminSpotsStatistics getAdminSpotsStatistics(Long userId) throws InvalidEntityException {
+		AdminSpotsStatistics statistics = new AdminSpotsStatistics();
+		List<Spot> adminSpots = spotRepository.findByOwnerUserId(userId);
+
+		List<SpotBookingInfo> allBookings = new ArrayList<>();
+		List<Spot> inActiveSpots = adminSpots.stream()
+				.filter(spot -> spot.getStatus() != SpotStatus.AVAILABLE)
+				.collect(Collectors.toList());
+
+		List<Payment> payments = paymentService.getAllPaymentsByAdmin(userId);
+
+		for (Spot spot : adminSpots) {
+			try {
+				allBookings.addAll(spotBookingService.getBookingsBySlotId(spot.getSpotId()));
+			} catch (InvalidEntityException e) {
+				throw new InvalidEntityException("Error fetching bookings for spot ID: " + spot.getSpotId());
+			}
+		}
+
+		statistics.setTotalSpots(adminSpots.size());
+		statistics.setTotalBookings(allBookings.size());
+		statistics.setActiveSpots(adminSpots.size() - inActiveSpots.size());
+		statistics.setInactiveSpots(inActiveSpots.size());
+
+		List<SpotBookingInfo> activeBookings = allBookings.stream().filter(booking -> {
+			LocalDate today = LocalDate.now();
+			LocalTime now = LocalTime.now();
+
+			boolean isOngoingBooking = (booking.getStartDate().isBefore(today) ||
+					(booking.getStartDate().isEqual(today) && booking.getStartTime().isBefore(now))) &&
+					(booking.getEndDate().isAfter(today) ||
+							(booking.getEndDate().isEqual(today) && booking.getEndTime().isAfter(now)));
+
+			boolean isFutureBooking = booking.getStartDate().isAfter(today) ||
+					(booking.getStartDate().isEqual(today) && booking.getStartTime().isAfter(now));
+
+			return isOngoingBooking || isFutureBooking;
+		})
+				.collect(Collectors.toList());
+
+		List<SpotBookingInfo> unpaidBookings = activeBookings.stream()
+				.filter(booking -> payments.stream()
+						.noneMatch(payment -> payment.getBookingId().equals(booking.getBookingId())))
+				.collect(Collectors.toList());
+		statistics.setPendingPayments(unpaidBookings.size());
+
+		List<Spot> uniqueActiveSpots = adminSpots.stream()
+				.filter(spot -> activeBookings.stream()
+						.anyMatch(booking -> booking.getSpotInfo().getSpotId().equals(spot.getSpotId())))
+				.distinct()
+				.collect(Collectors.toList());
+
+		statistics.setBookedSpots(uniqueActiveSpots.size());
+		statistics.setActiveBookings(activeBookings.size());
+
+		return statistics;
+
+	}
+
 }
