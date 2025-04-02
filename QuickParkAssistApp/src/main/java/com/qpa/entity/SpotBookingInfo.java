@@ -41,7 +41,11 @@ public class SpotBookingInfo {
 
     private String status;
 
-    private double totalAmount;
+    private double TotalAmount;
+
+    private Boolean paymentStatus=false;//03/04
+
+
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "spot_id") // Foreign key reference
@@ -61,23 +65,32 @@ public class SpotBookingInfo {
     // Parameterized constructor
     public SpotBookingInfo(Long bookingId, LocalDate bookingDate, LocalDate startDate, LocalDate endDate,
             LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
-            Vehicle vehicle, double totalAmount, List<AddOns> addOns) {
+            Vehicle vehicle, double totalAmount, List<AddOns> addOns,boolean paymentStatus) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.startDate = startDate;
         this.endDate = endDate;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.totalAmount = totalAmount;
+        this.TotalAmount = totalAmount;
         this.status = status;
         this.spotInfo = spotInfo;
         this.vehicle = vehicle;
         this.addOns = addOns;
+        this.paymentStatus=paymentStatus;
     }
 
     // Getters and Setters
     public Long getBookingId() {
         return bookingId;
+    }
+
+    public boolean isPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(boolean paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public void setBookingId(Long bookingId) {
@@ -149,11 +162,11 @@ public class SpotBookingInfo {
     }
 
     public double getTotalAmount() {
-        return totalAmount;
+        return TotalAmount;
     }
 
     public void setTotalAmount(double totalAmount) {
-        this.totalAmount = totalAmount;
+        this.TotalAmount = totalAmount;
     }
 
     public List<AddOns> getAddOns() {

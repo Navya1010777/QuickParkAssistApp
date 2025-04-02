@@ -15,7 +15,9 @@ public class SpotBookingInfo {
     private Spot spotInfo;
     private Vehicle vehicle;
     private List<AddOns> addOns;
-    private double totalAmount;
+    private double TotalAmount;
+
+    private Boolean paymentStatus=false;
 
     // Default constructor
     public SpotBookingInfo() {
@@ -24,7 +26,7 @@ public class SpotBookingInfo {
     // Parameterized constructor
     public SpotBookingInfo(Long bookingId, LocalDate bookingDate, LocalDate startDate, LocalDate endDate,
             LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
-            Vehicle vehicle, double totalAmount, List<AddOns> addOns) {
+            Vehicle vehicle, double totalAmount, List<AddOns> addOns,Boolean paymentStatus) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.startDate = startDate;
@@ -35,7 +37,8 @@ public class SpotBookingInfo {
         this.spotInfo = spotInfo;
         this.vehicle = vehicle;
         this.addOns = addOns;
-        this.totalAmount = totalAmount;
+        this.TotalAmount = totalAmount;
+        this.paymentStatus=paymentStatus;
     }
 
     // Getters and Setters
@@ -45,6 +48,14 @@ public class SpotBookingInfo {
 
     public void setBookingId(Long bookingId) {
         this.bookingId = bookingId;
+    }
+
+    public Boolean isPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(Boolean paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public LocalDate getBookingDate() {
@@ -112,11 +123,11 @@ public class SpotBookingInfo {
     }
 
     public double getTotalAmount() {
-        return totalAmount;
+        return TotalAmount;
     }
 
     public void setTotalAmount(double totalAmount) {
-        this.totalAmount = totalAmount;
+        this.TotalAmount = totalAmount;
     }
 
     public List<AddOns> getAddOns() {
@@ -137,7 +148,7 @@ public class SpotBookingInfo {
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
                 ", status='" + status + '\'' +
-                ", totalAmount=" + totalAmount +
+                ", totalAmount=" + TotalAmount +
                 ", spotInfo=" + (spotInfo != null ? spotInfo.toString() : "null") +
                 ", vehicle=" + (vehicle != null ? vehicle.toString() : "null") +
                 ", addOns=" + (addOns != null ? addOns.toString() : "null") +

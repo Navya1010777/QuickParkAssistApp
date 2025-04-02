@@ -103,6 +103,14 @@ public class HomeController {
         return "dashboard/contact";
     }
 
+    @GetMapping("/admin/contact-messages")
+public String showAdminQueries(Model model) {
+    String apiUrl = "http://localhost:7212/api/contact-messages"; // Backend API
+    List<ContactMessage> messages = restTemplate.getForObject(apiUrl, List.class);
+    model.addAttribute("messages", messages);
+    return "admin/ADMINquery"; // Renders ADMINquery.html
+}
+
     @PostMapping("/contact")
     public String submitContact(@ModelAttribute("contactMessage") ContactMessage message, Model model) {
         try {

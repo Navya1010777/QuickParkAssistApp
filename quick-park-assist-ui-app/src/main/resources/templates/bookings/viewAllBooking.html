@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
@@ -88,15 +89,24 @@
                         <td class="px-4 py-2 text-center" th:text="${booking.status}"></td>
                         <td class="px-4 py-2 text-center">₹<span th:text="${booking.totalAmount}"></span>/-</td>
                         <td class="px-4 py-2 text-center">
-                            <form th:action="@{/payment}" method="get">
-                                <input type="hidden" name="bookingId" th:value="${booking.bookingId}">
-                                <input type="hidden" name="amount" th:value="${booking.totalAmount}">
-                                <button type="submit"
-                                        class="py-1 px-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
-                                        th:text="'Pay ₹' + ${booking.totalAmount} + '/-'">
-                                </button>
-                            </form>
+                            <div th:switch="${booking.paymentStatus}">
+                                <span th:case="true" class="text-green-600 font-bold">PAID</span>
+                                <div th:case="false">
+                                    <form th:action="@{/payment}" method="get" th:if="${booking.status != 'cancelled'}">
+                                        <input type="hidden" name="bookingId" th:value="${booking.bookingId}">
+                                        <input type="hidden" name="amount" th:value="${booking.totalAmount}">
+                                        <button type="submit"
+                                                class="py-1 px-3 bg-green-500 text-white rounded hover:bg-green-600 transition-colors"
+                                                th:text="'Pay ₹' + ${booking.totalAmount} + '/-'">
+                                        </button>
+                                    </form>
+                                    <span th:if="${booking.status == 'cancelled'}" class="text-gray-500">Cancelled</span>
+                                </div>
+                            </div>
                         </td>
+                    </tr>
+                    <tr th:unless="${#lists.isEmpty(bookings)}">
+                        <td colspan="11" class="px-4 py-2 text-center text-gray-500">No bookings found.</td>
                     </tr>
                 </tbody>
             </table>
