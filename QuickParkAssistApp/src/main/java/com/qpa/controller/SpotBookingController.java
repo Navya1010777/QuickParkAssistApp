@@ -41,7 +41,6 @@ public class SpotBookingController {
             throw new InvalidEntityException("Start date and end date are required for booking.");
         }
         SpotBookingInfo savedBooking = spotBookingService.addBooking(slotId, registrationNumber, bookingInfo);
-        System.out.println("booking successfully placed");
         return ResponseEntity.ok(savedBooking);
     }
 

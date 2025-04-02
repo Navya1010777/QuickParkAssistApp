@@ -368,13 +368,15 @@ public class SpotService {
 			LocalDate today = LocalDate.now();
 			LocalTime now = LocalTime.now();
 
-			boolean isSameDay = !booking.getStartDate().isAfter(today)
-					&& !booking.getEndDate().isBefore(today);
-			boolean isWithinTime = (booking.getStartDate().isBefore(today)
-					|| (booking.getStartDate().isEqual(today) && booking.getStartTime().isBefore(now))) &&
-					(booking.getEndDate().isAfter(today)
-							|| (booking.getEndDate().isEqual(today) && booking.getEndTime().isAfter(now)));
-			return isSameDay && isWithinTime;
+			boolean isOngoingBooking = (booking.getStartDate().isBefore(today) ||
+					(booking.getStartDate().isEqual(today) && booking.getStartTime().isBefore(now))) &&
+					(booking.getEndDate().isAfter(today) ||
+							(booking.getEndDate().isEqual(today) && booking.getEndTime().isAfter(now)));
+
+			boolean isFutureBooking = booking.getStartDate().isAfter(today) ||
+					(booking.getStartDate().isEqual(today) && booking.getStartTime().isAfter(now));
+
+			return isOngoingBooking || isFutureBooking;
 		})
 				.collect(Collectors.toList());
 

@@ -164,4 +164,20 @@ public class SpotBookingInfo {
         this.addOns = addOns;
     }
 
+    @Override
+    public String toString() {
+        return "SpotBookingInfo{" +
+                "bookingId=" + bookingId +
+                ", bookingDate=" + bookingDate +
+                ", startDate=" + startDate +
+                ", endDate=" + endDate +
+                ", startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", status='" + status + '\'' +
+                ", totalAmount=" + totalAmount +
+                ", spotInfo=" + (spotInfo != null ? spotInfo.toString() : "null") +
+                ", vehicle=" + (vehicle != null ? vehicle.toString() : "null") +
+                ", addOns=" + (addOns != null ? addOns.toString() : "null") +
+                '}';
+    }
 }
