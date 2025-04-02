@@ -12,6 +12,7 @@ import com.qpa.entity.UserInfo;
 
 public interface UserRepository extends JpaRepository<UserInfo, Long> {
     Optional<UserInfo> findByEmail(String email);
+    List<UserInfo> findByUserType(String userType);//02-04
 
     Optional<UserInfo> findByUsername(String username);
 

@@ -155,4 +155,10 @@ public class UserController {
         return ResponseEntity.ok(new ResponseDTO<>("users fetched successfully", 200, true,
                 userService.getAllCurrentParkedUser(request)));
     }
+
+    // API to fetch all ADMIN users
+    @GetMapping
+    public List<UserInfo> getAllAdmins() {
+        return userService.getAllAdmins();
+    }
 }

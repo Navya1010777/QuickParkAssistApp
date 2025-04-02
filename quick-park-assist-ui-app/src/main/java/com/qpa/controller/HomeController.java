@@ -21,7 +21,6 @@ import com.qpa.entity.Vehicle;
 import com.qpa.service.AuthService;
 import com.qpa.service.UserService;
 import com.qpa.service.VehicleService;
-import com.razorpay.Payment;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -78,6 +77,10 @@ public class HomeController {
                         .sum();
 
                 model.addAttribute("totalEarnings", totalCollection);
+                // Fetch admins from backend API
+                String apiUrl = "http://localhost:7212/api/users"; // Ensure correct backend port
+                List<UserInfo> adminUsers = restTemplate.getForObject(apiUrl, List.class);
+                model.addAttribute("admins", adminUsers); // Send to Thymeleaf
                 return "admin/index";
             }
             List<Vehicle> vehicles = vehicleService.findUserVehicle(request).getData();
