@@ -41,7 +41,7 @@ public class SpotBookingInfo {
 
     private String status;
 
-    private double TotalAmount;
+    private double totalAmount;
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "spot_id") // Foreign key reference
@@ -68,7 +68,7 @@ public class SpotBookingInfo {
         this.endDate = endDate;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.TotalAmount = totalAmount;
+        this.totalAmount = totalAmount;
         this.status = status;
         this.spotInfo = spotInfo;
         this.vehicle = vehicle;
@@ -149,11 +149,11 @@ public class SpotBookingInfo {
     }
 
     public double getTotalAmount() {
-        return TotalAmount;
+        return totalAmount;
     }
 
     public void setTotalAmount(double totalAmount) {
-        this.TotalAmount = totalAmount;
+        this.totalAmount = totalAmount;
     }
 
     public List<AddOns> getAddOns() {

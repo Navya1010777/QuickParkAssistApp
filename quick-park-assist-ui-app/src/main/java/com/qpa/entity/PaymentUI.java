@@ -6,17 +6,17 @@ public class PaymentUI {
     private Long id;
     private String  bookingId;
     private String userEmail;
-    private Double TotalAmount;
+    private Double totalAmount;
     private String orderId;
     private String paymentStatus;
     private LocalDateTime paymentTime;
 
     public PaymentUI() {}
 
-    public PaymentUI(String  bookingId, String userEmail, Double TotalAmount, String orderId, String paymentStatus) {
+    public PaymentUI(String  bookingId, String userEmail, Double totalAmount, String orderId, String paymentStatus) {
         this.bookingId = bookingId;
         this.userEmail = userEmail;
-        this.TotalAmount = TotalAmount;
+        this.totalAmount = totalAmount;
         this.orderId = orderId;
         this.paymentStatus = paymentStatus;
         this.paymentTime = LocalDateTime.now();
@@ -47,11 +47,11 @@ public class PaymentUI {
     }
 
     public Double getTotalAmount() {
-        return TotalAmount;
+        return totalAmount;
     }
 
     public void setTotalAmount(Double totalAmount) {
-        TotalAmount = totalAmount;
+        this.totalAmount = totalAmount;
     }
 
     public String getOrderId() {

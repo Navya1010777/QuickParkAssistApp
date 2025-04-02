@@ -7,12 +7,16 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import com.qpa.dto.ResponseDTO;
+import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.ContactMessage;
+import com.qpa.entity.PaymentUI;
+import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
 import com.qpa.entity.UserType;
 import com.qpa.entity.Vehicle;
@@ -64,21 +68,32 @@ public class HomeController {
             UserInfo user = response.getData(); // Retrieves user info
             model.addAttribute("user", user); // Pass full name to the view
             if (user.getUserType() == UserType.ADMIN) {
+                List<UserInfo> activeUsers = userService.getActiveUsersForAdminParkingSpots(request).getData();
+                model.addAttribute("totalActiveUsers", activeUsers.size());
+                List<SpotResponseDTO> spots = userService.getAdminSpots(request);
+                model.addAttribute("totalParkingSpots", spots.size());
+
+                List<PaymentUI> payments = userService.getAllAdminPayments(request);
+                double totalCollection = payments.stream()
+                        .mapToDouble(payment -> payment.getTotalAmount() != null ? payment.getTotalAmount() : 0.0)
+                        .sum();
+
+                model.addAttribute("totalEarnings", totalCollection);
                 // Fetch admins from backend API
-                String apiUrl = "http://localhost:7212/api/users"; // Ensure correct backend port
+                String apiUrl = "http://localhost:7212/api/users/admin/viewAll"; // Ensure correct backend port
                 List<UserInfo> adminUsers = restTemplate.getForObject(apiUrl, List.class);
                 model.addAttribute("admins", adminUsers); // Send to Thymeleaf
                 return "admin/index";
             }
             List<Vehicle> vehicles = vehicleService.findUserVehicle(request).getData();
             vehicles.forEach(System.out::println); // Debugging: Print vehicles list
-
             model.addAttribute("vehicles", vehicles);
             return "dashboard/dashboard"; // Loads the dashboard view
         } else {
             return "error";
         }
     }
+
     @Autowired
     private RestTemplate restTemplate;
 
@@ -98,5 +113,39 @@ public class HomeController {
             model.addAttribute("error", "There was an error sending your message. Please try again later.");
         }
         return "dashboard/contact";
+    }
+
+    @GetMapping("/dashboard/reports")
+    public String AdminDashboardUsersPage(HttpServletRequest request, Model model) {
+        if (!authUiService.isAuthenticated(request)) {
+            return "redirect:/auth/login";
+        } else if (userService.getUserDetails(request).getData().getUserType() != UserType.ADMIN) {
+            return "redirect:/dashboard";
+        } else {
+            List<SpotBookingInfo> bookings = userService.getBookingsForAdmin(request);
+            model.addAttribute("bookings", bookings);
+            return "admin/dashboardUsers";
+        }
+    }
+    
+    @GetMapping("/dashboard/userDetails/{bookingId}")
+    public String AdminDashboardUserDetailsPage(HttpServletRequest request, Model model, @PathVariable Long bookingId) {
+        if (!authUiService.isAuthenticated(request)) {
+            return "redirect:/auth/login";
+        } else if (userService.getUserDetails(request).getData().getUserType() != UserType.ADMIN) {
+            return "redirect:/dashboard";
+        } else {
+            SpotBookingInfo booking = userService.getBookingByBookingId(bookingId, request);
+            Vehicle vehicle  = booking.getVehicle();
+            UserInfo user = vehicle.getUserObj();
+
+            PaymentUI payment = userService.getPaymentByBookingId(bookingId, request);
+            model.addAttribute("booking", booking);
+            model.addAttribute("user", user);
+            model.addAttribute("vehicle", vehicle);
+            model.addAttribute("payment", payment);
+
+            return "admin/userDetail";
+        }
     }
 }

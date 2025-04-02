@@ -137,16 +137,28 @@ public class UserController {
 
         try {
             return ResponseEntity.ok(new ResponseDTO<>("bookings fetched successfully", 200, true,
-                    userService.getUserbookings(request)));
+                    userService.getUsersbookings(request)));
         } catch (InvalidEntityException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ResponseDTO<>(e.getMessage(), HttpStatus.NOT_FOUND.value(), false));
         }
     }
 
+    @GetMapping("/getAllUsers")
+    public ResponseEntity<ResponseDTO<List<UserInfo>>> getAllUsers(HttpServletRequest request) {
+        return ResponseEntity
+                .ok(new ResponseDTO<>("users fetched successfully", 200, true, userService.getAllUsers(request)));
+    }
+
+    @GetMapping("/spots/current-active")
+    public ResponseEntity<ResponseDTO<List<UserInfo>>> getAllCurrentActiveUsers(HttpServletRequest request) {
+        return ResponseEntity.ok(new ResponseDTO<>("users fetched successfully", 200, true,
+                userService.getAllCurrentParkedUser(request)));
+    }
+
     // API to fetch all ADMIN users
-    @GetMapping
-    public List<UserInfo> getAllAdmins() {
-        return userService.getAllAdmins();
+    @GetMapping("/admin/viewAll")
+    public ResponseEntity<List<UserInfo>> getAllAdmins() {
+        return ResponseEntity.ok(userService.getAllAdmins());
     }
 }

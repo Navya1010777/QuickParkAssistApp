@@ -2,15 +2,19 @@ package com.qpa.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.qpa.dto.RegisterDTO;
+import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.AuthUser;
 import com.qpa.entity.SpotBookingInfo;
 import com.qpa.entity.UserInfo;
@@ -33,16 +37,18 @@ public class UserService {
     private final AuthService authService;
     private final CloudinaryService cloudinaryService;
     private final EmailService emailService;
+    private final SpotService spotService;
 
     public UserService(UserRepository userRepository, VehicleService vehicleService,
             AuthService authService, CloudinaryService cloudinaryService,
-            EmailService emailService, SpotBookingService spotBookingService) {
+            EmailService emailService, SpotBookingService spotBookingService, SpotService spotService) {
         this.userRepository = userRepository;
         this.vehicleService = vehicleService;
         this.authService = authService;
         this.cloudinaryService = cloudinaryService;
         this.emailService = emailService;
         this.spotBookingService = spotBookingService;
+        this.spotService = spotService;
     }
 
     public UserInfo getCurrentUserProfile(HttpServletRequest request) throws InvalidEntityException {
@@ -155,7 +161,10 @@ public class UserService {
                 .orElseThrow(() -> new InvalidEntityException("User not found"));
     }
 
-    public List<UserInfo> getAllUsers() {
+    public List<UserInfo> getAllUsers(HttpServletRequest request) {
+        if (authService.getUserType(request) != UserType.ADMIN) {
+            throw new UnauthorizedAccessException(HttpStatus.UNAUTHORIZED.toString());
+        }
         return userRepository.findAll();
     }
 
@@ -191,12 +200,48 @@ public class UserService {
         return user.getUserType();
     }
 
-    public List<SpotBookingInfo> getUserbookings(HttpServletRequest request) throws InvalidEntityException {
+    public List<SpotBookingInfo> getUsersbookings(HttpServletRequest request) throws InvalidEntityException {
         UserInfo user = getCurrentUserProfile(request);
-        return spotBookingService.getBookingsByContactNumber(user.getContactNumber());
+        List<Vehicle> vehicles = vehicleService.findByUserId(user.getUserId());
+        List<SpotBookingInfo> bookings = vehicles.stream().flatMap((vehicle) -> {
+            try {
+                return spotBookingService.getBookingsByVehicleId(vehicle.getVehicleId()).stream();
+            } catch (InvalidEntityException e) {
+                return Stream.empty();
+            }
+        }).collect(Collectors.toList());
+        return bookings;
     }
 
-    //02-04
+    public List<UserInfo> getAllCurrentParkedUser(HttpServletRequest request) {
+        List<SpotResponseDTO> ownerSpots = spotService.getSpotByOwner(authService.getUserId(request));
+
+        return ownerSpots.stream()
+                .flatMap(spot -> {
+                    try {
+                        return spotBookingService.getBookingsBySlotId(spot.getSpotId()).stream();
+                    } catch (InvalidEntityException e) {
+                        return Stream.empty(); // Return an empty stream if an exception occurs
+                    }
+                })
+                .filter(booking -> {
+                    LocalDate today = LocalDate.now();
+                    LocalTime now = LocalTime.now();
+
+                    boolean isSameDay = !booking.getStartDate().isAfter(today)
+                            && !booking.getEndDate().isBefore(today);
+                    boolean isWithinTime = (booking.getStartDate().isBefore(today)
+                            || (booking.getStartDate().isEqual(today) && booking.getStartTime().isBefore(now))) &&
+                            (booking.getEndDate().isAfter(today)
+                                    || (booking.getEndDate().isEqual(today) && booking.getEndTime().isAfter(now)));
+                    return isSameDay && isWithinTime;
+                })
+                .map(booking -> booking.getVehicle().getUserObj())
+                .collect(Collectors.toList());
+
+    }
+
+    // 02-04
     public List<UserInfo> getAllAdmins() {
         return userRepository.findAll()
                 .stream()

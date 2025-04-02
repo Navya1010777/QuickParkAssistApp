@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.PriceType;
 import com.qpa.entity.Spot;
 import com.qpa.entity.SpotBookingInfo;
@@ -29,6 +31,9 @@ public class SpotBookingService {
 
     @Autowired
     private SpotBookingInfoRepository spotBookingRepository;
+
+    @Autowired
+    private SpotService spotService;
 
     @Autowired
     private SpotRepository spotInfoRepository;
@@ -476,6 +481,22 @@ public class SpotBookingService {
 
         return duration;
 
+    }
+
+    public List<SpotBookingInfo> getAllAdminBookings(Long userId) throws InvalidEntityException {
+        List<SpotResponseDTO> ownerSpots = spotService.getSpotByOwner(userId);
+
+        List<SpotBookingInfo> allBookings = new ArrayList<>();
+
+        for (SpotResponseDTO spot : ownerSpots) {
+            try {
+                allBookings.addAll(getBookingsBySlotId(spot.getSpotId()));
+            } catch (InvalidEntityException e) {
+                throw new InvalidEntityException("Error fetching bookings for spot ID: " + spot.getSpotId());
+            }
+        }
+
+        return allBookings;
     }
 
 }
