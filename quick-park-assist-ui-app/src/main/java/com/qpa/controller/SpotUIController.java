@@ -248,8 +248,6 @@ public class SpotUIController {
         }
     }
 
-
-
     @GetMapping("/search")
     public String combinedSpotsView(
             @RequestParam(required = false) String city,
@@ -339,7 +337,6 @@ public class SpotUIController {
             model.addAttribute("status", SpotStatus.values());
             model.addAttribute("cities", sortedCitiesWithSpots); // Now uses only cities with spots
             UserInfo user = userService.getUserDetails(request).getData();
-            System.out.println(user);
             model.addAttribute("user", user);
 
         } catch (Exception e) {
@@ -601,38 +598,148 @@ public class SpotUIController {
         }
     }
 
+    @GetMapping("/api/booked-cities")
+    @ResponseBody
+    public List<String> getBookedCities() {
+        try {
+            ResponseEntity<SpotResponseDTO[]> response = restTemplate.exchange(
+                    BASE_URL + "/spots/booked",
+                    HttpMethod.GET,
+                    null,
+                    SpotResponseDTO[].class);
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                // Extract unique cities with booked spots
+                Set<String> citiesWithSpots = Arrays.stream(response.getBody())
+                    .map(spot -> spot.getLocation().getCity())
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+                
+                // Sort the cities
+                List<String> sortedCities = new ArrayList<>(citiesWithSpots);
+                Collections.sort(sortedCities);
+                return sortedCities;
+            }
+            return Collections.emptyList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
+    @GetMapping("/api/booked-landmarks")
+    @ResponseBody
+    public List<String> getBookedLandmarks(@RequestParam String city) {
+        try {
+            ResponseEntity<SpotResponseDTO[]> response = restTemplate.exchange(
+                    BASE_URL + "/spots/booked",
+                    HttpMethod.GET,
+                    null,
+                    SpotResponseDTO[].class);
+            
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                // Extract unique landmarks in the selected city with booked spots
+                Set<String> landmarksInCity = Arrays.stream(response.getBody())
+                    .filter(spot -> spot.getLocation().getCity() != null && 
+                            spot.getLocation().getCity().equals(city))
+                    .map(spot -> spot.getLocation().getLandmark())
+                    .filter(Objects::nonNull)
+                    .filter(landmark -> !landmark.isEmpty())
+                    .collect(Collectors.toSet());
+                
+                // Sort the landmarks
+                List<String> sortedLandmarks = new ArrayList<>(landmarksInCity);
+                Collections.sort(sortedLandmarks);
+                return sortedLandmarks;
+            }
+            return Collections.emptyList();
+        } catch (Exception e) {
+            return Collections.emptyList();
+        }
+    }
+
     @GetMapping("/booked")
-    public String getBookedSpots(Model model, HttpServletRequest request) {
+    public String getBookedSpots(
+            @RequestParam(required = false) String city,
+            @RequestParam(required = false) String landmark,
+            Model model, 
+            HttpServletRequest request) {
+        
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
             return "redirect:/auth/login";
         }
 
-        String url = BASE_URL + "/spots/booked";
-
         try {
-            ResponseEntity<SpotResponseDTO[]> response = restTemplate.exchange(
-                    url,
+            // Get all booked spots
+            ResponseEntity<SpotResponseDTO[]> allSpotsResponse = restTemplate.exchange(
+                    BASE_URL + "/spots/booked",
                     HttpMethod.GET,
                     null,
                     SpotResponseDTO[].class);
-
-            SpotResponseDTO[] bookedSpots = response.getBody();
-            Set<String> citiesWithSpots = Arrays.stream(bookedSpots)
-                    .map(spot -> spot.getLocation().getCity())
+            
+            SpotResponseDTO[] allBookedSpots = allSpotsResponse.getBody();
+            
+            // Extract unique cities with booked spots
+            Set<String> citiesWithSpots = Arrays.stream(allBookedSpots)
+                .map(spot -> spot.getLocation().getCity())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+            
+            // Sort the cities
+            List<String> sortedCities = new ArrayList<>(citiesWithSpots);
+            Collections.sort(sortedCities);
+            
+            // Extract landmarks for the selected city
+            List<String> landmarks = Collections.emptyList();
+            if (city != null && !city.isEmpty()) {
+                Set<String> landmarksInCity = Arrays.stream(allBookedSpots)
+                    .filter(spot -> spot.getLocation().getCity() != null && 
+                            spot.getLocation().getCity().equals(city))
+                    .map(spot -> spot.getLocation().getLandmark())
                     .filter(Objects::nonNull)
+                    .filter(ctLandmark -> !ctLandmark.isEmpty())
                     .collect(Collectors.toSet());
-
-            // Sort the cities with spots
-            List<String> sortedCitiesWithSpots = new ArrayList<>(citiesWithSpots);
-            Collections.sort(sortedCitiesWithSpots);
-            model.addAttribute("bookedSpots", bookedSpots);
-            model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
-            model.addAttribute("cities", sortedCitiesWithSpots);
+                
+                landmarks = new ArrayList<>(landmarksInCity);
+                Collections.sort(landmarks);
+            }
+            
+            // Filter spots based on city and landmark if needed
+            SpotResponseDTO[] filteredSpots;
+            
+            if (city != null && !city.isEmpty()) {
+                if (landmark != null && !landmark.isEmpty()) {
+                    // Filter by both city and landmark
+                    filteredSpots = Arrays.stream(allBookedSpots)
+                        .filter(spot -> city.equals(spot.getLocation().getCity()) && 
+                                landmark.equals(spot.getLocation().getLandmark()))
+                        .toArray(SpotResponseDTO[]::new);
+                } else {
+                    // Filter by city only
+                    filteredSpots = Arrays.stream(allBookedSpots)
+                        .filter(spot -> city.equals(spot.getLocation().getCity()))
+                        .toArray(SpotResponseDTO[]::new);
+                }
+            } else {
+                // No filtering
+                filteredSpots = allBookedSpots;
+            }
+            
+            model.addAttribute("spots", filteredSpots);
+            model.addAttribute("cities", sortedCities);
+            model.addAttribute("landmarks", landmarks);
+            model.addAttribute("UserInfo", currentUserInfo);
+            
         } catch (HttpClientErrorException.NotFound ex) {
-            // Handle the 404 case - no booked spots found
-            model.addAttribute("bookedSpots", new SpotResponseDTO[0]); // Empty array
+            model.addAttribute("spots", new SpotResponseDTO[0]);
+            model.addAttribute("cities", Collections.emptyList());
+            model.addAttribute("landmarks", Collections.emptyList());
             model.addAttribute("message", "No booked spots found.");
+        } catch (Exception e) {
+            model.addAttribute("error", "Error fetching booked spots: " + e.getMessage());
+            model.addAttribute("spots", new SpotResponseDTO[0]);
+            model.addAttribute("cities", Collections.emptyList());
+            model.addAttribute("landmarks", Collections.emptyList());
         }
 
         return "booked_spots_list";
@@ -663,7 +770,7 @@ public class SpotUIController {
             }
 
             model.addAttribute("spot", spot);
-            model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
+            
         } catch (HttpClientErrorException.NotFound ex) {
             model.addAttribute("errorMessage", "No spot found for booking ID: " + bookingId);
         } catch (Exception e) {
@@ -689,6 +796,7 @@ public class SpotUIController {
 
         model.addAttribute("startDate", startDate);
         model.addAttribute("endDate", endDate);
+        model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
 
         List<SpotResponseDTO> spots = new ArrayList<>();
 
@@ -895,7 +1003,7 @@ public class SpotUIController {
 
             // Add all necessary data to the model
             model.addAttribute("spots", spots);
-            model.addAttribute("cities", cities); // Now uses only cities with booked spots
+            model.addAttribute("cities", cities);
 
         } catch (Exception e) {
             System.out.println("==== Exception occurred while calling REST API: " + e.getMessage() + " ====");
