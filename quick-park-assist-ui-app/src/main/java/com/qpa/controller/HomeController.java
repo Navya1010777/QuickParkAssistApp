@@ -70,6 +70,7 @@ public class HomeController {
             if (user.getUserType() == UserType.ADMIN) {
                 List<UserInfo> activeUsers = userService.getActiveUsersForAdminParkingSpots(request).getData();
                 model.addAttribute("totalActiveUsers", activeUsers.size());
+                
                 List<SpotResponseDTO> spots = userService.getAdminSpots(request);
                 model.addAttribute("totalParkingSpots", spots.size());
 
