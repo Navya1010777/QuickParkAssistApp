@@ -8,6 +8,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.qpa.dto.AdminSpotsStatistics;
 import com.qpa.dto.ResponseDTO;
 import com.qpa.dto.SpotResponseDTO;
 import com.qpa.entity.PaymentUI;
@@ -132,4 +133,14 @@ public class UserService {
                 .getBody();
     }
 
+    public AdminSpotsStatistics getAdminSpotsStatistics(HttpServletRequest request){
+        
+        Long userId = getUserDetails(request).getData().getUserId();
+
+        return restTemplate
+        .get("/spots/getAdminSpotStatistics/" + userId, request,
+                new ParameterizedTypeReference<AdminSpotsStatistics>() {
+                })
+        .getBody();
+    }
 }

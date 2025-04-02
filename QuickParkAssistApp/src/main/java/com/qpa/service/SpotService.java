@@ -2,12 +2,14 @@ package com.qpa.service;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +20,7 @@ import com.qpa.dto.SpotResponseDTO;
 import com.qpa.dto.SpotSearchCriteria;
 import com.qpa.dto.SpotStatistics;
 import com.qpa.entity.Location;
+import com.qpa.entity.Payment;
 import com.qpa.entity.PriceType;
 import com.qpa.entity.Spot;
 import com.qpa.entity.SpotBookingInfo;
@@ -45,11 +48,13 @@ public class SpotService {
 	private final AuthService authService;
 	private final LocationService locationService;
 	private final CloudinaryService cloudinaryService;
+	private final PaymentService paymentService;
 
+	@Autowired
 	public SpotService(SpotRepository spotRepository, LocationRepository locationRepository,
 			UserRepository userRepository, SpotBookingInfoRepository bookingRepository, AuthService authService,
 			LocationService locationService, CloudinaryService cloudinaryService,
-			SpotBookingService spotBookingService) {
+			SpotBookingService spotBookingService, PaymentService paymentService) {
 		this.spotRepository = spotRepository;
 		this.userRepository = userRepository;
 		this.bookingRepository = bookingRepository;
@@ -57,6 +62,7 @@ public class SpotService {
 		this.locationService = locationService;
 		this.cloudinaryService = cloudinaryService;
 		this.spotBookingService = spotBookingService;
+		this.paymentService = paymentService;
 	}
 
 	public SpotResponseDTO createSpot(SpotCreateDTO spotDTO, MultipartFile spotImage, Long userId,
@@ -339,6 +345,11 @@ public class SpotService {
 		List<Spot> adminSpots = spotRepository.findByOwnerUserId(userId);
 
 		List<SpotBookingInfo> allBookings = new ArrayList<>();
+		List<Spot> inActiveSpots = adminSpots.stream()
+				.filter(spot -> spot.getStatus() != SpotStatus.AVAILABLE)
+				.collect(Collectors.toList());
+
+		List<Payment> payments = paymentService.getAllPaymentsByAdmin(userId);
 
 		for (Spot spot : adminSpots) {
 			try {
@@ -347,10 +358,41 @@ public class SpotService {
 				throw new InvalidEntityException("Error fetching bookings for spot ID: " + spot.getSpotId());
 			}
 		}
+
 		statistics.setTotalSpots(adminSpots.size());
 		statistics.setTotalBookings(allBookings.size());
+		statistics.setActiveSpots(adminSpots.size() - inActiveSpots.size());
+		statistics.setInactiveSpots(inActiveSpots.size());
 
-		
+		List<SpotBookingInfo> activeBookings = allBookings.stream().filter(booking -> {
+			LocalDate today = LocalDate.now();
+			LocalTime now = LocalTime.now();
+
+			boolean isSameDay = !booking.getStartDate().isAfter(today)
+					&& !booking.getEndDate().isBefore(today);
+			boolean isWithinTime = (booking.getStartDate().isBefore(today)
+					|| (booking.getStartDate().isEqual(today) && booking.getStartTime().isBefore(now))) &&
+					(booking.getEndDate().isAfter(today)
+							|| (booking.getEndDate().isEqual(today) && booking.getEndTime().isAfter(now)));
+			return isSameDay && isWithinTime;
+		})
+				.collect(Collectors.toList());
+
+		List<SpotBookingInfo> unpaidBookings = activeBookings.stream()
+				.filter(booking -> payments.stream()
+						.noneMatch(payment -> payment.getBookingId().equals(booking.getBookingId())))
+				.collect(Collectors.toList());
+		statistics.setPendingPayments(unpaidBookings.size());
+
+		List<Spot> uniqueActiveSpots = adminSpots.stream()
+				.filter(spot -> activeBookings.stream()
+						.anyMatch(booking -> booking.getSpotInfo().getSpotId().equals(spot.getSpotId())))
+				.distinct()
+				.collect(Collectors.toList());
+
+		statistics.setBookedSpots(uniqueActiveSpots.size());
+		statistics.setActiveBookings(activeBookings.size());
+
 		return statistics;
 
 	}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -32,7 +32,7 @@
             <span class="material-icons">bar_chart</span> Reports
           </li>
           <li
-            onclick="navigateTo('/spots/search')"
+            onclick="navigateTo('/dashboard/parking-spot')"
             class="mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
           >
             <span class="material-icons">local_parking</span> Parking Spots
@@ -45,7 +45,7 @@
           <li
             class="mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
           >
-            <form action="/auth/logout" method="post">
+            <form th:action="@{/auth/logout}" method="post">
               <button class="flex items-center gap-2">
                 <span class="material-icons">logout</span> Logout
               </button>
@@ -89,29 +89,47 @@
             class="bg-blue-500 text-white p-6 rounded-lg shadow-md text-center"
           >
             <h3 class="text-xl font-semibold">Total Spots</h3>
-            <p id="totalSpots" class="text-2xl font-bold mt-2">0</p>
+            <p
+              id="totalSpots"
+              class="text-2xl font-bold mt-2"
+              th:text="${statistics.totalSpots}"
+            >
+              0
+            </p>
           </div>
           <div
             class="bg-green-500 text-white p-6 rounded-lg shadow-md text-center"
           >
             <h3 class="text-xl font-semibold">Total Bookings</h3>
-            <p id="totalBookings" class="text-2xl font-bold mt-2">0</p>
+            <p
+              id="totalBookings"
+              class="text-2xl font-bold mt-2"
+              th:text="${statistics.totalBookings}"
+            >
+              0
+            </p>
           </div>
           <div
             class="bg-red-500 text-white p-6 rounded-lg shadow-md text-center"
           >
             <h3 class="text-xl font-semibold">Pending Payments</h3>
-            <p id="pendingPayments" class="text-2xl font-bold mt-2">0</p>
+            <p
+              id="pendingPayments"
+              class="text-2xl font-bold mt-2"
+              th:text="${statistics.pendingPayments}"
+            >
+              0
+            </p>
           </div>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-6">
           <div class="bg-white p-6 shadow-md rounded-lg flex items-center">
-            <span class="material-icons text-blue-500 text-4xl"
-              >add</span
-            >
+            <span class="material-icons text-blue-500 text-4xl">add</span>
             <div class="ml-4">
               <h3 class="text-gray-700">Active Spots</h3>
-              <p class="text-2xl font-bold">50</p>
+              <p class="text-2xl font-bold" th:text="${statistics.activeSpots}">
+                0
+              </p>
             </div>
           </div>
 
@@ -121,7 +139,12 @@
             >
             <div class="ml-4">
               <h3 class="text-gray-700">Inactive Spots</h3>
-              <p class="text-2xl font-bold">10</p>
+              <p
+                class="text-2xl font-bold"
+                th:text="${statistics.inactiveSpots}"
+              >
+                0
+              </p>
             </div>
           </div>
 
@@ -131,7 +154,12 @@
             >
             <div class="ml-4">
               <h3 class="text-gray-700">Active Bookings</h3>
-              <p class="text-2xl font-bold">25</p>
+              <p
+                class="text-2xl font-bold"
+                th:text="${statistics.activeBookings}"
+              >
+                0
+              </p>
             </div>
           </div>
 
@@ -139,21 +167,23 @@
             <span class="material-icons text-red-500 text-4xl">event_busy</span>
             <div class="ml-4">
               <h3 class="text-gray-700">Booked Spots</h3>
-              <p class="text-2xl font-bold">15</p>
+              <p class="text-2xl font-bold" th:text="${statistics.bookedSpots}">
+                0
+              </p>
             </div>
           </div>
         </div>
         <!-- Navigation Buttons -->
         <div class="mt-8 flex flex-wrap gap-4">
           <a
-            href="/spots-module"
+            href="/spots/search"
             class="bg-blue-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-blue-600"
           >
             Go to Spots Module
           </a>
 
           <a
-            href="/reports"
+            href="/dashboard/reports"
             class="bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600"
           >
             View Reports
@@ -162,22 +192,14 @@
       </div>
     </main>
 
-    <!-- JavaScript to Simulate Data Fetching -->
+    <!-- JavaScript for Profile Menu -->
     <script>
-      // Simulating API data (Replace this with actual API call)
-      document.addEventListener("DOMContentLoaded", function () {
-        setTimeout(() => {
-          document.getElementById("totalSpots").innerText = 42;
-          document.getElementById("totalBookings").innerText = 128;
-          document.getElementById("pendingPayments").innerText = 5;
-        }, 1000);
-      });
-
       document
         .getElementById("profileMenuBtn")
         .addEventListener("click", function () {
           document.getElementById("profileMenu").classList.toggle("hidden");
         });
+
       function navigateTo(route) {
         window.location.assign(route);
       }
