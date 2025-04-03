@@ -187,7 +187,7 @@ public class SpotBookingInfo {
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
                 ", status='" + status + '\'' +
-                ", totalAmount=" + totalAmount +
+                ", totalAmount=" + TotalAmount +
                 ", spotInfo=" + (spotInfo != null ? spotInfo.toString() : "null") +
                 ", vehicle=" + (vehicle != null ? vehicle.toString() : "null") +
                 ", addOns=" + (addOns != null ? addOns.toString() : "null") +
