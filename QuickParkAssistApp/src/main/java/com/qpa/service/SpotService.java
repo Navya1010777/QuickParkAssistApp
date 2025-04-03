@@ -140,7 +140,7 @@ public class SpotService {
 
 	public List<SpotResponseDTO> getAllSpots() {
 		return spotRepository.findAll().stream()
-				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
+				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE || spot.getStatus() == SpotStatus.UNAVAILABLE)
 				.filter(Spot::getIsActive)
 				.map(this::convertToDTO)
 				.collect(Collectors.toList());
