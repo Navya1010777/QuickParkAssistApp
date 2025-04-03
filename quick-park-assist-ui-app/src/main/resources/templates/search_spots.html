@@ -464,7 +464,7 @@
           >
             <div class="card-img-wrapper">
               <div
-                th:class="${spot.status == 'AVAILABLE' ? 'status-badge status-available' : 'status-badge status-occupied'}"
+                th:class="${spot.status == 'AVAILABLE'  ? 'status-badge status-available' : 'status-badge status-occupied'}"
                 th:text="${spot.status}"
               ></div>
               <img
@@ -478,6 +478,7 @@
                 alt="Default Parking Image"
               />
             </div>
+			
             <div class="card-body">
               <h5 class="card-title" th:text="${spot.spotNumber}">
                 Spot Number
