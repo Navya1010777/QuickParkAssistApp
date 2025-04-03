@@ -119,12 +119,6 @@
             text-decoration: none;
         }
 
-        .view-my-bookings:hover {
-            background-color: #2563eb;
-            transform: translateY(-1px);
-        }
-       
-
         @media (max-width: 640px) {
             .grid {
                 grid-template-columns: 1fr;
@@ -151,10 +145,6 @@
         <h2>Smart Parking Management System</h2>
 
         <div class="grid">
-            <a class="btn btn-primary" th:href="@{/ui/booking/add}">
-                <i class="bi bi-plus-circle"></i> New Booking
-            </a>
-
             <a class="btn btn-secondary" th:href="@{/ui/booking/viewAll}">
                 <i class="bi bi-list"></i> All Bookings
             </a>
@@ -166,12 +156,11 @@
             <a class="btn btn-secondary" th:href="@{/ui/booking/cancel}">
                 <i class="bi bi-x-circle"></i> Cancel Booking
             </a>
+            <a class="btn btn-secondary" th:href="@{/ui/booking/viewCancelledBookingForm}">
+                <i class="bi bi-search"></i> View Cancelled Bookings
+            </a>
         </div>
-
-        <!-- View My Bookings Button -->
-        <a class="view-my-bookings" th:href="@{/ui/booking/viewCancelledBookingForm}">
-            <i class="bi bi-search"></i> View Cancelled Bookings
-        </a>
+        
     </div>
 </body>
 </html>
