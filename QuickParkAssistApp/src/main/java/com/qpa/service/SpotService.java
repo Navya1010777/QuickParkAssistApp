@@ -159,7 +159,7 @@ public class SpotService {
 
 		return spots.stream()
 				.filter(spot -> spot.getIsActive())
-				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
+				.filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE || spot.getStatus() == SpotStatus.UNAVAILABLE)
 				.filter(spot -> criteria.getSpotType() == null || spot.getSpotType() == criteria.getSpotType())
 				.filter(spot -> criteria.getHasEVCharging() == null
 						|| spot.getHasEVCharging() == criteria.getHasEVCharging())
