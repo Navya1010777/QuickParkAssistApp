@@ -1,84 +1,96 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
+  <head>
     <title>Admin Contact Messages</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+    />
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #1FA3D4, #86C7E2, #206F91, #5B879F, #A4C1CA);
-            color: #333;
-            margin: 0;
-            padding: 20px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background: linear-gradient(
+          135deg,
+          #1fa3d4,
+          #86c7e2,
+          #206f91,
+          #5b879f,
+          #a4c1ca
+        );
+        color: #333;
+        margin: 0;
+        padding: 20px;
+      }
 
-        h2 {
-            text-align: center;
-            color: #fff;
-        }
+      h2 {
+        text-align: center;
+        color: #fff;
+      }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: #fff;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            overflow: hidden;
-        }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #fff;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+      }
 
-        thead {
-            background: #1FA3D4;
-            color: white;
-        }
+      thead {
+        background: #1fa3d4;
+        color: white;
+      }
 
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+      }
 
-        tbody tr:nth-child(even) {
-            background: #f9f9f9;
-        }
+      tbody tr:nth-child(even) {
+        background: #f9f9f9;
+      }
 
-        /* Button styles */
-        .reply-btn, .delete-btn {
-            border: none;
-            padding: 8px 12px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
+      /* Button styles */
+      .reply-btn,
+      .delete-btn {
+        border: none;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 14px;
+        border-radius: 5px;
+        transition: background 0.3s;
+      }
 
-        /* Default Reply Button Color */
-        .reply-btn {
-            background-color: #ffe494;
-            color: #333;
-        }
+      /* Default Reply Button Color */
+      .reply-btn {
+        background-color: #ffe494;
+        color: #333;
+      }
 
-        /* After Clicking Reply */
-        .reply-btn.replied {
-            background-color: #A8f387;
-        }
+      /* After Clicking Reply */
+      .reply-btn.replied {
+        background-color: #a8f387;
+      }
 
-        /* Delete Button */
-        .delete-btn {
-            background-color: #FF5F81;
-            color: white;
-        }
+      /* Delete Button */
+      .delete-btn {
+        background-color: #ff5f81;
+        color: white;
+      }
 
-        /* Icons */
-        .icon {
-            font-size: 16px;
-            margin-right: 5px;
-        }
+      /* Icons */
+      .icon {
+        font-size: 16px;
+        margin-right: 5px;
+      }
 
-        .back-btn {
+      .back-btn {
         position: absolute;
         top: 20px;
         right: 20px;
-        background-color: #FF5F81;
+        background-color: #ff5f81;
         color: white;
         padding: 10px 15px;
         text-decoration: none;
@@ -87,75 +99,79 @@
         display: flex;
         align-items: center;
         transition: background 0.3s;
-    }
+      }
 
-    .back-btn i {
+      .back-btn i {
         margin-right: 5px;
-    }
+      }
 
-    .back-btn:hover {
+      .back-btn:hover {
         background-color: #ff3b60;
-    }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <a href="javascript:history.back()" class="back-btn">
-        <i class="bi bi-arrow-left-circle"></i> Back
+      <i class="bi bi-arrow-left-circle"></i> Back
     </a>
     <h2>USER QUERIES</h2>
     <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Message</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="msg : ${messages}" th:id="'row-' + ${msg.id}">
-                <td th:text="${msg.id}"></td>
-                <td th:text="${msg.name}"></td>
-                <td th:text="${msg.email}"></td>
-                <td th:text="${msg.message}"></td>
-                <td>
-                    <!-- Reply Button -->
-                    <button class="reply-btn"
-                            th:data-email="'mailto:' + ${msg.email} + '?subject=RESPONSE TO YOUR QUERY ID: ' + ${msg.id} + ' - SMART PARK'"
-                            th:data-id="${msg.id}">
-                            <i class="bi bi-envelope"></i>
-                    </button>
-                    
-                    <!-- Delete Button -->
-                    <a class="delete-btn"
-                        th:href="@{http://localhost:7212/api/delete/{id}(id=${msg.id})}"
-                        onclick="return confirm('Are you sure you want to delete this message?');">
-                            <i class="bi bi-trash"></i>
-                        </a>
-                </td>
-            </tr>
-        </tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Message</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="msg : ${messages}" th:id="'row-' + ${msg.id}">
+          <td th:text="${msg.id}"></td>
+          <td th:text="${msg.name}"></td>
+          <td th:text="${msg.email}"></td>
+          <td th:text="${msg.message}"></td>
+          <td>
+            <!-- Reply Button -->
+            <button
+              class="reply-btn"
+              th:data-email="'mailto:' + ${msg.email} + '?subject=RESPONSE TO YOUR QUERY ID: ' + ${msg.id} + ' - SMART PARK'"
+              th:data-id="${msg.id}"
+            >
+              <i class="bi bi-envelope"></i>
+            </button>
+
+            <!-- Delete Button -->
+            <a
+              class="delete-btn"
+              th:href="@{http://localhost:7212/api/delete/{id}(id=${msg.id})}"
+              onclick="return confirm('Are you sure you want to delete this message?');"
+            >
+              <i class="bi bi-trash"></i>
+            </a>
+          </td>
+        </tr>
+      </tbody>
     </table>
 
     <script>
-       document.addEventListener("DOMContentLoaded", function () {
-            // Handle Reply Button Click
-            document.querySelectorAll(".reply-btn").forEach(button => {
-                button.addEventListener("click", function (event) {
-                    event.preventDefault();
+      document.addEventListener("DOMContentLoaded", function () {
+        // Handle Reply Button Click
+        document.querySelectorAll(".reply-btn").forEach((button) => {
+          button.addEventListener("click", function (event) {
+            event.preventDefault();
 
-                    const messageId = this.getAttribute("data-id");
-                    const emailLink = this.getAttribute("data-email");
+            const messageId = this.getAttribute("data-id");
+            const emailLink = this.getAttribute("data-email");
 
-                    // Open Email Client
-                    window.open(emailLink, "_blank");
+            // Open Email Client
+            window.open(emailLink, "_blank");
 
-                    // Change button color after clicking
-                    this.classList.add("replied");
-                });
-            });
+            // Change button color after clicking
+            this.classList.add("replied");
+          });
         });
+      });
     </script>
-</body>
+  </body>
 </html>
