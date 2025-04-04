@@ -14,7 +14,7 @@
     <!-- Sidebar -->
     <aside
       id="sidebar"
-      class="w-64 bg-blue-900 text-white h-[150vh] p-5 transition-all duration-300"
+      class="w-64 bg-blue-900 text-white h-screen p-5 transition-all duration-300"
     >
       <h1 class="text-2xl font-bold mb-5">Admin Panel</h1>
       <nav>
@@ -38,10 +38,38 @@
             <span class="material-icons">local_parking</span> Parking Spots
           </li>
           <li
+            onclick="navigateTo('/admin/contact-messages')"
             class="mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
           >
             <span class="material-icons">bar_chart</span> User Query
           </li>
+          <li
+            class="relative mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
+            onclick="toggleDropdown(event)"
+          >
+            <span class="material-icons">extension</span> ADD-ON
+            <ul
+              id="addonDropdown"
+              class="hidden absolute left-full top-0 ml-2 w-40 bg-white shadow-lg rounded"
+            >
+              <li class="p-2 hover:bg-gray-200 cursor-pointer text-black">
+                <a onclick="navigateTo('/view-addon')" class="text-black"
+                  >View ADD-ONs</a
+                >
+              </li>
+              <li class="p-2 hover:bg-gray-200 cursor-pointer text-black">
+                <a onclick="navigateTo('/new-addon')" class="text-black"
+                  >New ADD-ON</a
+                >
+              </li>
+              <li class="p-2 hover:bg-gray-200 cursor-pointer text-black">
+                <a onclick="navigateTo('/status')" class="text-black"
+                  >Status ADD-ON</a
+                >
+              </li>
+            </ul>
+          </li>
+
           <li
             class="mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
           >
@@ -54,7 +82,6 @@
         </ul>
       </nav>
     </aside>
-
     <!-- Main Content -->
     <div class="container mx-auto p-6">
       <!-- User Information -->
@@ -200,6 +227,27 @@
       function navigateTo(route) {
         window.location.assign(route);
       }
+
+      function toggleDropdown(event) {
+        event.stopPropagation(); // Prevents click from closing immediately
+        let dropdown = document.getElementById("addonDropdown");
+        dropdown.classList.toggle("hidden");
+      }
+
+      // Close dropdown when clicking anywhere else
+      document.addEventListener("click", function (event) {
+        let dropdown = document.getElementById("addonDropdown");
+        if (!dropdown.classList.contains("hidden")) {
+          dropdown.classList.add("hidden");
+        }
+      });
+
+      // Prevent dropdown from closing when clicking inside it
+      document
+        .getElementById("addonDropdown")
+        .addEventListener("click", function (event) {
+          event.stopPropagation();
+        });
     </script>
   </body>
 </html>
