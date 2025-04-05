@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>View All Addons</title>
+  </head>
+  <body>
+    <h2>All Addons</h2>
+    <table border="1">
+      <tr>
+        <th>Addon ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Price</th>
+        <th>Vehicle Type</th>
+      </tr>
+      <tr th:each="addon : ${addons}">
+        <td th:text="${addon.addOnId}"></td>
+        <td th:text="${addon.name}"></td>
+        <td th:text="${addon.description}"></td>
+        <td th:text="${addon.price}"></td>
+        <td th:text="${addon.vehicleType}"></td>
+      </tr>
+    </table>
+    <a th:href="@{/addons/}">Back to Home</a>
+  </body>
+</html>

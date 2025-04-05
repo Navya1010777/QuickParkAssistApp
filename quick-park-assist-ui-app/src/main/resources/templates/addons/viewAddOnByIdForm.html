@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>View Add-On by ID</title>
+  </head>
+  <body>
+    <h2>Search Add-On by ID</h2>
+    <form th:action="@{/addons/viewAddOnById}" method="get">
+      <label for="id">Enter AddOn ID:</label>
+      <input type="number" id="id" name="id" required />
+      <button type="submit">Search</button>
+    </form>
+
+    <a th:href="@{/addons/}">Back to Home</a>
+  </body>
+</html>

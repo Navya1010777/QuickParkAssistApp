@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <title>View Add-Ons by Vehicle Type</title>
+  </head>
+  <body>
+    <h2>Search Add-Ons by Vehicle Type</h2>
+    <form th:action="@{/addons/viewAddOnsByVehicleType}" method="get">
+      <label>Vehicle Type:</label>
+      <input type="text" name="vehicleType" required />
+      <button type="submit">Search</button>
+    </form>
+
+    <a th:href="@{/addons/}">Back to Home</a>
+  </body>
+</html>
