@@ -232,6 +232,19 @@
               </li>
             </th:block>
           </ul>
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item">
+              <form
+                class="nav-link logout-link"
+                action="/auth/logout"
+                method="post"
+              >
+                <button type="submit">
+                  <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </button>
+              </form>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>
