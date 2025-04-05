@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
+
 
 import com.qpa.dto.SpotCreateDTO;
 import com.qpa.dto.SpotResponseDTO;
@@ -748,35 +750,27 @@ public class SpotUIController {
     @GetMapping("/by-booking")
     public String getSpotByBookingIdPage(@RequestParam(required = false) Long bookingId, Model model,
             HttpServletRequest request) {
-
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
             return "redirect:/auth/login";
         }
-
         if (bookingId == null) {
             return "search_spot_bookingId";
         }
-
         try {
             String url = BASE_URL + "/spots/by-booking/" + bookingId;
-
             ResponseEntity<SpotResponseDTO> response = restTemplate.exchange(
                     url, HttpMethod.GET, null, SpotResponseDTO.class);
-
             SpotResponseDTO spot = response.getBody();
-
-            if (spot != null) {
-            }
-
             model.addAttribute("spot", spot);
             
         } catch (HttpClientErrorException.NotFound ex) {
+            // This will catch 404 errors specifically
             model.addAttribute("errorMessage", "No spot found for booking ID: " + bookingId);
         } catch (Exception e) {
-            model.addAttribute("errorMessage", "An error occurred while fetching spot details.");
+            // Changed to show invalid ID message for all other errors
+            model.addAttribute("errorMessage", "Invalid booking ID: " + bookingId);
         }
-
         return "search_spot_bookingId";
     }
 
