@@ -355,7 +355,6 @@ public class SpotService {
 			try {
 				allBookings.addAll(spotBookingService.getBookingsBySlotId(spot.getSpotId()));
 			} catch (InvalidEntityException e) {
-				throw new InvalidEntityException("Error fetching bookings for spot ID: " + spot.getSpotId());
 			}
 		}
 
