@@ -2,7 +2,6 @@ package com.qpa.entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -14,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
@@ -43,9 +41,7 @@ public class SpotBookingInfo {
 
     private double TotalAmount;
 
-    private Boolean paymentStatus=false;//03/04
-
-
+    private Boolean paymentStatus = false;// 03/04
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "spot_id") // Foreign key reference
@@ -55,9 +51,6 @@ public class SpotBookingInfo {
     @JoinColumn(name = "vehicle_id") // Foreign key reference
     private Vehicle vehicle;
 
-    @OneToMany(mappedBy = "spotBookingInfo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AddOns> addOns;
-
     // Default constructor
     public SpotBookingInfo() {
     }
@@ -65,7 +58,7 @@ public class SpotBookingInfo {
     // Parameterized constructor
     public SpotBookingInfo(Long bookingId, LocalDate bookingDate, LocalDate startDate, LocalDate endDate,
             LocalTime startTime, LocalTime endTime, String status, Spot spotInfo,
-            Vehicle vehicle, double totalAmount, List<AddOns> addOns,boolean paymentStatus) {
+            Vehicle vehicle, double totalAmount, boolean paymentStatus) {
         this.bookingId = bookingId;
         this.bookingDate = bookingDate;
         this.startDate = startDate;
@@ -76,8 +69,7 @@ public class SpotBookingInfo {
         this.status = status;
         this.spotInfo = spotInfo;
         this.vehicle = vehicle;
-        this.addOns = addOns;
-        this.paymentStatus=paymentStatus;
+        this.paymentStatus = paymentStatus;
     }
 
     // Getters and Setters
@@ -169,14 +161,6 @@ public class SpotBookingInfo {
         this.TotalAmount = totalAmount;
     }
 
-    public List<AddOns> getAddOns() {
-        return addOns;
-    }
-
-    public void setAddOns(List<AddOns> addOns) {
-        this.addOns = addOns;
-    }
-
     @Override
     public String toString() {
         return "SpotBookingInfo{" +
@@ -190,7 +174,6 @@ public class SpotBookingInfo {
                 ", totalAmount=" + TotalAmount +
                 ", spotInfo=" + (spotInfo != null ? spotInfo.toString() : "null") +
                 ", vehicle=" + (vehicle != null ? vehicle.toString() : "null") +
-                ", addOns=" + (addOns != null ? addOns.toString() : "null") +
                 '}';
     }
 }
