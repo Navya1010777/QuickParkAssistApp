@@ -283,12 +283,12 @@ body {
     flex-wrap: nowrap; /* Prevents wrapping */
     gap: 20px;
     min-width: 150%; /* Ensures scrolling effect */
-    animation: scrollLeft 10s linear infinite;
+    animation: scrollLeft 15s linear infinite;
 }
 
 /* Reverse Row */
 .reverse {
-    animation: scrollRight 10s linear infinite;
+    animation: scrollRight 15s linear infinite;
 }
 
 /* Card Settings */
@@ -304,7 +304,7 @@ body {
 }
 
 .testimonial-card:hover {
-    transform: scale(1.05);
+    transform: scale(1.10);
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
 }
 

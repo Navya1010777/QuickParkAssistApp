@@ -35,7 +35,7 @@ public class LocationDataInitializer {
                 put("Uttar Pradesh",
                         List.of("Lucknow", "Kanpur", "Ghaziabad", "Agra", "Meerut", "Varanasi", "Allahabad", "Bareilly",
                                 "Moradabad", "Aligarh", "Saharanpur", "Gorakhpur", "Firozabad", "Mathura", "Shahjahanpur",
-                                "Rampur", "Hapur"));
+                                "Rampur", "Hapur", "Noida"));
                 put("Madhya Pradesh", List.of("Indore", "Bhopal", "Jabalpur", "Gwalior", "Ratlam", "Rewa"));
                 put("Andhra Pradesh", List.of("Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Anantapur", "Kurnool"));
                 put("Bihar", List.of("Patna", "Gaya", "Bhagalpur"));
@@ -55,6 +55,7 @@ public class LocationDataInitializer {
             Map<String, String> cityPincodeMap = new HashMap<>() {{
                 put("Mumbai", "400001");
                 put("Delhi", "110001");
+                put("Noida", "201304");
                 put("Bangalore", "560001");
                 put("Hyderabad", "500001");
                 put("Chennai", "600001");
