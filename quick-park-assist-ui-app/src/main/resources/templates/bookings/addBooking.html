@@ -61,7 +61,7 @@
             <option
               th:each="vehicle : ${vehicles}"
               th:value="${vehicle.registrationNumber}"
-              th:text="${vehicle.brand + ' ' + vehicle.model}"
+              th:text="${vehicle.registrationNumber}"
             ></option>
           </select>
         </div>

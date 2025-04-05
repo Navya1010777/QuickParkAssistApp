@@ -79,10 +79,10 @@ public class SpotBookingService {
         }
 
         // Check for conflicting booking
-        Optional<SpotBookingInfo> conflictingBooking = spotBookingRepository.findConflictingBooking(
+        List<SpotBookingInfo> conflictingBooking = spotBookingRepository.findConflictingBooking(
                 spotId, bookingInfo.getStartDate(), bookingInfo.getStartTime(), bookingInfo.getEndTime());
-        if (conflictingBooking.isPresent()) {
-            SpotBookingInfo conflict = conflictingBooking.get();
+        if (!conflictingBooking.isEmpty()) {
+            SpotBookingInfo conflict = conflictingBooking.get(0);
             throw new InvalidEntityException(
                     "Spot is already booked from " + conflict.getStartTime() + " to " + conflict.getEndTime() +
                             " on " + conflict.getStartDate());
@@ -490,7 +490,6 @@ public class SpotBookingService {
             try {
                 allBookings.addAll(getBookingsBySlotId(spot.getSpotId()));
             } catch (InvalidEntityException e) {
-                throw new InvalidEntityException("Error fetching bookings for spot ID: " + spot.getSpotId());
             }
         }
 

@@ -49,7 +49,7 @@ public interface SpotBookingInfoRepository extends JpaRepository<SpotBookingInfo
             "WHERE sb.spotInfo.spotId = :spotId " +
             "AND sb.startDate = :startDate " +
             "AND (sb.startTime < :endTime AND sb.endTime > :startTime)")
-    Optional<SpotBookingInfo> findConflictingBooking(
+    List<SpotBookingInfo> findConflictingBooking(
             @Param("spotId") Long spotId,
             @Param("startDate") LocalDate startDate,
             @Param("startTime") LocalTime startTime,
