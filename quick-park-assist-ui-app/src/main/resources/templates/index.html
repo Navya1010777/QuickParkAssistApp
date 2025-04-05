@@ -11,9 +11,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/faq.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    
 
 </head>
 <body>
@@ -503,6 +503,110 @@
         </div>
     </div>
 </footer>
+
+<!-- FAQ section bot DIV -->
+    <div class="faq-icon" id="faqIcon" title="Click to chat 🤖">🤖</div>
+
+    <!-- FAQ chat window -->
+    <div class="faq-chat" id="faqChat">
+        <div class="faq-header">
+            Hi,👋🏼 I am DIV what's your question? 
+            <span onclick="closeFAQ()">✖</span>
+        </div>
+        <div class="faq-body">
+            <div id="responseArea"></div>
+        </div>
+        <div class="faq-input">
+            <input type="text" id="questionInput" placeholder="Write your question...">
+            <button onclick="submitQuestion()">Send</button>
+        </div>
+    </div>
+
+<!-- JavaScript included within <script> tag -->
+    <script>
+
+        let icon = document.getElementById("faqIcon");
+        let chat = document.getElementById("faqChat");
+        let offsetX = 0, offsetY = 0, isDragging = false;
+    
+        // Start dragging
+        icon.addEventListener("mousedown", (e) => {
+        isDragging = true;
+        offsetX = e.clientX - icon.offsetLeft;
+        offsetY = e.clientY - icon.offsetTop;
+        icon.style.cursor = "grabbing";
+        });
+    
+        // Dragging in motion
+        document.addEventListener("mousemove", (e) => {
+          if (isDragging) {
+            let x = e.clientX - offsetX;
+            let y = e.clientY - offsetY;
+            icon.style.left = x + "px";
+            icon.style.top = y + "px";
+            icon.style.bottom = "auto"; // cancel default bottom-right
+            icon.style.right = "auto";
+          }
+        });
+    
+        // Stop dragging
+        document.addEventListener("mouseup", () => {
+          isDragging = false;
+          icon.style.cursor = "grab";
+        });
+    
+        // Open FAQ near the icon
+        icon.addEventListener("click", () => {
+          chat.style.display = "block";
+          // Position chat relative to icon
+          const iconRect = icon.getBoundingClientRect();
+          chat.style.left = iconRect.left + "px";
+          chat.style.top = (iconRect.top + 60) + "px"; // place just below icon
+        });
+    
+        function closeFAQ() {
+          chat.style.display = "none";
+          document.getElementById("questionInput").value = '';
+          document.getElementById("responseArea").innerText = '';
+        }
+    
+            // Function to submit the question to the backend
+            async function submitQuestion() {
+                const question = document.getElementById('questionInput').value.trim();
+                if (!question) {
+                    alert('Please enter a question.');
+                    return;
+                }
+    
+                try {
+                    const response = await fetch('http://localhost:7212/faq', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ question: question })
+                    });
+    
+                    if (!response.ok) {
+                        throw new Error("Failed to get response");
+                    }
+    
+                    const answer = await response.text();
+                    document.getElementById('responseArea').innerText = answer;
+                    document.getElementById('questionInput').value = ''; // Clear input after submission
+                } catch (error) {
+                    console.error('Error:', error);
+                    document.getElementById('responseArea').innerText = 'Error: Could not fetch response. Please try again.';
+                }
+            }
+    
+            // Allow pressing Enter to submit the question
+            document.getElementById('questionInput').addEventListener('keypress', function (e) {
+                if (e.key === 'Enter') {
+                    submitQuestion();
+                }
+            });
+        </script>
 
 <script src="/js/script.js"></script>
 <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>

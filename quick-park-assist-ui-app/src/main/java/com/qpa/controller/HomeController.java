@@ -44,7 +44,7 @@ public class HomeController {
      * Redirects to the login page if the user is not authenticated.
      */
     @GetMapping("/")
-    public String homePage(HttpServletRequest request, Model model) {
+    public String homePage() {
         return "index"; // Loads the home page
     }
 
