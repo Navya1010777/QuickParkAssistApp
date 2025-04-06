@@ -25,7 +25,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+
 
 @Entity
 @Table(name = "users")
@@ -53,9 +53,9 @@ public class UserInfo {
     @PastOrPresent(message = "date must be past or present")
     private LocalDate dob; // Optional
 
-    @Size(min = 10, max = 13, message = "Contact number must be between 10 and 13 digits")
-    @Pattern(regexp = "^[0-9]+$", message = "Contact number must contain only digits")
-    @Column(length = 13)
+    
+    @Pattern(regexp = "^\\+\\d{1,4}\\s[6-9]\\d{9}$", message = "Enter a valid number with country code")
+    @Column(length = 15)
     private String contactNumber; // Optional
 
     @NotNull
