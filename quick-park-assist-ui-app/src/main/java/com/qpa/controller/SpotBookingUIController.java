@@ -21,6 +21,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -86,6 +87,7 @@ public class SpotBookingUIController {
             return "redirect:/ui/booking/viewAll";
         } catch (HttpClientErrorException e) {
             String errorMessage = extractCleanErrorMessage(e.getResponseBodyAsString());
+            redirectAttributes.addFlashAttribute("spotBookingDTO", spotBookingDTO); // Preserve form data
             if (errorMessage.contains("Spot is not available")) {
                 redirectAttributes.addFlashAttribute("error",
                         "❌ Spot with ID " + spotBookingDTO.getSpotId() + " is not available. Please select another spot.");
@@ -108,6 +110,7 @@ public class SpotBookingUIController {
                 redirectAttributes.addFlashAttribute("error", "❌ " + errorMessage);
             }
         } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("spotBookingDTO", spotBookingDTO); // Preserve form data
             redirectAttributes.addFlashAttribute("error", "❌ Unexpected error: " + e.getMessage());
         }
         return "redirect:/ui/booking/add?spotId=" + spotBookingDTO.getSpotId();
@@ -128,7 +131,7 @@ public class SpotBookingUIController {
         String errorMessage = null;
 
         try {
-            // Fetch the logged-in user's contact number
+            // Fetch the logged-in user's details
             ResponseDTO<UserInfo> userResponse = usersService.getUserDetails(request);
             if (userResponse == null || !userResponse.isSuccess() || userResponse.getData() == null) {
                 model.addAttribute("error", "Unable to fetch user details. Please ensure you are logged in.");
@@ -137,8 +140,8 @@ public class SpotBookingUIController {
             }
 
             String contactNumber = userResponse.getData().getContactNumber();
-            if (contactNumber == null || contactNumber.trim().isEmpty()) {
-                model.addAttribute("error", "Contact number not found for the logged-in user.");
+            if (contactNumber == null || !isValidContactNumber(contactNumber)) {
+                model.addAttribute("error", "Invalid contact number for the logged-in user.");
                 model.addAttribute("bookings", Collections.emptyList());
                 return "bookings/viewAllBooking";
             }
@@ -222,10 +225,17 @@ public class SpotBookingUIController {
             }
 
             // Case-insensitive status check
-            if (booking.getStatus() != null && booking.getStatus().toLowerCase().equals("cancelled")) {
-                model.addAttribute("error", "⚠ Cannot cancel booking; it is already cancelled.");
+            if (booking.getStatus() != null) {
+                String status = booking.getStatus().toLowerCase();
+                if (status.equals("cancelled")) {
+                    model.addAttribute("error", "⚠ Cannot cancel booking; it is already cancelled.");
+                } else if (status.equals("completed")) {
+                    model.addAttribute("error", "⚠ Cannot cancel booking; it is already completed.");
+                } else {
+                    model.addAttribute("booking", booking);
+                }
             } else {
-                model.addAttribute("booking", booking);
+                model.addAttribute("error", "⚠ Booking status is not available.");
             }
         } catch (HttpClientErrorException e) {
             String errorMessage = extractErrorMessage(e.getResponseBodyAsString(), bookingId);
@@ -250,6 +260,33 @@ public class SpotBookingUIController {
     @PostMapping("/cancelByBookingId")
     public String cancelBookingById(@RequestParam Long bookingId, RedirectAttributes redirectAttributes) {
         try {
+            // Fetch the booking to check its status
+            ResponseEntity<SpotBookingInfo> response = restTemplate.getForEntity(
+                    BASE_URL + "/viewBookingById/" + bookingId,
+                    SpotBookingInfo.class);
+            SpotBookingInfo booking = response.getBody();
+
+            if (booking == null) {
+                redirectAttributes.addFlashAttribute("error", "Booking ID " + bookingId + " does not exist.");
+                return "redirect:/ui/booking/cancel";
+            }
+
+            // Case-insensitive status check
+            if (booking.getStatus() != null) {
+                String status = booking.getStatus().toLowerCase();
+                if (status.equals("cancelled")) {
+                    redirectAttributes.addFlashAttribute("error", "⚠ Cannot cancel booking; it is already cancelled.");
+                    return "redirect:/ui/booking/cancel";
+                } else if (status.equals("completed")) {
+                    redirectAttributes.addFlashAttribute("error", "⚠ Cannot cancel booking; it is already completed.");
+                    return "redirect:/ui/booking/cancel";
+                }
+            } else {
+                redirectAttributes.addFlashAttribute("error", "⚠ Booking status is not available.");
+                return "redirect:/ui/booking/cancel";
+            }
+
+            // Proceed with cancellation
             restTemplate.delete(BASE_URL + "/cancel/" + bookingId);
             redirectAttributes.addFlashAttribute("message", "Booking ID " + bookingId + " cancelled successfully!");
         } catch (HttpClientErrorException e) {
@@ -283,15 +320,22 @@ public class SpotBookingUIController {
             }
 
             // Case-insensitive status check
-            if (booking.getStatus() != null && booking.getStatus().toLowerCase().equals("cancelled")) {
-                model.addAttribute("error", "⚠ Cannot update booking; it is already cancelled.");
+            if (booking.getStatus() != null) {
+                String status = booking.getStatus().toLowerCase();
+                if (status.equals("cancelled")) {
+                    model.addAttribute("error", "⚠ Cannot update booking; it is already cancelled.");
+                } else if (status.equals("completed")) {
+                    model.addAttribute("error", "⚠ Cannot update booking; it is already completed.");
+                } else {
+                    model.addAttribute("booking", booking);
+                }
             } else {
-                model.addAttribute("booking", booking);
+                model.addAttribute("error", "⚠ Booking status is not available.");
             }
         } catch (HttpClientErrorException.NotFound e) {
             model.addAttribute("error", "⚠ Booking not found! Please check the ID.");
         } catch (Exception e) {
-            model.addAttribute("error", "❌ Unable to fetch booking: " + e.getMessage());
+            model.addAttribute("error", "❌ Booking ID " + bookingId+" does not exist" );
         }
         return "bookings/updateBooking";
     }
@@ -299,80 +343,106 @@ public class SpotBookingUIController {
     /**
      * Updates a booking's end date and time.
      */
-    @PostMapping("/update")
-    public String updateBooking(
-            @RequestParam Long bookingId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate newEndDate,
-            @RequestParam @DateTimeFormat(pattern = "HH:mm") LocalTime newEndTime,
-            RedirectAttributes redirectAttributes) {
-        try {
-            if (bookingId == null) {
-                redirectAttributes.addFlashAttribute("error", "⚠ Booking ID is required!");
-                return "redirect:/ui/booking/update";
+   @PostMapping("/update")
+public String updateBooking(
+        @RequestParam Long bookingId,
+        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate newEndDate,
+        @RequestParam @DateTimeFormat(pattern = "HH:mm") LocalTime newEndTime,
+        RedirectAttributes redirectAttributes) {
+    try {
+        if (bookingId == null) {
+            redirectAttributes.addFlashAttribute("error", "⚠ Booking ID is required!");
+            return "redirect:/ui/booking/update";
+        }
+
+        // Fetch existing booking details
+        ResponseEntity<SpotBookingInfo> response = restTemplate.getForEntity(
+                BASE_URL + "/viewBookingById/" + bookingId,
+                SpotBookingInfo.class);
+        SpotBookingInfo booking = response.getBody();
+
+        // Check for 400 error and parse the message
+        if (response.getStatusCode().value() == 400 && booking == null) {
+            String errorMessage = extractMessage(response.getBody() != null ? response.toString() : "");
+            if (errorMessage.contains("Booking does not exist")) {
+                redirectAttributes.addFlashAttribute("error", "⚠ Booking not found. Please verify the booking ID and try again.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "❌ " + errorMessage);
             }
+            return "redirect:/ui/booking/update?bookingId=" + bookingId;
+        }
 
-            // Fetch existing booking details
-            ResponseEntity<SpotBookingInfo> response = restTemplate.getForEntity(
-                    BASE_URL + "/viewBookingById/" + bookingId,
-                    SpotBookingInfo.class);
-            SpotBookingInfo booking = response.getBody();
+        if (booking == null) {
+            redirectAttributes.addFlashAttribute("error", "⚠ Booking not found!");
+            return "redirect:/ui/booking/update?bookingId=" + bookingId;
+        }
 
-            if (booking == null) {
-                redirectAttributes.addFlashAttribute("error", "⚠ Booking not found!");
-                return "redirect:/ui/booking/update?bookingId=" + bookingId;
-            }
-
-            // Check if booking is cancelled
-            if (booking.getStatus() != null && booking.getStatus().toLowerCase().equals("cancelled")) {
+        // Case-insensitive status check
+        if (booking.getStatus() != null) {
+            String status = booking.getStatus().toLowerCase();
+            if (status.equals("cancelled")) {
                 redirectAttributes.addFlashAttribute("error", "⚠ Cannot update booking; it is already cancelled.");
                 return "redirect:/ui/booking/update?bookingId=" + bookingId;
-            }
-
-            LocalDate startDate = booking.getStartDate();
-            LocalTime startTime = booking.getStartTime();
-
-            // Validate: End Date & Time must be after Start Date & Time
-            if (newEndDate == null || newEndTime == null) {
-                redirectAttributes.addFlashAttribute("error", "⚠ New End Date and Time are required!");
+            } else if (status.equals("completed")) {
+                redirectAttributes.addFlashAttribute("error", "⚠ Cannot update booking; it is already completed.");
                 return "redirect:/ui/booking/update?bookingId=" + bookingId;
             }
-
-            if (newEndDate.isBefore(startDate) ||
-                    (newEndDate.isEqual(startDate) && newEndTime.isBefore(startTime))) {
-                redirectAttributes.addFlashAttribute("error", "⚠ End date & time must be after start date & time.");
-                return "redirect:/ui/booking/update?bookingId=" + bookingId;
-            }
-
-            // Prepare update request
-            booking.setEndDate(newEndDate);
-            booking.setEndTime(newEndTime);
-
-            // Check for conflicts before updating
-            try {
-                ResponseEntity<String> conflictCheckResponse = restTemplate.postForEntity(
-                        BASE_URL + "/check-update-conflict/" + bookingId,
-                        booking,
-                        String.class);
-
-                if (conflictCheckResponse.getStatusCode() == HttpStatus.OK) {
-                    restTemplate.put(BASE_URL + "/update/" + bookingId, booking);
-                    redirectAttributes.addFlashAttribute("message", "✅ Booking updated successfully!");
-                }
-            } catch (HttpClientErrorException e) {
-                if (e.getStatusCode() == HttpStatus.CONFLICT) {
-                    String errorMessage = extractMessage(e.getResponseBodyAsString());
-                    redirectAttributes.addFlashAttribute("error", "❌ " + errorMessage);
-                    return "redirect:/ui/booking/update?bookingId=" + bookingId;
-                } else {
-                    redirectAttributes.addFlashAttribute("error", "❌ Unexpected error: " + e.getResponseBodyAsString());
-                    return "redirect:/ui/booking/update?bookingId=" + bookingId;
-                }
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "❌ Failed to update booking: " + e.getMessage());
         }
-        return "redirect:/ui/booking/update?bookingId=" + bookingId;
+
+        LocalDate startDate = booking.getStartDate();
+        LocalTime startTime = booking.getStartTime();
+        if (startDate == null || startTime == null) {
+            redirectAttributes.addFlashAttribute("error", "⚠ Start date or time is missing for the booking.");
+            return "redirect:/ui/booking/update?bookingId=" + bookingId;
+        }
+
+        // Validate: End Date & Time must be after Start Date & Time
+        if (newEndDate == null || newEndTime == null) {
+            redirectAttributes.addFlashAttribute("error", "⚠ New End Date and Time are required!");
+            return "redirect:/ui/booking/update?bookingId=" + bookingId;
+        }
+
+        LocalDateTime startDateTime = startDate.atTime(startTime);
+        LocalDateTime endDateTime = newEndDate.atTime(newEndTime);
+        if (!startDateTime.isBefore(endDateTime)) {
+            redirectAttributes.addFlashAttribute("error", "⚠ End date & time must be after start date & time. " +
+                    "Start: " + startDateTime + ", End: " + endDateTime);
+            return "redirect:/ui/booking/update?bookingId=" + bookingId;
+        }
+
+        // Prepare update request
+        booking.setEndDate(newEndDate);
+        booking.setEndTime(newEndTime);
+
+        // Check for conflicts before updating
+        try {
+            ResponseEntity<String> conflictCheckResponse = restTemplate.postForEntity(
+                    BASE_URL + "/check-update-conflict/" + bookingId,
+                    booking,
+                    String.class);
+
+            if (conflictCheckResponse.getStatusCode() == HttpStatus.OK) {
+                restTemplate.put(BASE_URL + "/update/" + bookingId, booking);
+                redirectAttributes.addFlashAttribute("message", "✅ Booking updated successfully!");
+            } else {
+                String errorMessage = extractMessage(conflictCheckResponse.getBody());
+                redirectAttributes.addFlashAttribute("error", "❌ " + errorMessage);
+            }
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode() == HttpStatus.CONFLICT) {
+                String errorMessage = extractMessage(e.getResponseBodyAsString());
+                redirectAttributes.addFlashAttribute("error", "❌ " + errorMessage);
+            } else {
+                redirectAttributes.addFlashAttribute("error", "❌ Unexpected error: " + e.getResponseBodyAsString());
+            }
+        }
+    } catch (Exception e) {
+        redirectAttributes.addFlashAttribute("error", "❌ Failed to update booking: " + e.getMessage());
     }
+    return "redirect:/ui/booking/update?bookingId=" + bookingId;
+
+
+}
 
     /**
      * Displays the form to view cancelled bookings, automatically fetching the user's contact number.
@@ -388,8 +458,8 @@ public class SpotBookingUIController {
 
         UserInfo user = userResponse.getData();
         String contactNumber = user.getContactNumber();
-        if (contactNumber == null || contactNumber.trim().isEmpty()) {
-            model.addAttribute("error", "Contact number not found for the logged-in user.");
+        if (contactNumber == null || !isValidContactNumber(contactNumber)) {
+            model.addAttribute("error", "Invalid contact number for the logged-in user.");
             return "viewCancelledBookingForm";
         }
 
@@ -404,8 +474,8 @@ public class SpotBookingUIController {
      */
     @GetMapping("/cancelledBookings")
     public String viewMyCancelledBookings(@RequestParam(required = false) String contactNumber, Model model) {
-        if (contactNumber == null || contactNumber.trim().isEmpty()) {
-            model.addAttribute("error", "Contact number is required to view cancelled bookings.");
+        if (contactNumber == null || contactNumber.trim().isEmpty() || !isValidContactNumber(contactNumber)) {
+            model.addAttribute("error", "Valid contact number is required to view cancelled bookings.");
             return "viewCancelledBookings";
         }
 
@@ -424,7 +494,7 @@ public class SpotBookingUIController {
             model.addAttribute("cancelledBookings", cancelledBookings != null ? cancelledBookings : new ArrayList<>());
             model.addAttribute("contactNumber", contactNumber);
         } catch (HttpClientErrorException e) {
-            model.addAttribute("error", "Failed to fetch cancelled bookings: " + e.getMessage());
+            model.addAttribute("error", "No cancelled bookings found");
             model.addAttribute("cancelledBookings", Collections.emptyList());
         } catch (Exception e) {
             model.addAttribute("error", "An unexpected error occurred: " + e.getMessage());
@@ -464,13 +534,14 @@ public class SpotBookingUIController {
     /**
      * Extracts a message from a JSON response body.
      */
-    private String extractMessage(String responseBody) {
+    // Helper method to extract message from response
+    private String extractMessage(String response) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.readTree(responseBody);
+            JsonNode jsonNode = objectMapper.readTree(response);
             return jsonNode.has("message") ? jsonNode.get("message").asText() : "An unexpected error occurred.";
         } catch (Exception e) {
-            return "Booking conflict! Please select another time.";
+            return response.contains("Booking does not exist") ? "Booking not found." : "Booking conflict occured , please try other time slot";
         }
     }
 }

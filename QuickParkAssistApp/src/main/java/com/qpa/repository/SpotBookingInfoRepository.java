@@ -46,15 +46,16 @@ public interface SpotBookingInfoRepository extends JpaRepository<SpotBookingInfo
     List<SpotBookingInfo> findByStartDateBetween(LocalDate startDate, LocalDate endDate);
 
     @Query("SELECT sb FROM SpotBookingInfo sb " +
-            "WHERE sb.spotInfo.spotId = :spotId " +
-            "AND sb.startDate = :startDate " +
-            "AND (sb.startTime < :endTime AND sb.endTime > :startTime)")
-    List<SpotBookingInfo> findConflictingBooking(
-            @Param("spotId") Long spotId,
-            @Param("startDate") LocalDate startDate,
-            @Param("startTime") LocalTime startTime,
-            @Param("endTime") LocalTime endTime);
-
+    "WHERE sb.spotInfo.spotId = :spotId " +
+    "AND sb.status NOT IN ('cancelled', 'completed') " +
+    "AND ((sb.startDate < :endDate) OR (sb.startDate = :endDate AND sb.startTime < :endTime)) " +
+    "AND ((sb.endDate > :startDate) OR (sb.endDate = :startDate AND sb.endTime > :startTime))")
+List<SpotBookingInfo> findConflictingBooking(
+     @Param("spotId") Long spotId,
+     @Param("startDate") LocalDate startDate,
+     @Param("startTime") LocalTime startTime,
+     @Param("endDate") LocalDate endDate,
+     @Param("endTime") LocalTime endTime);
     // To set the status of spot as unavailable and spotbookinginfo as confirmed
 
     // Fetch bookings where start date is today, start time has passed, and status
@@ -73,8 +74,9 @@ public interface SpotBookingInfoRepository extends JpaRepository<SpotBookingInfo
     List<SpotBookingInfo> findBookingsToComplete(@Param("currentDate") LocalDate currentDate,
             @Param("currentTime") LocalTime currentTime);
 
-    @Query("SELECT b FROM SpotBookingInfo b WHERE b.spotInfo.spotId = :spotId " +
+            @Query("SELECT b FROM SpotBookingInfo b WHERE b.spotInfo.spotId = :spotId " +
             "AND b.bookingId != :excludeBookingId " +
+            "AND b.status NOT IN ('cancelled', 'completed') " +
             "AND ((b.startDate < :endDate OR (b.startDate = :endDate AND b.startTime < :endTime)) " +
             "AND (b.endDate > :startDate OR (b.endDate = :startDate AND b.endTime > :startTime)))")
     List<SpotBookingInfo> findConflictingBookingsforUpdatedbookings(
