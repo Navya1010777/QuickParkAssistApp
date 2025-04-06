@@ -75,9 +75,9 @@ public class AuthController {
         }
 
         redirectAttributes.addFlashAttribute("success", backendResponse.getMessage());
-        
+        System.out.println("inside the register done ");
         // Auto-login after successful registration
-        authUiService.login(new AuthUser(registerDTO.getUsername(), registerDTO.getPassword()), response, request);
+        authUiService.login(new AuthUser(registerDTO.getEmail(), registerDTO.getPassword()), response, request);
         return "redirect:/dashboard"; // Redirect to dashboard after registration
     }
 

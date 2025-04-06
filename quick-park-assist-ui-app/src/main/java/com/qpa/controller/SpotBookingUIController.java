@@ -140,11 +140,11 @@ public class SpotBookingUIController {
             }
 
             String contactNumber = userResponse.getData().getContactNumber();
-            if (contactNumber == null || !isValidContactNumber(contactNumber)) {
-                model.addAttribute("error", "Invalid contact number for the logged-in user.");
-                model.addAttribute("bookings", Collections.emptyList());
-                return "bookings/viewAllBooking";
-            }
+            // if (contactNumber == null || !isValidContactNumber(contactNumber)) {
+            //     model.addAttribute("error", "Invalid contact number for the logged-in user.");
+            //     model.addAttribute("bookings", Collections.emptyList());
+            //     return "bookings/viewAllBooking";
+            // }
 
             model.addAttribute("userContactNumber", contactNumber);
 
@@ -166,11 +166,12 @@ public class SpotBookingUIController {
                         new ParameterizedTypeReference<List<SpotBookingInfo>>() {});
                 bookings = response.getBody() != null ? response.getBody() : new ArrayList<>();
             } else {
-                // Default: Fetch bookings for the logged-in user's contact number
-                ResponseEntity<List<SpotBookingInfo>> response = restTemplate.exchange(
-                        BASE_URL + "/viewByContactNumber/" + contactNumber, HttpMethod.GET, null,
-                        new ParameterizedTypeReference<List<SpotBookingInfo>>() {});
-                bookings = response.getBody() != null ? response.getBody() : new ArrayList<>();
+                // // Default: Fetch bookings for the logged-in user's contact number
+                // ResponseEntity<List<SpotBookingInfo>> response = restTemplate.exchange(
+                //         BASE_URL + "/viewByContactNumber/" + contactNumber, HttpMethod.GET, null,
+                //         new ParameterizedTypeReference<List<SpotBookingInfo>>() {});
+                // bookings = response.getBody() != null ? response.getBody() : new ArrayList<>();
+                bookings =usersService.getUserBookingHistory(request).getData();
             }
 
             if (bookings.isEmpty()) {
