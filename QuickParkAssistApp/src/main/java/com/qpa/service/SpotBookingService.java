@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -62,12 +61,6 @@ public class SpotBookingService {
         if (bookingInfo.getStartDate().isAfter(bookingInfo.getEndDate())) {
             throw new InvalidEntityException("Start date (" + bookingInfo.getStartDate() +
                     ") must be on or before end date (" + bookingInfo.getEndDate() + ").");
-        }
-
-        // Validate that startTime is before endTime
-        if (!bookingInfo.getStartTime().isBefore(bookingInfo.getEndTime())) {
-            throw new InvalidEntityException("Start time (" + bookingInfo.getStartTime() +
-                    ") must be before end time (" + bookingInfo.getEndTime() + ").");
         }
 
         // Validate full date-time consistency
