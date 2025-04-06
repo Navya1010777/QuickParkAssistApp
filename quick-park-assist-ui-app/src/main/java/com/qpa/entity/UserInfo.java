@@ -26,8 +26,7 @@ public class UserInfo {
     @PastOrPresent(message = "date must be past or present")
     private String dob;
 
-    @Size(min = 10, max = 10, message = "Contact number must be between 10 and 13 digits")
-    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Contact number must be a valid 10-digit Indian mobile number (e.g., 9876543210)")
+    @Pattern(regexp = "^\\+\\d{1,4}\\s[6-9]\\d{9}$", message = "Enter a valid number with country code")
     private String contactNumber;
 
     private UserType userType;

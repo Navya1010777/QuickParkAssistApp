@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/faq.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 
 </head>
 <body>
@@ -511,7 +510,7 @@
     <div class="faq-chat" id="faqChat">
         <div class="faq-header">
             Hi,👋🏼 I am DIV what's your question? 
-            <span onclick="closeFAQ()">✖</span>
+            <span onclick="closeFAQ()"><i class="bi bi-x-circle"></i></span>
         </div>
         <div class="faq-body">
             <div id="responseArea"></div>
@@ -579,7 +578,7 @@
                 }
     
                 try {
-                    const response = await fetch('http://localhost:7212/faq', {
+                    const response = await fetch('http://localhost:8081/faq', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

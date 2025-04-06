@@ -235,17 +235,20 @@
                     />
                   </div>
                   <div class="col-12 col-sm-6 col-lg-4">
-                    <label class="form-label fw-medium text-dark d-block"
-                      >Contact Number:</label
-                    >
+                    <label class="form-label fw-medium text-dark d-block">
+                      Contact Number:
+                    </label>
                     <input
-                      placeholder="Enter your phone number"
-                      type="number"
+                      placeholder="e.g. +91 9876543210"
                       class="editable form-control bg-light text-dark"
                       th:field="*{user.contactNumber}"
+                      pattern="^\+\d{1,4}\s[6-9]\d{9}$"
+                      title="Enter a valid number with country code"
                       readonly
+                    
                     />
                   </div>
+                  
 
                   <div class="col-12 col-sm-6 col-lg-4">
                     <label class="form-label fw-medium text-dark d-block"

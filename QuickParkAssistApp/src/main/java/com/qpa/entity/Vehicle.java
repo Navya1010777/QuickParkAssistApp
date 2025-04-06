@@ -16,7 +16,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+
 
 @Entity
 @Table(name = "vehicles")
@@ -25,9 +25,8 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long vehicleId;
 
-    @NotBlank
-    @Size(max = 20)
-    @Pattern(regexp = "^[A-Z0-9-]+$", message = "Registration number must contain only uppercase letters, numbers, and hyphens")
+    @NotBlank(message = "Registration number is required")
+    @Pattern(regexp = "^[A-Z]{2}\\d{2}[A-Z0-9]{6}$", message = "Invalid registration number format (e.g., UP16DS4141)")
     @Column(nullable = false, unique = true)
     private String registrationNumber;
 
