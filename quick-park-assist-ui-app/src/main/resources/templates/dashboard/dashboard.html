@@ -327,6 +327,13 @@
                     >
                       <i class="bi bi-pencil"></i> Edit
                     </a>
+                    <a
+                      th:href="@{/vehicle/editVehicle/{id}(id=${vehicle.vehicleId})}"
+                      class="btn btn-primary"
+                      th:id="'edit-btn-' + ${vehicle.vehicleId}"
+                    >
+                      <i class="bi bi-pencil"></i> Delete
+                    </a>
                   </div>
 
                   <form
