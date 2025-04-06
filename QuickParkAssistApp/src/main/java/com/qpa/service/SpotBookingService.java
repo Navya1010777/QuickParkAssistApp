@@ -57,19 +57,13 @@ public class SpotBookingService {
         if (bookingInfo.getEndDate() == null) {
             throw new InvalidEntityException("End date must be provided.");
         }
-
+    
         // Validate that startDate is on or before endDate
         if (bookingInfo.getStartDate().isAfter(bookingInfo.getEndDate())) {
             throw new InvalidEntityException("Start date (" + bookingInfo.getStartDate() +
                     ") must be on or before end date (" + bookingInfo.getEndDate() + ").");
         }
-
-        // Validate that startTime is before endTime
-        if (!bookingInfo.getStartTime().isBefore(bookingInfo.getEndTime())) {
-            throw new InvalidEntityException("Start time (" + bookingInfo.getStartTime() +
-                    ") must be before end time (" + bookingInfo.getEndTime() + ").");
-        }
-
+    
         // Validate full date-time consistency
         LocalDateTime startDateTime = bookingInfo.getStartDate().atTime(bookingInfo.getStartTime());
         LocalDateTime endDateTime = bookingInfo.getEndDate().atTime(bookingInfo.getEndTime());
@@ -77,21 +71,22 @@ public class SpotBookingService {
             throw new InvalidEntityException("Booking start (" + startDateTime +
                     ") must be before booking end (" + endDateTime + ").");
         }
-
-        // Check for conflicting booking
+    
+        // Check for conflicting booking (excluding cancelled/completed)
         List<SpotBookingInfo> conflictingBooking = spotBookingRepository.findConflictingBooking(
-                spotId, bookingInfo.getStartDate(), bookingInfo.getStartTime(), bookingInfo.getEndTime());
+                spotId, bookingInfo.getStartDate(), bookingInfo.getStartTime(),
+                bookingInfo.getEndDate(), bookingInfo.getEndTime());
         if (!conflictingBooking.isEmpty()) {
             SpotBookingInfo conflict = conflictingBooking.get(0);
             throw new InvalidEntityException(
                     "Spot is already booked from " + conflict.getStartTime() + " to " + conflict.getEndTime() +
                             " on " + conflict.getStartDate());
         }
-
+    
         // Retrieve SpotInfo
         Spot spot = spotInfoRepository.findById(spotId)
                 .orElseThrow(() -> new InvalidEntityException("Spot with ID " + spotId + " does not exist."));
-
+    
         // Check spot status
         SpotStatus spotStatus = spot.getStatus();
         System.out.println("spot status: " + spotStatus);
@@ -100,95 +95,73 @@ public class SpotBookingService {
                     "Spot with ID " + spotId + " is not available for booking. Current status: " +
                             (spotStatus != null ? spotStatus.name() : "null"));
         }
-
+    
         // Retrieve Vehicle
         Vehicle vehicle = vehicleRepository.findByRegistrationNumber(registrationNumber);
         if (vehicle == null) {
             throw new InvalidEntityException(
                     "Vehicle with Registration Number " + registrationNumber + " does not exist.");
         }
-
+    
         // Validate vehicle type
         VehicleType vehicleType = vehicle.getVehicleType();
         if (vehicleType == null) {
             throw new InvalidEntityException(
                     "Vehicle with Registration Number " + registrationNumber + " does not have a valid type.");
         }
-
+    
         // Set default booking date if not provided
         if (bookingInfo.getBookingDate() == null) {
             bookingInfo.setBookingDate(LocalDate.now());
         }
-
+    
         // Associate spot and vehicle with booking
         bookingInfo.setSpotInfo(spot);
         bookingInfo.setVehicle(vehicle);
-        // bookingInfo.setStatus("booked");
-
+    
         double totalAmount = 0;
-
+    
         Duration duration = calculateParkingHours(bookingInfo.getStartDate(), bookingInfo.getStartTime(),
                 bookingInfo.getEndDate(), bookingInfo.getEndTime());
-
+    
         // Get total hours
-
         long totalHours = duration.toHours();
-
+    
         // Round off the days
-
         long roundedDays = Math.round((double) totalHours / 24);
-
+    
         long roundedHours = Math.round(totalHours);
-
+    
         if (spot.getPriceType() == PriceType.HOURLY) {
-
             totalAmount = roundedHours * spot.getPrice();
-
-        }
-
-        else if (spot.getPriceType() == PriceType.DAILY) {
-
+        } else if (spot.getPriceType() == PriceType.DAILY) {
             totalAmount = roundedDays * spot.getPrice();
-
         }
-
+    
         bookingInfo.setTotalAmount(totalAmount);
-
+    
         // Compare startdate and starttime with current date and current time to set
         // booking status as either confirmed or booked
-
         LocalDate currentDate = LocalDate.now();
-
         LocalTime currentTime = LocalTime.now();
-
+    
         // Compare startDate with currentDate and startTime with currentTime
-
         if (bookingInfo.getStartDate().isEqual(currentDate) &&
-
                 (bookingInfo.getStartTime().isBefore(currentTime) || bookingInfo.getStartTime().equals(currentTime))) {
-
             bookingInfo.setStatus("confirmed");
-
-            // Update spot status to UNAVAILABLE
-
-        }
-
-        else {
-
+        } else {
             bookingInfo.setStatus("booked");
-
         }
-
+    
         // Update spot status to UNAVAILABLE
         // spot.setStatus(SpotStatus.UNAVAILABLE);
         // spotInfoRepository.save(spot);
-
+    
         // Save and return the booking
         SpotBookingInfo savedBooking = spotBookingRepository.save(bookingInfo);
-
+    
         try {
-            // Assuming Vehicle has a getUser() method that returns a User object with
-            // getEmail()
+            // Assuming Vehicle has a getUser() method that returns a User object with getEmail()
             String userEmail = savedBooking.getVehicle().getUserObj().getEmail();
             String subject = "Booking Confirmation - Spot ID: " + spotId;
             String body = "Dear User,\n\n" +
@@ -395,7 +368,7 @@ public class SpotBookingService {
 
     @Transactional
 
-    @Scheduled(fixedRate = 15 * 60 * 1000) // Runs every 15 minutes (made for 2 min for testing purpose)
+    @Scheduled(fixedRate = 1 * 60 * 1000) // Runs every 15 minutes (made for 2 min for testing purpose)
 
     public void updateBookingStatusesToConfirm() {
 
@@ -429,7 +402,7 @@ public class SpotBookingService {
 
     @Transactional
 
-    @Scheduled(fixedRate = 15 * 60 * 1000) // Runs every 15 minutes
+    @Scheduled(fixedRate = 1 * 60 * 1000) // Runs every 15 minutes
 
     public void updateBookingStatusesToComplete() {
 
@@ -490,6 +463,7 @@ public class SpotBookingService {
             try {
                 allBookings.addAll(getBookingsBySlotId(spot.getSpotId()));
             } catch (InvalidEntityException e) {
+                throw new InvalidEntityException("Error fetching bookings for spot ID: " + spot.getSpotId());
             }
         }
 
