@@ -43,32 +43,47 @@
           >
             <span class="material-icons">bar_chart</span> User Query
           </li>
-          <li
-            class="relative mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
-            onclick="toggleDropdown(event)"
-          >
-            <span class="material-icons">extension</span> ADD-ON
+          <li class="mb-3 flex flex-col">
+            <div
+              class="flex items-center justify-between gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
+              onclick="toggleDropdown(event)"
+            >
+              <div class="flex items-center gap-2">
+                <span class="material-icons">extension</span> ADD-ON
+              </div>
+              <span
+                id="dropdownIcon"
+                class="material-icons transition-all duration-300"
+                >expand_more</span
+              >
+            </div>
+
+            <!-- Dropdown inside sidebar -->
             <ul
               id="addonDropdown"
-              class="hidden absolute left-full top-0 ml-2 w-40 bg-white shadow-lg rounded"
+              class="hidden flex flex-col mt-1 bg-blue-800 rounded-lg"
             >
-              <li class="p-2 hover:bg-gray-200 cursor-pointer text-black">
-                <a onclick="navigateTo('/view-addon')" class="text-black"
-                  >View ADD-ONs</a
-                >
+              <li
+                onclick="navigateTo('/addons/view-addon')"
+                class="px-3 py-4 hover:bg-blue-700 cursor-pointer"
+              >
+                <p>View ADD-ONs</p>
               </li>
-              <li class="p-2 hover:bg-gray-200 cursor-pointer text-black">
-                <a onclick="navigateTo('/new-addon')" class="text-black"
-                  >New ADD-ON</a
-                >
+              <li
+                onclick="navigateTo('/addons/new-addon')"
+                class="px-3 py-4 hover:bg-blue-700 cursor-pointer"
+              >
+                <p>New ADD-ON</p>
               </li>
-              <li class="p-2 hover:bg-gray-200 cursor-pointer text-black">
-                <a onclick="navigateTo('/status')" class="text-black"
-                  >Status ADD-ON</a
-                >
+              <li
+                onclick="navigateTo('/addons/status')"
+                class="px-3 py-4 hover:bg-blue-700 cursor-pointer"
+              >
+                <p>Status ADD-ON</p>
               </li>
             </ul>
           </li>
+
 
           <li
             class="mb-3 flex items-center gap-2 hover:bg-blue-700 p-2 rounded cursor-pointer"
@@ -232,9 +247,18 @@
       }
 
       function toggleDropdown(event) {
-        event.stopPropagation(); // Prevents click from closing immediately
-        let dropdown = document.getElementById("addonDropdown");
+        event.stopPropagation();
+        const dropdown = document.getElementById("addonDropdown");
+        const icon = document.getElementById("dropdownIcon");
+
         dropdown.classList.toggle("hidden");
+
+        // Toggle arrow direction
+        if (dropdown.classList.contains("hidden")) {
+          icon.textContent = "expand_more";
+        } else {
+          icon.textContent = "expand_less";
+        }
       }
 
       // Close dropdown when clicking anywhere else

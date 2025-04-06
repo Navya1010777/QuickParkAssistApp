@@ -10,9 +10,11 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qpa.entity.AddOns;
 import com.qpa.entity.VehicleType;
@@ -29,7 +31,7 @@ public class AddOnUIController {
 
     private static final String BASE_URL = "/addons";
 
-    @GetMapping("/addAddonForm")
+    @GetMapping("/new-addon")
     public String addAddonForm(Model model) {
         model.addAttribute("addon", new AddOns());
         model.addAttribute("vehicleTypes", Arrays.asList(VehicleType.values())); // Add enum values for dropdown
@@ -37,76 +39,69 @@ public class AddOnUIController {
     }
 
     @PostMapping("/addAddon")
-    public String addAddon(@ModelAttribute AddOns addon, Model model, HttpServletRequest request) {
+    public String addAddon(@ModelAttribute AddOns addon, RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
         try {
             ResponseEntity<AddOns> response = restTemplate.post(BASE_URL + "/add", addon, request,
                     new ParameterizedTypeReference<AddOns>() {
                     });
-
-            model.addAttribute("message", "Addon added successfully: " + response.getBody().getName());
-            return "addons/home";
+            if (response.getBody() == null) {
+                redirectAttributes.addFlashAttribute("message", "Error adding addon: ");
+                return "redirect:/addons/addAddon";
+            }
+            redirectAttributes.addFlashAttribute("message",
+                    "Addon added successfully: " + response.getBody().getName());
+            return "redirect:/addons/view-addon";
         } catch (Exception e) {
-            return "addons/home";
+            return "redirect:/addons/addAddon";
         }
     }
 
-    @GetMapping("/")
-    public String home() {
-        return "addons/home";
-    }
-
-    @GetMapping("/viewAllAddons")
+    @GetMapping("/view-addon")
     public String viewAllAddons(Model model, HttpServletRequest request) {
         ResponseEntity<List<AddOns>> response = restTemplate.get(
                 BASE_URL + "/viewAll", request, new ParameterizedTypeReference<List<AddOns>>() {
                 });
+
         List<AddOns> allAddOns = response.getBody();
-        for (AddOns addOns: allAddOns){
-            System.out.println("addon id: "+addOns.getAddOnId());
-        }
-        model.addAttribute("addons", response.getBody());
+        model.addAttribute("vehicleTypes", VehicleType.values());
+        model.addAttribute("addons", allAddOns);
         return "addons/viewAllAddons"; // Renders viewAllAddons.html
     }
 
-    @GetMapping("/viewAddOnByIdForm")
-    public String viewAddOnByIdForm() {
-        return "addons/viewAddOnByIdForm"; // Renders the form
-    }
-
-    @GetMapping("/viewAddOnById")
-    public String viewAddOnById(@RequestParam("id") Long id, Model model, HttpServletRequest request) {
+    @GetMapping("/view-addon/{addOnId}")
+    public String viewAddOnById(@PathVariable Long addOnId, Model model, HttpServletRequest request) {
         try {
-            ResponseEntity<AddOns> response = restTemplate.get(BASE_URL + "/" + id, request,
+            ResponseEntity<AddOns> response = restTemplate.get(BASE_URL + "/" + addOnId, request,
                     new ParameterizedTypeReference<AddOns>() {
                     });
-            model.addAttribute("addon", response.getBody());
+            model.addAttribute("vehicleTypes", VehicleType.values());
+            model.addAttribute("addons", response.getBody());
             System.out.println(response.getBody());
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("error", "AddOn not found with ID: " + id);
+            model.addAttribute("message", "AddOn not found with ID: " + addOnId);
         }
-        return "addons/viewAddOnById"; // Returns the Thymeleaf template
+        return "addons/viewAllAddons"; // Returns the Thymeleaf template
     }
 
-    @GetMapping("/viewAddOnsByVehicleTypeForm")
-    public String viewAddOnsByVehicleTypeForm() {
-        return "addons/viewAddOnsByVehicleTypeForm"; // Renders the form page
-    }
-
-    @GetMapping("/viewAddOnsByVehicleType")
-    public String viewAddOnsByVehicleType(@RequestParam("vehicleType") String vehicleType, Model model,
+    @GetMapping(value = "/view-addon", params = "vehicleType")
+    public String viewAddOnsByVehicleType(@RequestParam("vehicleType") VehicleType vehicleType, Model model,
             HttpServletRequest request) {
         try {
+            System.out.println("in the vehicleType controller");
             ResponseEntity<AddOns[]> response = restTemplate.get(BASE_URL + "/vehicle-type/" + vehicleType, request,
                     new ParameterizedTypeReference<AddOns[]>() {
                     });
             model.addAttribute("addons", Arrays.asList(response.getBody()));
-
+            model.addAttribute("vehicleTypes", VehicleType.values());
+            model.addAttribute("vehicleType", vehicleType);
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("error", "No AddOns found for Vehicle Type: " + vehicleType);
         }
-        return "addons/viewAddOnsByVehicleType"; // Returns the Thymeleaf template
+        return "addons/viewAllAddons"; // Returns the Thymeleaf template
     }
 
+    
 }
