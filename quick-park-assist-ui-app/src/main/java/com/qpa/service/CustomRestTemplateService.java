@@ -110,6 +110,22 @@ public class CustomRestTemplateService {
             return handleErrorResponse(ex, responseType);
         }
     }
+    public <T> ResponseEntity<T> delete(
+            String route, Object requestBody, HttpServletRequest request,
+            ParameterizedTypeReference<T> responseType) {
+
+        HttpEntity<Object> requestEntity = new HttpEntity<>(requestBody, prepareHeaders(request));
+
+        try {
+            return restTemplate.exchange(
+                    BASE_URL + route,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    responseType);
+        } catch (HttpClientErrorException | HttpServerErrorException ex) {
+            return handleErrorResponse(ex, responseType);
+        }
+    }
 
     private <T> ResponseEntity<T> handleErrorResponse(HttpStatusCodeException ex,
             ParameterizedTypeReference<T> responseType) {
@@ -204,5 +220,6 @@ public class CustomRestTemplateService {
             return handleErrorResponse(ex, responseType);
         }
     }
+
 
 }

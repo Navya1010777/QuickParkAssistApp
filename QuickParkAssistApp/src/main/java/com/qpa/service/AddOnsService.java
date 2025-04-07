@@ -35,4 +35,23 @@ public class AddOnsService {
 
 	}
 
+	public AddOns updateAddOn(Long id, AddOns updatedAddOn) {
+		AddOns existingAddOn = addOnRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("AddOn not found with id: " + id));
+
+		existingAddOn.setName(updatedAddOn.getName());
+		existingAddOn.setDescription(updatedAddOn.getDescription());
+		existingAddOn.setPrice(updatedAddOn.getPrice());
+		existingAddOn.setVehicleType(updatedAddOn.getVehicleType());
+
+		return addOnRepository.save(existingAddOn);
+	}
+
+	public void deleteAddOn(Long id) {
+		if (!addOnRepository.existsById(id)) {
+			throw new RuntimeException("AddOn not found with id: " + id);
+		}
+		addOnRepository.deleteById(id);
+	}
+
 }
