@@ -3,6 +3,7 @@ package com.qpa.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qpa.dto.AdminSpotsStatistics;
 import com.qpa.dto.ResponseDTO;
@@ -21,6 +23,7 @@ import com.qpa.entity.UserInfo;
 import com.qpa.entity.UserType;
 import com.qpa.entity.Vehicle;
 import com.qpa.service.AuthService;
+import com.qpa.service.CustomRestTemplateService;
 import com.qpa.service.UserService;
 import com.qpa.service.VehicleService;
 
@@ -38,6 +41,9 @@ public class HomeController {
     private VehicleService vehicleService;
     @Autowired
     private UserService userService; // Service for fetching user details
+
+    @Autowired
+    private CustomRestTemplateService restTemplateService;
 
     /**
      * Handles requests to the home page.
@@ -64,21 +70,16 @@ public class HomeController {
         ResponseDTO<UserInfo> response = userService.getUserDetails(request);
 
         if (response.isSuccess()) {
-            model.addAttribute("success", response.getMessage()); // Adds error message if fetching fails
             UserInfo user = response.getData(); // Retrieves user info
             model.addAttribute("user", user); // Pass full name to the view
             if (user.getUserType() == UserType.ADMIN) {
                 AdminSpotsStatistics statistics = userService.getAdminSpotsStatistics(request);
-
                 model.addAttribute("totalActiveUsers", statistics.getActiveBookings());
-
                 model.addAttribute("totalParkingSpots", statistics.getTotalSpots());
-
                 List<PaymentUI> payments = userService.getAllAdminPayments(request);
                 double totalCollection = payments.stream()
                         .mapToDouble(payment -> payment.getTotalAmount() != null ? payment.getTotalAmount() : 0.0)
                         .sum();
-
                 model.addAttribute("totalEarnings", totalCollection);
                 // Fetch admins from backend API
                 String apiUrl = "http://localhost:7212/api/users/admin/viewAll"; // Ensure correct backend port
@@ -87,7 +88,6 @@ public class HomeController {
                 return "admin/index";
             }
             List<Vehicle> vehicles = vehicleService.findUserVehicle(request).getData();
-            vehicles.forEach(System.out::println); // Debugging: Print vehicles list
             model.addAttribute("vehicles", vehicles);
             return "dashboard/dashboard"; // Loads the dashboard view
         } else {
@@ -105,12 +105,12 @@ public class HomeController {
     }
 
     @GetMapping("/admin/contact-messages")
-public String showAdminQueries(Model model) {
-    String apiUrl = "http://localhost:7212/api/contact-messages"; // Backend API
-    List<ContactMessage> messages = restTemplate.getForObject(apiUrl, List.class);
-    model.addAttribute("messages", messages);
-    return "admin/ADMINquery"; // Renders ADMINquery.html
-}
+    public String showAdminQueries(Model model) {
+        String apiUrl = "http://localhost:7212/api/contact-messages"; // Backend API
+        List<ContactMessage> messages = restTemplate.getForObject(apiUrl, List.class);
+        model.addAttribute("messages", messages);
+        return "admin/ADMINquery"; // Renders ADMINquery.html
+    }
 
     @PostMapping("/contact")
     public String submitContact(@ModelAttribute("contactMessage") ContactMessage message, Model model) {
@@ -159,10 +159,26 @@ public String showAdminQueries(Model model) {
     }
 
     @GetMapping("/dashboard/parking-spot")
-    public String getMethodName(HttpServletRequest request, Model model) {
+    public String getParkingSpotPage(HttpServletRequest request, Model model) {
         AdminSpotsStatistics statistics = userService.getAdminSpotsStatistics(request);
         model.addAttribute("statistics", statistics);
         return "admin/parkingSpots";
     }
 
+    @GetMapping("/contact/delete/{id}")
+    public String deleteMessage(@PathVariable Long id, HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+        ResponseDTO<Void> backendResponse = restTemplateService
+                .delete("/contact/delete/"+id, null, request, new ParameterizedTypeReference<ResponseDTO<Void>>() {
+                }).getBody();
+
+        if (backendResponse != null) {
+            if (backendResponse.isSuccess()) {
+                redirectAttributes.addFlashAttribute("success", backendResponse.getMessage());
+            } else {
+                redirectAttributes.addFlashAttribute("error", backendResponse.getMessage());
+            }
+        }
+        return "redirect:/admin/contact-messages";
+    }
 }

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.qpa.dto.ResponseDTO;
@@ -90,7 +91,7 @@ public class VehicleController {
             redirectAttributes.addFlashAttribute("error", "Login to continue");
             return "redirect:/auth/login";
         }
-        
+
         vehicle.setUserObj(userService.getUserDetails(request).getData());
         ResponseDTO<Void> backendResponse = vehicleService.addVehicle(vehicle, request);
         if (backendResponse.isSuccess()) {
@@ -101,4 +102,18 @@ public class VehicleController {
 
         return "redirect:/dashboard";
     }
+
+    @GetMapping("deleteVehicle/{id}")
+    public String deleteVehicle(@PathVariable Long id, HttpServletRequest request,
+            RedirectAttributes redirectAttributes) {
+        ResponseDTO<Void> backendResponse = vehicleService.deleteVehicle(id, request);
+        System.out.println(backendResponse.getMessage());
+        if (!backendResponse.isSuccess()) {
+            redirectAttributes.addFlashAttribute("error", backendResponse.getMessage());
+        } else {
+            redirectAttributes.addFlashAttribute("success", backendResponse.getMessage());
+        }
+        return "redirect:/dashboard";
+    }
+
 }

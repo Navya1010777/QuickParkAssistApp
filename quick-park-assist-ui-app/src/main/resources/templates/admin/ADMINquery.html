@@ -116,6 +116,18 @@
       <i class="bi bi-arrow-left-circle"></i> Back
     </a>
     <h2>USER QUERIES</h2>
+    <div class="mb-3" th:if="${success != null}">
+      <div class="valid-feedback d-block">
+        <i class="bi bi-check-circle-fill me-1"></i> [[${success}]]
+      </div>
+    </div>
+
+    <div class="mb-3" th:if="${error != null}">
+      <div class="invalid-feedback d-block">
+        <i class="bi bi-exclamation-circle-fill me-1"></i> [[${error}]]
+      </div>
+    </div>
+
     <div style="margin-bottom: 10px;">
       <label for="categoryFilter" style="font-weight: bold; color: #1fa3d4; margin-right: 10px;">Filter</label>
       <select id="categoryFilter" onchange="filterMessages()" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
@@ -156,7 +168,7 @@
             <!-- Delete Button -->
             <a
               class="delete-btn"
-              th:href="@{http://localhost:7212/api/delete/{id}(id=${msg.id})}"
+              th:href="@{/contact/delete/{id}(id=${msg.id})}"
               onclick="return confirm('Are you sure you want to delete this message?');"
             >
               <i class="bi bi-trash"></i>
