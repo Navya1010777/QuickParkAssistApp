@@ -242,8 +242,8 @@
                       placeholder="e.g. +91 9876543210"
                       class="editable form-control bg-light text-dark"
                       th:field="*{user.contactNumber}"
-                      pattern="^\+\d{1,4}\s[6-9]\d{9}$"
-                      title="Enter a valid number with country code"
+                      pattern="^[6-9]\d{9}$"
+                      title="Enter a valid number"
                       readonly
                     
                     />

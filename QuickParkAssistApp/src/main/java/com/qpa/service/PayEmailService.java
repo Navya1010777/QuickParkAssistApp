@@ -34,6 +34,7 @@ public class PayEmailService {
                 + "<hr style='border: 0; height: 1px; background: #ddd;'>"
                 + "<p style='text-align: center; color: gray; font-size: 12px;'>Thank you for your purchase!💖😄<br>Report Fraud: +91 9876543210</p>"
                 + "</div>"
+                + "<div class='footer'>© 2025 Smart Park. All rights reserved.</div>"
                 + "</div>";
 
         helper.setTo(to);

@@ -54,7 +54,7 @@ public class UserInfo {
     private LocalDate dob; // Optional
 
     
-    @Pattern(regexp = "^\\+\\d{1,4}\\s[6-9]\\d{9}$", message = "Enter a valid number with country code")
+    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Enter a valid number")
     @Column(length = 15)
     private String contactNumber; // Optional
 

@@ -83,11 +83,18 @@ img {
                 <div class="mb-4">
                     <input type="text" th:field="*{name}" class="w-full p-3 border border-gray-300 rounded focus:ring focus:ring-blue-300" placeholder="Your Name" required>
                 </div>
-                <div class="mb-4">
+                <div class="mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <input type="email" th:field="*{email}" class="w-full p-3 border border-gray-300 rounded focus:ring focus:ring-blue-300" placeholder="Your Email" required>
+                    
+                    <select th:field="*{category}" class="w-full p-3 border border-gray-300 rounded focus:ring focus:ring-blue-300" required>
+                        <option value="">-- Select Category --</option>
+                        <option value="FRAUD">FRAUD</option>
+                        <option value="ERROR">ERROR</option>
+                        <option value="OTHER">OTHER</option>
+                    </select>
                 </div>
                 <div class="mb-4">
-                    <textarea th:field="*{message}" class="w-full p-3 border border-gray-300 rounded focus:ring focus:ring-blue-300" rows="5" placeholder="Your Message" required></textarea>
+                    <textarea th:field="*{message}" class="w-full p-3 border border-gray-300 rounded focus:ring focus:ring-blue-300" rows="3" placeholder="Your Message" required></textarea>
                 </div>
                 <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md transition duration-300">
                     <i class="bi bi-send-fill"></i> Send Message
@@ -136,7 +143,7 @@ img {
             <div>
                 <h5 class="text-lg font-semibold">Contact Us</h5>
                 <p class="text-gray-300">Email: support@quickpark.com</p>
-                <p class="text-gray-300">Phone: +914 9235 67890</p>
+                <p class="text-gray-300">Phone: +91 9235 67890</p>
             </div>
             
             <!-- Social Media Links -->

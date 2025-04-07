@@ -9,14 +9,15 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        background: linear-gradient(
+        /* background: linear-gradient(
           135deg,
           #1fa3d4,
           #86c7e2,
           #206f91,
           #5b879f,
           #a4c1ca
-        );
+        ); */
+        background-color: #fff;
         color: #333;
         margin: 0;
         padding: 20px;
@@ -24,7 +25,7 @@
 
       h2 {
         text-align: center;
-        color: #fff;
+        color: black;
       }
 
       table {
@@ -88,7 +89,7 @@
 
       .back-btn {
         position: absolute;
-        top: 20px;
+        top: 85px;
         right: 20px;
         background-color: #ff5f81;
         color: white;
@@ -127,12 +128,22 @@
       </div>
     </div>
 
+    <div style="margin-bottom: 10px;">
+      <label for="categoryFilter" style="font-weight: bold; color: #1fa3d4; margin-right: 10px;">Filter</label>
+      <select id="categoryFilter" onchange="filterMessages()" style="padding: 8px 12px; border-radius: 5px; border: 1px solid #ccc;">
+        <option value="ALL">All</option>
+        <option value="FRAUD">FRAUD</option>
+        <option value="ERROR">ERROR</option>
+        <option value="OTHER">OTHER</option>
+      </select>
+    </div>
     <table>
       <thead>
         <tr>
           <th>ID</th>
           <th>Name</th>
           <th>Email</th>
+          <th>Category</th>
           <th>Message</th>
           <th>Action</th>
         </tr>
@@ -142,6 +153,7 @@
           <td th:text="${msg.id}"></td>
           <td th:text="${msg.name}"></td>
           <td th:text="${msg.email}"></td>
+          <td th:text="${msg.category}"></td>
           <td th:text="${msg.message}"></td>
           <td>
             <!-- Reply Button -->
@@ -167,23 +179,25 @@
     </table>
 
     <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        // Handle Reply Button Click
-        document.querySelectorAll(".reply-btn").forEach((button) => {
-          button.addEventListener("click", function (event) {
-            event.preventDefault();
+      function filterMessages() {
+    const selected = document.getElementById("categoryFilter").value;
+    const rows = document.querySelectorAll("tbody tr");
 
-            const messageId = this.getAttribute("data-id");
-            const emailLink = this.getAttribute("data-email");
+    rows.forEach((row) => {
+      const category = row.getAttribute("data-category");
+      row.style.display = (selected === "ALL" || category === selected) ? "" : "none";
+    });
+  }
 
-            // Open Email Client
-            window.open(emailLink, "_blank");
-
-            // Change button color after clicking
-            this.classList.add("replied");
-          });
-        });
-      });
+  // Keep existing reply button logic
+  document.querySelectorAll(".reply-btn").forEach((button) => {
+    button.addEventListener("click", function (event) {
+      event.preventDefault();
+      const emailLink = this.getAttribute("data-email");
+      window.open(emailLink, "_blank");
+      this.classList.add("replied");
+    });
+  });
     </script>
   </body>
 </html>

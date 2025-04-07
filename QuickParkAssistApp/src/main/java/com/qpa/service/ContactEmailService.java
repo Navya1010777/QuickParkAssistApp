@@ -34,7 +34,7 @@ public class ContactEmailService {
         return "<html>" +
                 "<head>" +
                 "<style>" +
-                "body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: rgb(187, 182, 182); }" +
+                "body { font-family: Arial, sans-serif; margin: 0; padding: 0; background-color: rgb(225, 220, 220); }" +
                 ".email-container { max-width: 600px; margin: 20px auto; padding: 40px; border-radius: 10px; text-align: center; color: black; " +
                 "box-shadow: 0 4px 10px rgba(0,0,0,0.1); background-color:rgb(226, 226, 225); }" +
                 ".content { position: relative; z-index: 1; }" +

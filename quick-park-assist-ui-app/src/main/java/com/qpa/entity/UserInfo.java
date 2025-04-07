@@ -26,7 +26,8 @@ public class UserInfo {
     @PastOrPresent(message = "date must be past or present")
     private String dob;
 
-    @Pattern(regexp = "^\\+\\d{1,4}\\s[6-9]\\d{9}$", message = "Enter a valid number with country code")
+    @Pattern(regexp = "^[6-9]\\d{9}$", message = "Enter a valid number with country code")
+    @Size(min =14, max=15)
     private String contactNumber;
 
     private UserType userType;
