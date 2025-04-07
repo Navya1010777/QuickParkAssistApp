@@ -8,7 +8,6 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,6 +42,14 @@ public class AddOnUIController {
     public String addAddon(@ModelAttribute AddOns addon, RedirectAttributes redirectAttributes,
             HttpServletRequest request) {
         try {
+            if (addon.getAddOnId() != null) {
+                String url = BASE_URL + "/update/" + addon.getAddOnId();
+                restTemplate.put(url, addon, request, new ParameterizedTypeReference<AddOns>() {
+                });
+                redirectAttributes.addFlashAttribute("message", "Addon updated successfully!");
+                return "redirect:/addons/view-addon";
+            }
+
             ResponseEntity<AddOns> response = restTemplate.post(BASE_URL + "/add", addon, request,
                     new ParameterizedTypeReference<AddOns>() {
                     });
@@ -106,27 +113,21 @@ public class AddOnUIController {
 
     @GetMapping("/editAddon/{id}")
     public String editAddonForm(@PathVariable Long id, Model model, HttpServletRequest request) {
-        ResponseEntity<AddOns> response = restTemplate.get(BASE_URL + "/" + id, request, new ParameterizedTypeReference<AddOns>() {
-        });
+        ResponseEntity<AddOns> response = restTemplate.get(BASE_URL + "/" + id, request,
+                new ParameterizedTypeReference<AddOns>() {
+                });
         model.addAttribute("addon", response.getBody());
         model.addAttribute("vehicleTypes", VehicleType.values());
         return "addons/addAddon";
     }
-    
-    @PostMapping("/updateAddon")
-    public String updateAddon(@ModelAttribute AddOns addon, RedirectAttributes redirectAttributes, HttpServletRequest request) {
-        String url = BASE_URL + "/update/" + addon.getAddOnId();
-        restTemplate.put(url, addon, request,  new ParameterizedTypeReference<AddOns>() {
-        });
-        redirectAttributes.addFlashAttribute("message", "Addon updated successfully!");
-        return "redirect:/view-addon";
-    }
 
-    @DeleteMapping("/deleteAddon/{id}")
-    public String deleteAddon(@PathVariable Long id, RedirectAttributes redirectAttributes, HttpServletRequest request) {
-        String message = restTemplate.delete(BASE_URL + "/delete/" + id, null, request, new ParameterizedTypeReference<String>() {
-        }).getBody();
+    @GetMapping("/deleteAddon/{id}")
+    public String deleteAddon(@PathVariable Long id, RedirectAttributes redirectAttributes,
+            HttpServletRequest request) {
+        String message = restTemplate
+                .delete(BASE_URL + "/delete/" + id, null, request, new ParameterizedTypeReference<String>() {
+                }).getBody();
         redirectAttributes.addFlashAttribute("message", message);
-        return "redirect:/view-addon";
+        return "redirect:/addons/view-addon";
     }
 }
