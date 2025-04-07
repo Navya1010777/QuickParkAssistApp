@@ -92,6 +92,11 @@ public class VehicleService {
         if (!userId.equals(vehicle.getUserObj().getUserId())) {
             throw new UnauthorizedAccessException("You do not have permission to delete this vehicle");
         }
+        List<SpotBookingInfo> bookings = spotBookingInfoRepository.findByVehicle_VehicleId(id);
+        if (!bookings.isEmpty()){
+            throw new InvalidEntityException("booking exist for the requested vehicle");
+        }
+        
 
         vehicleRepository.delete(vehicle);
     }

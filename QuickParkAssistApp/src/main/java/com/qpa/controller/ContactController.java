@@ -1,6 +1,5 @@
 package com.qpa.controller;
 
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import com.qpa.service.ContactService;
 
 import jakarta.mail.MessagingException;
 
-
 @RequestMapping("/api")
 @RestController
 public class ContactController {
@@ -36,7 +34,8 @@ public class ContactController {
             // Save the message and get the saved entity with generated ID
             ContactMessage savedMessage = contactService.saveMessage(message);
             // Send confirmation email with the generated ID
-            contactEmailService.sendConfirmationEmail(savedMessage.getName(), savedMessage.getEmail(), savedMessage.getId());
+            contactEmailService.sendConfirmationEmail(savedMessage.getName(), savedMessage.getEmail(),
+                    savedMessage.getId());
             return ResponseEntity.ok("Message saved and email sent successfully");
         } catch (MessagingException e) {
             return ResponseEntity.status(500).body("Failed to send email: " + e.getMessage());
@@ -44,21 +43,22 @@ public class ContactController {
             return ResponseEntity.status(500).body("Failed to process request: " + e.getMessage());
         }
     }
-     @GetMapping("/contact-messages")
+
+    @GetMapping("/contact-messages")
     public ResponseEntity<List<ContactMessage>> getAllMessages() {
         List<ContactMessage> messages = contactService.getAllMessages(); // Fetch messages from service
         return ResponseEntity.ok(messages);
     }
-    
-    @DeleteMapping("/delete/{id}")
-public ResponseEntity<ResponseDTO<Void>> deleteMessage(@PathVariable Long id) {
-    boolean deleted = contactService.deleteMessageById(id);
 
-    if (deleted) {
-        return ResponseEntity.ok(new ResponseDTO<>("Message deleted successfully", 200, true, null));
-    } else {
-        return ResponseEntity.status(404)
-                .body(new ResponseDTO<>("Message not found", 404, false, null));
+    @DeleteMapping("/contact/delete/{id}")
+    public ResponseEntity<ResponseDTO<Void>> deleteMessage(@PathVariable Long id) {
+        boolean deleted = contactService.deleteMessageById(id);
+
+        if (deleted) {
+            return ResponseEntity.ok(new ResponseDTO<>("Message deleted successfully", 200, true));
+        } else {
+            return ResponseEntity.status(404)
+                    .body(new ResponseDTO<>("Message not found", 404, false));
+        }
     }
-}
 }
