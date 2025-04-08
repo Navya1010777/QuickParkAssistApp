@@ -110,6 +110,11 @@ public class SpotController {
         return ResponseEntity.ok(spotService.getStatistics());
     }
 
+    @GetMapping("/my-statistics")
+    public ResponseEntity<SpotStatistics> getMyStatistics(@RequestParam(required = false) Long userId) {
+        return ResponseEntity.ok(spotService.getMyStatistics(userId));
+    }
+
     @GetMapping("/all")
     public ResponseEntity<List<SpotResponseDTO>> getAllSpots() {
         List<SpotResponseDTO> spotList = spotService.getAllSpots();

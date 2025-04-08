@@ -201,6 +201,25 @@ public class SpotService {
 				availableSpots,
 				unavailableSpots);
 	}
+	
+	public SpotStatistics getMyStatistics(Long userId) {
+	  // Find spots belonging to the specific admin
+    List<Spot> adminSpots = spotRepository.findByOwnerUserId(userId);
+    
+    // Calculate total spots for this admin
+    long totalSpots = adminSpots.size();
+    
+    // Calculate available and unavailable spots for this admin
+    long availableSpots = adminSpots.stream()
+            .filter(spot -> spot.getStatus() == SpotStatus.AVAILABLE)
+            .count();
+    long unavailableSpots = totalSpots - availableSpots;
+    
+    return new SpotStatistics(
+            totalSpots,
+            availableSpots,
+            unavailableSpots);
+	}
 
 	private SpotResponseDTO convertToDTO(Spot spot) {
 		SpotResponseDTO dto = new SpotResponseDTO();
