@@ -423,13 +423,15 @@
                 <select name="status" class="form-select">
                   <option value="">Any</option>
                   <option
-                    th:each="st : ${status}"
+                    th:each="st, stat : ${status}"
+                    th:if="${!stat.last}"
                     th:value="${st}"
                     th:text="${st}"
                     th:selected="${param.status == st}"
                   ></option>
                 </select>
               </div>
+              
             </div>
 
             <div th:if="${user != null and user.userType.toString() == 'ADMIN'}" class="action-buttons mt-3">

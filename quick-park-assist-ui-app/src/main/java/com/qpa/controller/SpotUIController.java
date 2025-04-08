@@ -349,18 +349,31 @@ public class SpotUIController {
     }
 
     @GetMapping("/statistics")
-    public String getSpotStatistics(Model model, HttpServletRequest request) {
+    public String getSpotStatistics(
+            @RequestParam(required = false) Long userId,
+            Model model, 
+            HttpServletRequest request) {
+        
         UserInfo currentUserInfo = userService.getUserDetails(request).getData();
         if (currentUserInfo == null) {
             return "redirect:/auth/login";
         }
-
+        
+        // If userId is not provided, use the current user's ID
+        if (userId == null) {
+            userId = currentUserInfo.getUserId();
+        }
+        
+        // Add userId as a request parameter to the API call
+        String url = BASE_URL + "/spots/my-statistics?userId=" + userId;
+        
         SpotStatistics statistics = restTemplate.getForObject(
-                BASE_URL + "/spots/statistics",
+                url,
                 SpotStatistics.class);
-
+        
         model.addAttribute("statistics", statistics);
-        model.addAttribute("UserInfo", userService.getUserDetails(request).getData());
+        model.addAttribute("UserInfo", currentUserInfo);
+        
         return "statistics";
     }
 

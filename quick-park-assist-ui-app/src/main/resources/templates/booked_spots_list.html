@@ -387,9 +387,6 @@
             <div th:each="spot : ${spots}" class="parking-spot">
                 <div class="card">
                     <div class="card-img-wrapper">
-                        <div th:class="${spot.status == 'AVAILABLE' ? 'status-badge status-available' : 'status-badge status-occupied'}" 
-                             th:text="UNAVAILABLE">
-                        </div>
                         <img th:if="${spot.spotImage != null and not #strings.isEmpty(spot.spotImage)}" 
                               th:src="${spot.spotImage}" 
                               alt="Spot Image">
