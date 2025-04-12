@@ -149,7 +149,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr th:each="msg : ${messages}" th:id="'row-' + ${msg.id}">
+        <tr th:each="msg : ${messages}" th:id="'row-' + ${msg.id}" th:attr="data-category=${msg.category}">
           <td th:text="${msg.id}"></td>
           <td th:text="${msg.name}"></td>
           <td th:text="${msg.email}"></td>
@@ -188,7 +188,7 @@
       row.style.display = (selected === "ALL" || category === selected) ? "" : "none";
     });
   }
-
+  window.onload = filterMessages;
   // Keep existing reply button logic
   document.querySelectorAll(".reply-btn").forEach((button) => {
     button.addEventListener("click", function (event) {
@@ -198,6 +198,7 @@
       this.classList.add("replied");
     });
   });
+  
     </script>
   </body>
 </html>
